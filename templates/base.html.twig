@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block title %}Accueil{% endblock %}</title>
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text><text y=%221.3em%22 x=%220.2em%22 font-size=%2276%22 fill=%22%23fff%22>sf</text></svg>">
+        
+         <!-- Google Fonts : Comfortaa -->
+        <link href="https://fonts.googleapis.com/css2?family=Comfortaa&display=swap" rel="stylesheet">
+
+         <!-- Fichier CSS -->
+        <link rel="stylesheet" href="{{ asset('css/base.css') }}">
+
+        {% block head %}{% endblock %}
+
+        {% block stylesheets %}{% endblock %}
+
+    </head>
+    <body>
+       <header class="navbar-custom">
+            <div class="container-header">
+                <div class="gauche">
+                    <img src="{{ asset('images/logo.png') }}" alt="EcoRide" class="logo">
+                    <span class="site-name">EcoRide</span>
+                 </div>
+
+                    <nav class="nav-menu">
+                    <a href="/">Accueil</a>
+                    <span class="separator">|</span>
+                    <a href="/covoiturages">Covoiturages</a>
+                    <span class="separator">|</span>
+                    <a href="/contact">Contact</a>
+                    <span class="separator">|</span>
+                    <a href="/login">Connexion</a>
+                    <img src="{{ asset('images/user-icon.svg') }}" alt="Profil" class="user-icon">
+                    </nav>
+                </div>
+        </header>
+
+        {% block body %}{% endblock %}
+
+        <footer class='nav-footer'>
+            <div class='container-footer'>
+                <div class='navbar-footer'>
+                    <a href='/a-propos'>A propos</a>
+                    <a href='/contact'>Nous contacter</a>
+                    <a href='mentions-legales'>Mentions légales</a>
+                </div>
+
+                <div class='reseaux-sociaux'>
+                    <p class='retrouvez-nous'>Retrouvez nous sur :</p>
+                    <img src="{{ asset('images/X-icon.svg') }}" alt="X" class='X-icon'>
+                    <img src="{{ asset('images/instagram-icon.svg') }}" alt="Instagram" class='instagram-icon'>
+                    <img src="{{ asset('images/snapchat-icon.svg') }}" alt="Snapchat" class='snapchat-icon'>
+
+            </div>
+        </footer>
+    </body>
+    
+</html>

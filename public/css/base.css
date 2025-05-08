@@ -1,0 +1,98 @@
+/* Réinitialise les marges et paddings du navigateur */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  
+.navbar-custom {
+    background-color: #4A90E2;
+    width: 100%;
+  }
+  
+  .container-header {
+    display: flex;
+    justify-content: space-between; /* gauche et droite bien séparés */
+    align-items: center;
+    width: 100%;
+  }
+  
+  .gauche {
+    display: flex;
+    align-items: center;
+  }
+  
+  .logo {
+    height: 100px;
+    margin-right: 2px;
+  }
+  
+  .site-name {
+    font-family: 'Comfortaa', sans-serif;
+    font-size: 30px;
+    font-weight: bold;
+    color: white;
+  }
+  
+  .nav-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+  
+  .nav-menu a {
+    color: white;
+    text-decoration: none;
+    font-family: 'Comfortaa', sans-serif;
+    font-size: 20px;
+  }
+  
+  .separator {
+    color: white;
+  }
+  
+  .user-icon {
+    height: 24px;
+    margin-left: 10px;
+  }
+
+/* footer */
+.nav-footer {
+    display: flex;
+    align-items: center;
+    padding: 0.1em;
+    background-color: #4A86E8;
+    font-family: 'Comfortaa', sans-serif;
+}
+
+.container-footer {
+    display: flex;
+    align-items: center;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: (1, 1fr);
+}
+
+.navbar-footer a {
+    grid-column: 1, 1;
+    color: white;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 5px;
+    grid-column: 1, 1;
+}
+
+.reseaux-sociaux {
+    color: white;
+    grid-column: 2, 1;
+    justify-content: flex-end;
+    align-content:center;
+    padding: 5px;
+    gap: 10px;
+}
+
+body {
+    font-family: 'Comfortaa', sans-serif;
+}

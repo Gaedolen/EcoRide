@@ -1,0 +1,40 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil EcoRide{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/accueil.css') }}">
+{% endblock %}
+
+{% block body %}
+
+<!-- Présentation d'EcoRide  -->
+    <div class='presentation'>
+        <h1 class='bienvenue'>Bienvenue sur EcoRide !</h1>
+        <div class='presentation-contenu'>
+            <img src="{{ asset('images/img-conviviale.jpeg') }}" class='img-conviviale' alt="Covoiturage Convivial">
+            <div class="texte-presentation">
+                <p>Voyagez l’esprit tranquille avec <span class="eco-color">EcoRide</span> !</p>
+                <p>
+                    On vous propose des trajets <strong>en voiture à bas prix</strong>,
+                    <strong>respectueux de l’environnement</strong> et en toute <strong>convivialité</strong> !
+                </p>
+            </div>
+        </div>
+    </div>
+<!-- Formulaire de recherche covoiturage -->
+    <div class='formulaire'>
+        <h2 class='titre-formulaire'>Choisissez votre itinéraire :</h2>
+        <form action="/recherche-trajets" method="GET">
+            <div class='champs-saisie'>
+                <input type="text" class="form-control" id="lieu_depart" name="lieu_depart" placeholder="Ville de départ" required>
+                <input type="text" class="form-control" id="lieu_arrivee" name="lieu_arrivee" placeholder="Ville d'arrivée" required>
+                <input type="date" class="form-control" id="date_depart" name="date_depart" value="{{ "tomorrow"|date('Y-m-d') }}" required>
+                <input type="time" class="form-control" id="heure_depart" name="heure_depart" value="06:00" required>
+            </div>
+            <input type="submit" value="Rechercher" class='rechercher'>
+        </form>
+    </div>
+
+<img src="{{ asset('images/paysage_voiture.png') }}" alt="Paysage" class='paysage' width="1200" height="200">
+{% endblock %}
