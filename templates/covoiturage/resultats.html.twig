@@ -1,0 +1,43 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello CovoiturageController!{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/resultats.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class='formulaire-modification'>
+        <h2 class='titre-formulaire-modification'>Modifiez votre itinéraire :</h2>
+        <form action="/recherche-trajets" method="GET">
+            <div class='champs-saisie'>
+                <input type="text" class="form-control" id="lieu_depart" name="lieu_depart" placeholder="Ville de départ" required>
+                <input type="text" class="form-control" id="lieu_arrivee" name="lieu_arrivee" placeholder="Ville d'arrivée" required>
+                <input type="date" class="form-control" id="date_depart" name="date_depart" value="{{ "tomorrow"|date('Y-m-d') }}" required>
+                <input type="time" class="form-control" id="heure_depart" name="heure_depart" value="06:00" required>
+            </div>
+            <input type="submit" value="Rechercher" class='rechercher'>
+        </form>
+    </div>
+    {% if trajets is empty %}
+        <p>Aucun trajet trouvé.</p>
+    {% else %}
+        {% for trajet in trajets %}
+            <!-- Affichage d’un trajet -->
+            <div class='container-information'>
+                <div class='description-conducteur'>
+                    <img src="" alt="photo" class='photo-profil'>
+                    <p class='pseudo'></p>
+                    <img src="" alt="star-icon" class='star-icon'>
+                    <p class='note'></p>
+            </div>
+
+            <div class='description-voyage'>
+                <p>{{trajet.date_depart}}</p>
+                <p>{{trajet.heure_depart}}</p>
+                <img src="" alt="people-icon" class='people-icon'>
+                <p>{{trajet.nb_place}}</p>
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

@@ -5,7 +5,11 @@
     box-sizing: border-box;
   }
 
-  
+  body {
+    font-family: 'Comfortaa', sans-serif;
+}
+
+/* Header */  
 .navbar-custom {
     background-color: #4A90E2;
     width: 100%;
@@ -57,12 +61,12 @@
     margin-left: 10px;
   }
 
-/* footer */
+/* Footer */
 .nav-footer {
     display: flex;
     align-items: center;
     padding: 0.1em;
-    background-color: #4A86E8;
+    background-color: #4A90E2;
     font-family: 'Comfortaa', sans-serif;
 }
 
@@ -84,6 +88,11 @@
     grid-column: 1, 1;
 }
 
+.copyrigth {
+    color: white;
+    font-size: 15px;
+}
+
 .reseaux-sociaux {
     color: white;
     grid-column: 2, 1;
@@ -93,6 +102,3 @@
     gap: 10px;
 }
 
-body {
-    font-family: 'Comfortaa', sans-serif;
-}
