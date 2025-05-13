@@ -9,7 +9,7 @@
 {% block body %}
     <div class='formulaire-modification'>
         <h2 class='titre-formulaire-modification'>Modifiez votre itinéraire :</h2>
-        <form action="/recherche-trajets" method="GET">
+        <form action="{{ path('app_covoiturage') }}" method="GET">
             <div class='champs-saisie'>
                 <input type="text" class="form-control" id="lieu_depart" name="lieu_depart" placeholder="Ville de départ" required>
                 <input type="text" class="form-control" id="lieu_arrivee" name="lieu_arrivee" placeholder="Ville d'arrivée" required>
@@ -30,13 +30,28 @@
                     <p class='pseudo'></p>
                     <img src="" alt="star-icon" class='star-icon'>
                     <p class='note'></p>
-            </div>
+                </div>
 
-            <div class='description-voyage'>
-                <p>{{trajet.date_depart}}</p>
-                <p>{{trajet.heure_depart}}</p>
-                <img src="" alt="people-icon" class='people-icon'>
-                <p>{{trajet.nb_place}}</p>
+                <div class='description-voyage'>
+                    <p>{{trajet.date_depart}}</p>
+                    <p>{{trajet.heure_depart}}</p>
+                    <img src="" alt="arrow-icon" class="arrow-icon">
+                    <p>{{trajet.heure_arrivee}}</p>
+                    
+                    <img src="" alt="people-icon" class='people-icon'>
+                    <p>{{trajet.nb_place}}</p>
+
+                    {% if trajet.statut is null %}
+                        <img src="" alt="not-eco-icon" class="not-eco-icon">
+                    {% else %}
+                        <img src="" alt="eco-icon" class="eco-icon">
+                    {% endif %}
+                </div>
+
+                <div class="price-details">
+                    <p>{{trajet.prix_personne}}</p>
+                    <a href="/details_covoiturage">Détails</a>
+                </div>
             </div>
         {% endfor %}
     {% endif %}

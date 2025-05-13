@@ -1,4 +1,4 @@
-/* Formulaire */
+/* Formulaire de modification*/
 .formulaire-modification {
     background-color: #4A90E2;
     padding: 10px;
@@ -48,3 +48,5 @@ input {
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
+
+

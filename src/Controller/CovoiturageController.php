@@ -13,8 +13,8 @@ class CovoiturageController extends AbstractController
     #[Route('/covoiturage', name: 'app_covoiturage')]
     public function rechercher(Request $request): Response
     {
-        $depart = $request->query->get('depart');
-        $arrivee = $request->query->get('arrivee');
+        $depart = $request->query->get('lieu_depart');
+        $arrivee = $request->query->get('lieu_arrivee');
         $date = $request->query->get('date_depart');
         $heure = $request->query->get('heure_depart');
 
@@ -29,7 +29,7 @@ class CovoiturageController extends AbstractController
             ':depart' => $depart,
             ':arrivee' => $arrivee,
             ':date' => $date,
-            'heure' => $heure,
+            ':heure' => $heure,
         ]);
 
         $trajets = $stmt->fetchAll(PDO::FETCH_ASSOC);
