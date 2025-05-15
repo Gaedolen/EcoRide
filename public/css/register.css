@@ -1,8 +1,4 @@
-body {
-    font-family: 'Comfortaa', sans-serif;
-}
-
-.form-container {
+.container-form {
     background-color: #EFEFEF;
     margin: 0 auto;
     align-items: center;
@@ -14,7 +10,7 @@ body {
     margin-right: 700px;
 }
 
-h1 { /* Connexion */
+h1 { /* M'inscrire */
     color: #4a86e8ff;
     font-size: 35px;
     font-weight: bold;
@@ -30,6 +26,7 @@ h1 { /* Connexion */
     font-size: 20px;
 }
 
+/* Champs de saisie */
 input {
     background-color: white;
     text-decoration: none;
@@ -37,22 +34,39 @@ input {
     border-style: none;
     padding: 12px;
     font-size: 20px;
+    font-family: 'Comfortaa', sans-serif;
     margin-bottom: 10px;
     flex-direction: column;
     display: flex;
 }
 
-.checkbox {
-    flex-direction: row;
-    display: flex;
-    margin : 20px;
+.date-naissance{
+    color: #6c757d;
 }
 
-.label { /* Se souvenir de moi */
-    padding-left: 10px;
+/* Pour le champ de saisie photo */
+.hidden-input {
+    display: none;
 }
 
-.connexion { /* bouton de connexion */
+.custom-upload { /* nouveau bouton pour sélectionner une photo */
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(#a2e76d, yellowgreen);
+    color: white;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: 'Comfortaa', sans-serif;
+    margin-bottom: 10px;
+    transition: background 0.3s ease;
+}
+
+.custom-upload:hover {
+    background: linear-gradient(#8ed657, #317d31);
+}
+
+.bouton { /* bouton d'inscription */
     background: linear-gradient(#a2e76d, yellowgreen);
     border: none;
     color: white;
@@ -72,7 +86,12 @@ input {
     margin-bottom: 20px;
 }
 
-.pas-inscrit {
+.bouton:hover {
+    background: linear-gradient(#8ed657, #317d31);
+}
+
+
+.deja-inscrit {
     margin-top: 10px;
     display: flex;
     margin: 0 auto;

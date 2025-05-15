@@ -16,24 +16,34 @@ use Symfony\Component\Routing\Attribute\Route;
 class RegistrationController extends AbstractController
 {
     #[Route('/register', name: 'app_register')]
-    public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher, Security $security, EntityManagerInterface $entityManager): Response
-    {
+    public function register(
+        Request $request,
+        UserPasswordHasherInterface $userPasswordHasher,
+        Security $security,
+        EntityManagerInterface $entityManager
+    ): Response {
         $user = new User();
         $form = $this->createForm(RegistrationFormType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            /** @var string $plainPassword */
-            $plainPassword = $form->get('plainPassword')->getData();
+            // Photo de profil
+            $photoFile = $form->get('photo')->getData();
 
-            // encode the plain password
+            if ($photoFile) {
+                $binaryData = file_get_contents($photoFile->getPathname());
+                $user->setPhoto($binaryData);
+            }
+
+            // Encodage du mot de passe
+            $plainPassword = $form->get('plainPassword')->getData();
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
 
+            // Enregistrement en base
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // do anything else you need here, like send an email
-
+            // Connexion automatique
             return $security->login($user, UsersAuthenticator::class, 'main');
         }
 

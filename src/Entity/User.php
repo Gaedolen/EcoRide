@@ -2,7 +2,9 @@
 
 namespace App\Entity;
 
+use Symfony\Component\Validator\Constraints as Assert;
 use App\Repository\UserRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -19,6 +21,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180)]
+    #[Assert\NotBlank(message: 'L’email est obligatoire.')]
+    #[Assert\Email(message: 'Veuillez entrer un email valide.')]
     private ?string $email = null;
 
     /**
@@ -31,10 +35,38 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'Le mot de passe est obligatoire.')]
     private ?string $password = null;
 
     #[ORM\Column]
     private bool $isVerified = false;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: 'Le pseudo est obligatoire.')]
+    private ?string $pseudo = null;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: 'Le nom est obligatoire.')]
+    private ?string $nom = null;
+
+    #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: 'Le prénom est obligatoire.')]
+    private ?string $prenom = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\NotBlank(message: 'L’adresse est obligatoire.')]
+    private ?string $adresse = null;
+
+    #[ORM\Column(length: 50, nullable: true)]
+    #[Assert\NotBlank(message: 'Le numéro de téléphone est obligatoire.')]
+    private ?string $telephone = null;
+
+    #[ORM\Column(type: 'blob', nullable: true)]
+    private $photo = null;
+
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotBlank(message: 'La date de naissance est obligatoire.')]
+    private ?\DateTimeInterface $date_naissance = null;
 
     public function getId(): ?int
     {
@@ -119,6 +151,90 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsVerified(bool $isVerified): static
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getPseudo(): ?string
+    {
+        return $this->pseudo;
+    }
+
+    public function setPseudo(string $pseudo): static
+    {
+        $this->pseudo = $pseudo;
+
+        return $this;
+    }
+
+    public function getNom(): ?string
+    {
+        return $this->nom;
+    }
+
+    public function setNom(string $nom): static
+    {
+        $this->nom = $nom;
+
+        return $this;
+    }
+
+    public function getPrenom(): ?string
+    {
+        return $this->prenom;
+    }
+
+    public function setPrenom(string $prenom): static
+    {
+        $this->prenom = $prenom;
+
+        return $this;
+    }
+
+    public function getAdresse(): ?string
+    {
+        return $this->adresse;
+    }
+
+    public function setAdresse(?string $adresse): static
+    {
+        $this->adresse = $adresse;
+
+        return $this;
+    }
+
+    public function getTelephone(): ?string
+    {
+        return $this->telephone;
+    }
+
+    public function setTelephone(?string $telephone): static
+    {
+        $this->telephone = $telephone;
+
+        return $this;
+    }
+
+    public function getPhoto()
+    {
+        return $this->photo;
+    }
+
+    public function setPhoto($photo): self
+    {
+        $this->photo = $photo;
+
+        return $this;
+    }
+
+    public function getDateNaissance(): ?\DateTimeInterface
+    {
+        return $this->date_naissance;
+    }
+
+    public function setDateNaissance(\DateTimeInterface $date_naissance): static
+    {
+        $this->date_naissance = $date_naissance;
 
         return $this;
     }

@@ -17,46 +17,50 @@
 
     </head>
     <body>
-       <header class="navbar-custom">
-            <div class="container-header">
-                <div class="gauche">
-                    <img src="{{ asset('images/logo.png') }}" alt="EcoRide" class="logo">
-                    <span class="site-name">EcoRide</span>
-                 </div>
+        <div class="page-container">
+            <header class="navbar-custom">
+                    <div class="container-header">
+                        <div class="gauche">
+                            <img src="{{ asset('images/logo.png') }}" alt="EcoRide" class="logo">
+                            <span class="site-name">EcoRide</span>
+                        </div>
 
-                    <nav class="nav-menu">
-                    <a href="/">Accueil</a>
-                    <span class="separator">|</span>
-                    <a href="/covoiturages">Covoiturages</a>
-                    <span class="separator">|</span>
-                    <a href="/contact">Contact</a>
-                    <span class="separator">|</span>
-                    <a href="/login">Connexion</a>
-                    <img src="{{ asset('images/user-icon.svg') }}" alt="Profil" class="user-icon">
-                    </nav>
-                </div>
-        </header>
+                            <nav class="nav-menu">
+                            <a href="/">Accueil</a>
+                            <span class="separator">|</span>
+                            <a href="/covoiturages">Covoiturages</a>
+                            <span class="separator">|</span>
+                            <a href="/contact">Contact</a>
+                            <span class="separator">|</span>
+                            <a href="/login">Connexion</a>
+                            <img src="{{ asset('images/user-icon.svg') }}" alt="Profil" class="user-icon">
+                            </nav>
+                        </div>
+                </header>
 
-        {% block body %}{% endblock %}
+                <main class="content">
+                    {% block body %}{% endblock %}
+                </main>
 
-        <footer class='nav-footer'>
-            <div class='container-footer'>
-                <div class='navbar-footer'>
-                    <a href='/a-propos'>A propos</a>
-                    <a href='/contact'>Nous contacter</a>
-                    <a href='mentions-legales'>Mentions légales</a>
-                </div>
+                <footer class='nav-footer'>
+                    <div class='container-footer'>
+                        <div class='navbar-footer'>
+                            <a href='/a-propos'>A propos</a>
+                            <a href='/contact'>Nous contacter</a>
+                            <a href='mentions-legales'>Mentions légales</a>
+                        </div>
 
-                <p class='copyrigth'>© 2025 Copyright</p>
+                        <p class='copyrigth'>© 2025 Copyright</p>
 
-                <div class='reseaux-sociaux'>
-                    <p class='retrouvez-nous'>Retrouvez nous sur :</p>
-                    <img src="{{ asset('images/X-icon.svg') }}" alt="X" class='X-icon'>
-                    <img src="{{ asset('images/instagram-icon.svg') }}" alt="Instagram" class='instagram-icon'>
-                    <img src="{{ asset('images/snapchat-icon.svg') }}" alt="Snapchat" class='snapchat-icon'>
-                </div>
+                        <div class='reseaux-sociaux'>
+                            <p class='retrouvez-nous'>Retrouvez nous sur :</p>
+                            <img src="{{ asset('images/X-icon.svg') }}" alt="X" class='X-icon'>
+                            <img src="{{ asset('images/instagram-icon.svg') }}" alt="Instagram" class='instagram-icon'>
+                            <img src="{{ asset('images/snapchat-icon.svg') }}" alt="Snapchat" class='snapchat-icon'>
+                        </div>
+                    </div>
+                </footer>
             </div>
-        </footer>
     </body>
     
 </html>
