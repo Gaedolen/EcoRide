@@ -1,55 +1,70 @@
+/* Container principal */
 .container-form {
     background-color: #EFEFEF;
-    margin: 0 auto;
-    align-items: center;
-    justify-content: center;
     border-radius: 20px;
-    padding: 20px;
-    margin: 20px;
-    margin-left: 700px;
-    margin-right: 700px;
+    padding: 30px 20px;
+    max-width: 400px;
+    margin: 40px auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Comfortaa', sans-serif;
 }
 
-h1 { /* M'inscrire */
-    color: #4a86e8ff;
-    font-size: 35px;
+/* Titre "M'inscrire" */
+.container-form h1 {
+    color: #4a86e8;
+    font-size: 32px;
     font-weight: bold;
-    padding-bottom: 10px;
-    display: flex;
-    margin: 0 auto;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-}
-
-::placeholder {
-    font-size: 20px;
+    text-align: center;
+    margin-bottom: 25px;
 }
 
 /* Champs de saisie */
-input {
-    background-color: white;
-    text-decoration: none;
-    border-radius: 20px;
-    border-style: none;
-    padding: 12px;
-    font-size: 20px;
-    font-family: 'Comfortaa', sans-serif;
-    margin-bottom: 10px;
-    flex-direction: column;
+.input {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
 }
 
-.date-naissance{
+/* Champs de saisie spécifiques */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+input[type="tel"] {
+    width: 100%;
+    max-width: 300px;
+    background-color: white;
+    border-radius: 20px;
+    border: none;
+    padding: 12px 16px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+/* Placeholder */
+::placeholder {
+    font-family: 'Comfortaa', sans-serif;
+    font-size: 16px;
     color: #6c757d;
 }
 
-/* Pour le champ de saisie photo */
+/* input de la date */
+.date-naissance {
+    color: #6c757d;
+}
+
+/* Bouton de télécharchement d'une photo */
+.photo-upload-wrapper {
+    margin-top: 10px;
+    text-align: center;
+}
+
 .hidden-input {
     display: none;
 }
 
-.custom-upload { /* nouveau bouton pour sélectionner une photo */
+.custom-upload {
     display: inline-block;
     padding: 10px 20px;
     background: linear-gradient(#a2e76d, yellowgreen);
@@ -57,45 +72,81 @@ input {
     border-radius: 20px;
     font-weight: bold;
     cursor: pointer;
-    font-family: 'Comfortaa', sans-serif;
-    margin-bottom: 10px;
     transition: background 0.3s ease;
+    width: fit-content;
 }
 
 .custom-upload:hover {
     background: linear-gradient(#8ed657, #317d31);
 }
 
-.bouton { /* bouton d'inscription */
+/* Checkbox des conditions */
+.conditions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 15px 0;
+    gap: 10px;
+    font-size: 14px;
+}
+
+/* Bouton d'inscription */
+.bouton {
     background: linear-gradient(#a2e76d, yellowgreen);
     border: none;
     color: white;
-    text-decoration: none;
     border-radius: 20px;
-    padding: 12px;
-    font-size: 25px;
-    width: 300px;
+    padding: 12px 20px;
+    font-size: 20px;
+    width: 100%;
+    max-width: 300px;
     font-weight: bold;
-    display: flex;
-    margin: 0 auto;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    margin-bottom: 20px;
+    margin: 10px auto 20px auto;
+    display: block;
 }
 
 .bouton:hover {
     background: linear-gradient(#8ed657, #317d31);
 }
 
-
+/* Lien "déjà incrit ?" */
 .deja-inscrit {
+    display: block;
+    text-align: center;
+    font-size: 14px;
+    color: #5a29a4;
+    text-decoration: underline;
     margin-top: 10px;
-    display: flex;
-    margin: 0 auto;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
+}
+
+/* Barre de force Mot de passe */
+.password-strength-container {
+    width: 100%;
+    max-width: 300px;
+    margin: 10px auto;
+}
+
+#password-strength-bar {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #ccc;
+    width: 100%;
+    margin-bottom: 5px;
+    transition: background-color 0.3s ease;
+}
+
+#password-strength-text {
+    font-size: 14px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* Message d'erreur moins de 18 ans */
+.error-message {
+    font-size: 14px;
+    color: red;
+    text-align: center;
+    margin-top: 5px;
 }

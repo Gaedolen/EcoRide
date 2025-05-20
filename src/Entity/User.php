@@ -22,7 +22,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 180)]
     #[Assert\NotBlank(message: 'L’email est obligatoire.')]
-    #[Assert\Email(message: 'Veuillez entrer un email valide.')]
+    #[Assert\Email(message: "L'adresse email '{{ value }}' n'est pas valide.")]    
     private ?string $email = null;
 
     /**
@@ -65,7 +65,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private $photo = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
-    #[Assert\NotBlank(message: 'La date de naissance est obligatoire.')]
+    #[Assert\NotBlank(message: 'La date de naissance est requise.')]
+    #[Assert\LessThan([
+        'value' => 'today -18 years',
+        'message' => 'Vous devez avoir au moins 18 ans pour vous inscrire.'
+    ])]
     private ?\DateTimeInterface $date_naissance = null;
 
     public function getId(): ?int

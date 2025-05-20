@@ -10,8 +10,6 @@
     <div class="container-form">
         <h1>M'inscrire</h1>
 
-        {{ form_errors(registrationForm) }}
-
         {{ form_start(registrationForm) }}
             <div class='input'>
                 {{ form_widget(registrationForm.email, {
@@ -23,10 +21,15 @@
 
                 {{ form_widget(registrationForm.plainPassword, {
                     attr: {
-                        class: 'mot-de-passe',
+                        id: 'plainPassword',
                         placeholder: 'Mot de passe'
-                        }
+                    }
                 }) }}
+
+                <div class="password-strength-container">
+                    <div id="password-strength-bar"></div>
+                    <p id="password-strength-text"></p>
+                </div>
 
                 {{ form_widget(registrationForm.pseudo, {
                     attr: {
@@ -67,8 +70,9 @@
                     attr: {
                         class: 'date-naissance',
                         placeholder: 'Date de naissance'
-                        }
+                    }
                 }) }}
+                <p id="age-error" class="error-message"></p>
 
                 <div class='photo-upload-wrapper'>
                     <label for='registration_form_photo' class='custom-upload'> Choisir une photo </label>
@@ -93,4 +97,6 @@
 
         <p><a href="{{ path('app_login') }}" class="deja-inscrit">Déjà inscrit ? Me connecter</a></p>
     </div>
+
+    <script src="{{ asset('js/password-strength.js') }}"></script>
 {% endblock %}
