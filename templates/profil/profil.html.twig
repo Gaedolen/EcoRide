@@ -3,17 +3,23 @@
 {% block title %}Mon profil{% endblock %}
 
 {% block body %}
-    <h1>Profil de {{ user.pseudo }}</h1>
 
-    <ul>
-        <li>Email : {{ user.email }}</li>
-        <li>Nom : {{ user.nom }}</li>
-        <li>Prénom : {{ user.prenom }}</li>
-        <li>Adresse : {{ user.adresse }}</li>
-        <li>Téléphone : {{ user.telephone }}</li>
-        <li>Date de naissance : {{ user.dateNaissance|date('d/m/Y') }}</li>
-        {% if user.photo %}
-            <li><img src="data:image/jpeg;base64,{{ user.photo|base64 }}" alt="Photo de profil" style="max-width: 150px;"></li>
-        {% endif %}
-    </ul>
+    <h1>Mon profil</h1>
+
+    <div class='profil-container'>
+        <ul>
+            <li>Pseudo : {{ user.pseudo }}</li>
+            <li>Email : {{ user.email }}</li>
+            <li>Nom : {{ user.nom }}</li>
+            <li>Prénom : {{ user.prenom }}</li>
+            <li>Adresse : {{ user.adresse }}</li>
+            <li>Téléphone : {{ user.telephone }}</li>
+            <li>Date de naissance : {{ user.dateNaissance|date('d/m/Y') }}</li>
+            {% if user.photo %}
+                <li><img src="data:image/jpeg;base64,{{ user.photo|base64 }}" alt="Photo de profil" style="max-width: 150px;"></li>
+            {% endif %}
+        </ul>
+    </div>
+
+    
 {% endblock %}
