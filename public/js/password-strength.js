@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () { // Vérification de la force du mot de passe
-    const passwordInput = document.getElementById("registration_form_plainPassword");
+    const passwordInput = document.querySelector('[name="registration_form[plainPassword]"]');
     const bar = document.getElementById("password-strength-bar");
     const text = document.getElementById("password-strength-text");
 

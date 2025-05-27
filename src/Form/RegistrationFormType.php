@@ -53,11 +53,12 @@ class RegistrationFormType extends AbstractType
             ->add('adresse', TextType::class, [
                 'required' => true,
                 'attr' => [
-                    'placehonlder' => 'Adresse',
+                    'placeholder' => 'Adresse',
                     'class' => 'champ'
                 ]
             ])
-            ->add('date_naissance', DateType::class, [
+           ->add('date_naissance', DateType::class, [
+                'widget' => 'single_text',
                 'required' => true,
                 'attr' => [
                     'placeholder' => 'Date de naissance',

@@ -71,6 +71,14 @@ html, body {
     height: 24px;
     margin-left: 10px;
   }
+
+  .photo-profil-header {
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+  }
   
 /* Body */
 .content {

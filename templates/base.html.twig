@@ -26,14 +26,35 @@
                         </div>
 
                             <nav class="nav-menu">
-                            <a href="/">Accueil</a>
-                            <span class="separator">|</span>
-                            <a href="/covoiturages">Covoiturages</a>
-                            <span class="separator">|</span>
-                            <a href="/contact">Contact</a>
-                            <span class="separator">|</span>
-                            <a href="/login">Connexion</a>
-                            <img src="{{ asset('images/user-icon.svg') }}" alt="Profil" class="user-icon">
+                                <a href="/">Accueil</a>
+                                <span class="separator">|</span>
+                                <a href="/covoiturages">Covoiturages</a>
+                                <span class="separator">|</span>
+                                <a href="/contact">Contact</a>
+                                <span class="separator">|</span>
+                                {% if app.user %}
+                                    <a href="{{ path('app_profil') }}">
+                                        {% if app.user.photo %}
+                                            <img 
+                                                src="data:image/jpeg;base64,{{ app.user.photo|base64 }}" 
+                                                alt="Photo de profil" 
+                                                class="photo-profil-header"
+                                            >
+                                        {% else %}
+                                            <img 
+                                                src="{{ asset('images/user-icon.svg') }}" 
+                                                alt="Profil" 
+                                                class="user-icon"
+                                            >
+                                        {% endif %}
+                                    </a>
+                                    <a href="{{ path('app_logout') }}">Déconnexion</a>
+                                {% else %}
+                                    <a href="{{ path('app_login') }}">
+                                        <img src="{{ asset('images/user-icon.svg') }}" alt="Connexion" class="user-icon">
+                                        Connexion
+                                    </a>
+                                {% endif %}
                             </nav>
                         </div>
                 </header>

@@ -10,6 +10,8 @@
     <div class="container-form">
         <h1>M'inscrire</h1>
 
+        {{ form_errors(registrationForm) }}
+
         {{ form_start(registrationForm) }}
             <div class='input'>
                 {{ form_widget(registrationForm.email, {
@@ -21,6 +23,7 @@
 
                 {{ form_widget(registrationForm.plainPassword, {
                     attr: {
+                        class: 'mot-de-passe',
                         id: 'plainPassword',
                         placeholder: 'Mot de passe'
                     }

@@ -29,7 +29,6 @@ class RegistrationController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // Photo de profil
             $photoFile = $form->get('photo')->getData();
-
             if ($photoFile) {
                 $binaryData = file_get_contents($photoFile->getPathname());
                 $user->setPhoto($binaryData);
@@ -44,7 +43,7 @@ class RegistrationController extends AbstractController
             $entityManager->flush();
 
             // Connexion automatique
-            return $security->login($user, UsersAuthenticator::class, 'main');
+            return $this->redirectToRoute('app_accueil');
         }
 
         return $this->render('registration/register.html.twig', [
