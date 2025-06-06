@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use App\Repository\VoitureRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VoitureRepository::class)]
@@ -17,7 +18,7 @@ class Voiture
     private ?string $modele = null;
 
     #[ORM\Column(length: 50)]
-    private ?string $immatricultation = null;
+    private ?string $immatriculation = null;
 
     #[ORM\Column(length: 50)]
     private ?string $energie = null;
@@ -25,8 +26,22 @@ class Voiture
     #[ORM\Column(length: 50)]
     private ?string $couleur = null;
 
+    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    private ?\DateTimeInterface $datePremiereImmatriculation = null;
+
+
     #[ORM\Column(length: 50)]
-    private ?string $date_premiere_immatriculation = null;
+    private ?string $marque = null;
+
+    #[ORM\Column(type: 'integer')]
+    private ?int $nbPlaces = null;
+
+    #[ORM\Column(type: 'boolean')]
+    private ?bool $fumeur = null;
+
+    #[ORM\Column(type: 'boolean')]
+    private ?bool $animaux = null;
+
 
     public function getId(): ?int
     {
@@ -45,14 +60,14 @@ class Voiture
         return $this;
     }
 
-    public function getImmatricultation(): ?string
+    public function getImmatriculation(): ?string
     {
-        return $this->immatricultation;
+        return $this->immatriculation;
     }
 
-    public function setImmatricultation(string $immatricultation): static
+    public function setImmatriculation(string $immatriculation): static
     {
-        $this->immatricultation = $immatricultation;
+        $this->immatriculation = $immatriculation;
 
         return $this;
     }
@@ -81,15 +96,61 @@ class Voiture
         return $this;
     }
 
-    public function getDatePremiereImmatriculation(): ?string
+    public function getDatePremiereImmatriculation(): ?\DateTimeInterface
     {
-        return $this->date_premiere_immatriculation;
+        return $this->datePremiereImmatriculation;
     }
 
-    public function setDatePremiereImmatriculation(string $date_premiere_immatriculation): static
+    public function setDatePremiereImmatriculation(\DateTimeInterface $date): self
     {
-        $this->date_premiere_immatriculation = $date_premiere_immatriculation;
-
+        $this->datePremiereImmatriculation = $date;
         return $this;
     }
+
+
+    public function getMarque(): ?string
+    {
+        return $this->marque;
+    }
+
+    public function setMarque(string $marque): self
+    {
+        $this->marque = $marque;
+        return $this;
+    }
+
+    public function getNbPlaces(): ?int
+    {
+        return $this->nbPlaces;
+    }
+
+    public function setNbPlaces(int $nbPlaces): self
+    {
+        $this->nbPlaces = $nbPlaces;
+        return $this;
+    }
+
+
+    public function isFumeur(): ?bool
+    {
+        return $this->fumeur;
+    }
+
+    public function setFumeur(bool $fumeur): self
+    {
+        $this->fumeur = $fumeur;
+        return $this;
+    }
+
+    public function isAnimaux(): ?bool
+    {
+        return $this->animaux;
+    }
+
+    public function setAnimaux(bool $animaux): self
+    {
+        $this->animaux = $animaux;
+        return $this;
+    }
+
 }
