@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\VoitureRepository;
 use Doctrine\DBAL\Types\Types;
+use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: VoitureRepository::class)]
@@ -18,6 +19,11 @@ class Voiture
     private ?string $modele = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: 'La plaque d\'immatriculation est obligatoire.')]
+    #[Assert\Regex(
+        pattern: '/^[A-Z]{2}-\d{3}-[A-Z]{2}$/',
+        message: 'Le format de la plaque doit être du type AA-123-AA.'
+    )]
     private ?string $immatriculation = null;
 
     #[ORM\Column(length: 50)]
@@ -27,6 +33,8 @@ class Voiture
     private ?string $couleur = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotBlank(message: 'La date de première immatriculation est requise.')]
+    #[Assert\LessThan('today', message: 'La date d\'immatriculation doit être antérieure à aujourd\'hui.')]
     private ?\DateTimeInterface $datePremiereImmatriculation = null;
 
 

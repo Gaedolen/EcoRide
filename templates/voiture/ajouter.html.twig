@@ -18,7 +18,7 @@
                 {{form_widget(form.immatriculation, {
                     attr: {
                         class: "immatriculation",
-                        placeholder: "AA-000-AA"
+                        placeholder: "AA-123-AA"
                     }
                 })}}
 
@@ -55,7 +55,7 @@
 
                 <label for="energie">Énergie</label>
                 {{form_widget(form.energie, {
-                    atrr: {
+                    attr: {
                         class: "energie",
                         placeholder: "Electrique"
                     }
@@ -77,7 +77,7 @@
                             <li data-value="Violet" style="--color: #7f00ff;"><span class="dot"></span> Violet</li>
                             <li data-value="Marron" style="--color: #654321;"><span class="dot"></span> Marron</li>
                         </ul>
-                        <input type="hidden" name="couleur_personnalisee" id="voiture_couleur" value="">
+                        <input type="hidden" name="voiture[couleur]" id="voiture_couleur" value="">
                     </div>
                 </div>
             </div>

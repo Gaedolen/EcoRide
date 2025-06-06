@@ -37,6 +37,15 @@ h2 {
     background-color: #fff;
 }
 
+/* Champs de saisie Modèle et Marque */
+input:-webkit-autofill,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:hover {
+    box-shadow: 0 0 0px 1000px white inset !important;
+    -webkit-text-fill-color: #000 !important;
+    background-color: white !important;
+}
+
 /* Bouton  d'ajout */
 .ajouter {
     margin-top: 25px;
@@ -113,6 +122,9 @@ h2 {
     color: #6c757d;
 }
 
+.date_premiere_immatriculation:focus {
+    color: black;
+}
 /* Checkbox*/
 .checkbox-group {
     display: flex;

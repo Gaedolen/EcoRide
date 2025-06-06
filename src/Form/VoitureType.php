@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Config\Framework\Workflows\WorkflowsConfig\PlaceConfig;
 
 class VoitureType extends AbstractType
 {
@@ -27,7 +28,12 @@ class VoitureType extends AbstractType
                 ]
             ])
             ->add('immatriculation', TextType::class, [
-                'attr' => ['class' => 'form-input',]
+                'attr' => [
+                    'class' => 'form-input',
+                    'placeholder' => 'AA-123-AA',
+                    'pattern' => '[A-Z]{2}-\d{3}-[A-Z]{2}',
+                    'title' => 'Format attendu : AA-123-AA'
+                ]
             ])
             ->add('energie', ChoiceType::class, [
                 'choices' => [
@@ -48,10 +54,13 @@ class VoitureType extends AbstractType
             ])
             ->add('datePremiereImmatriculation', DateType::class, [
                 'widget' => 'single_text',
-                'attr' => ['class' => 'form-input']
+                'attr' => [
+                    'class' => 'form-input',
+                    'max' => (new \DateTime())->format('Y-m-d'),
+                    'placeholder' => 'jj/mm/aaaa',
+                    'autocomplete' => 'off'
+                ]
             ])
-            
-
             ->add('marque', TextType::class, [
                 'required' => true,
                 'label' => 'Marque',
