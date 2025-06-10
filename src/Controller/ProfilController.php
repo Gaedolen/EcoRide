@@ -9,13 +9,20 @@ use Symfony\Component\Routing\Attribute\Route;
 class ProfilController extends AbstractController
 {
     #[Route('/profil', name: 'app_profil')]
-    public function index(): Response
+        public function profil(): Response
     {
-        // récupération de l'utilisateur connecté
-        $user = $this->getUser();
+        $utilisateur = $this->getUser();
+        /** @var \App\Entity\User $utilisateur */
+
+        // Connexion PDO
+        $pdo = new \PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
+        $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = :id");
+        $stmt->execute(['id' => $utilisateur->getId()]);
+        $voitures = $stmt->fetchAll(\PDO::FETCH_ASSOC);
 
         return $this->render('profil/profil.html.twig', [
-            'user' => $user,
+            'user' => $utilisateur,
+            'voitures' => $voitures, // ← on transmet un tableau de voitures
         ]);
     }
 }

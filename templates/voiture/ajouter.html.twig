@@ -77,7 +77,8 @@
                             <li data-value="Violet" style="--color: #7f00ff;"><span class="dot"></span> Violet</li>
                             <li data-value="Marron" style="--color: #654321;"><span class="dot"></span> Marron</li>
                         </ul>
-                        <input type="hidden" name="voiture[couleur]" id="voiture_couleur" value="">
+                        {{ form_widget(form.couleur) }}
+
                     </div>
                 </div>
             </div>

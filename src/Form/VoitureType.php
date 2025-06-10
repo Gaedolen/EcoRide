@@ -4,6 +4,7 @@ namespace App\Form;
 
 use App\Entity\User;
 use App\Entity\Voiture;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -26,6 +27,9 @@ class VoitureType extends AbstractType
                     'class' => 'form-input',
                     'placeholder' => 'Ex : 207'
                 ]
+            ])
+            ->add('couleur', HiddenType::class, [
+                'constraints' => [new NotBlank(message: 'Veuillez choisir une couleur.')]
             ])
             ->add('immatriculation', TextType::class, [
                 'attr' => [

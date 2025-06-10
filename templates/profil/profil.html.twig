@@ -22,5 +22,25 @@
     </div>
 
     <a href="{{ path('ajouter_voiture') }}" class="btn-ajouter-voiture">Ajouter une voiture</a>
+    
+    <h2>Mes voitures</h2>
+
+    {% if voitures is not empty %}
+        {% for voiture in voitures %}
+            <ul class="voiture-item">
+                <li>Marque : {{ voiture.marque }}</li>
+                <li>Modèle : {{ voiture.modele }}</li>
+                <li>Plaque d'immatriculation : {{ voiture.immatriculation }}</li>
+                <li>Date de première immatriculation : {{ voiture.date_premiere_immatriculation|date('d/m/Y') }}</li>
+                <li>Nombre de places : {{ voiture.nb_places }}</li>
+                <li>Énergie : {{ voiture.energie }}</li>
+                <li>Couleur : {{ voiture.couleur }}</li>
+                <li>Fumeur : {{ voiture.fumeur ? 'Oui' : 'Non' }}</li>
+                <li>Animaux : {{ voiture.animaux ? 'Oui' : 'Non' }}</li>
+            </ul>
+        {% endfor %}
+    {% else %}
+        <p>Vous n'avez pas encore enregistré de voiture.</p>
+    {% endif %}
 
 {% endblock %}
