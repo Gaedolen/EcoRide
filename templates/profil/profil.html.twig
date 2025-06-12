@@ -2,9 +2,15 @@
 
 {% block title %}Mon profil{% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/profil.css') }}">
+{% endblock %}
+
 {% block body %}
 
     <h1>Mon profil</h1>
+
+    <a href="{{ path('modifier_profil') }}" class="btn-modifier">Modifier mon profil</a>
 
     <div class='profil-container'>
         <ul>
@@ -25,7 +31,11 @@
     
     <h2>Mes voitures</h2>
 
-    {% if voitures is not empty %}
+    {% if voitures is not empty and user.isChauffeur == true %}
+        <a href="{{ path('ajouter_voiture') }}" class="btn-ajouter-voiture">Ajouter une voiture</a>
+    
+        <h1>Mes voitures</h1>
+
         {% for voiture in voitures %}
             <ul class="voiture-item">
                 <li>Marque : {{ voiture.marque }}</li>

@@ -1,0 +1,149 @@
+/* Conteneur principal */
+.modification-container {
+    background-color: #EFEFEF;
+    border-radius: 20px;
+    padding: 30px 20px;
+    max-width: 400px;
+    margin: 40px auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    font-family: 'Comfortaa', sans-serif;
+}
+
+/* Titre */
+h1 {
+    color: #4a86e8;
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* Labels */
+label {
+    display: block;
+    font-size: 20px;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #4a86e8;
+    margin-bottom: 5px;
+}
+
+/* Champs de saisie */
+input[type="text"],
+input[type="email"],
+input[type="date"],
+input[type="tel"] {
+    width: 100%;
+    max-width: 300px;
+    background-color: white;
+    border-radius: 20px;
+    border: none;
+    padding: 12px 16px;
+    font-size: 18px;
+    box-sizing: border-box;
+}
+
+/* Input de la date */
+.dateNaissance {
+    font-family: 'Comfortaa', sans-serif;
+}
+
+/* Checkbox */
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    font-family: 'Comfortaa', sans-serif;
+    color: #4a86e8;
+    font-weight: bold;;
+    font-size: 20px;
+    gap: 10px;
+}
+
+.custom-checkbox {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    border: 2px solid #4a86e8;
+    background-color: #fff;
+    cursor: pointer;
+    position: relative;
+    transition: 0.2s;
+}
+
+.custom-checkbox:checked {
+    background-color: #4a86e8;
+    border: 2px solid #4a86e8;
+}
+
+.custom-checkbox::before {
+    content: '✔';
+    display: block;
+    text-align: center;
+    color: white;
+    font-size: 14px;
+    line-height: 18px;
+    visibility: hidden;
+}
+
+.custom-checkbox:checked::before {
+    visibility: visible;
+}
+
+/* Bouton de téléchargement de la photo de profil */
+.photo-upload-wrapper {
+    margin-top: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.hidden-input {
+    display: none;
+}
+
+.custom-upload {
+    display: inline-block;
+    padding: 10px 20px;
+    background: linear-gradient(#a2e76d, yellowgreen);
+    color: white;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    width: fit-content;
+}
+
+.file-name-display {
+    margin-top: 8px;
+    font-size: 10px;
+}
+
+/* Bouton de validation des modifications */
+.btn-modification {
+    font-family: 'Comfortaa', sans-serif;
+    margin-top: 25px;
+    width: 100%;
+    padding: 12px;
+    font-size: 20px;
+    border: none;
+    border-radius: 20px;
+    background: linear-gradient(#a2e76d, yellowgreen);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-modification {
+    background: linear-gradient(#8ed657, #317d31);
+}

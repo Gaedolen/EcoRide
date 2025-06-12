@@ -78,8 +78,8 @@
                 <p id="age-error" class="error-message"></p>
 
                 <div class='photo-upload-wrapper'>
-                    <label for='registration_form_photo' class='custom-upload'> Choisir une photo </label>
-                    {{ form_widget(registrationForm.photo, {
+                    <label for='{{ form.photo.vars.id }}' class='custom-upload'> Choisir une photo </label>
+                    {{ form_widget(form.photo, {
                         attr: {
                             class: 'hidden-input',
                             accept: 'image/*'

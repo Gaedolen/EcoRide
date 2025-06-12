@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon profil{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('css/modifier.css') }}?v=1">
+{% endblock %}
+
+{% block body %}
+
+    <div class='modification-container'>
+        <h1>Modifier mon profil</h1>
+
+        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+
+            <label for="pseudo">Pseudo</label>
+            {{ form_widget(form.pseudo, {
+                    attr: {
+                        class: 'pseudo'
+                        }
+            }) }}
+
+            <label for="nom">Nom</label>
+            {{ form_widget(form.nom, {
+                    attr: {
+                        class: 'nom'
+                        }
+            }) }}
+
+            <label for="prenom">Prénom</label>
+            {{ form_widget(form.prenom, {
+                    attr: {
+                        class: 'prenom'
+                        }
+            }) }}
+
+            <label for="dateNaissance">Date de naissance</label>
+            {{ form_widget(form.dateNaissance, {
+                    attr: {
+                        class: 'dateNaissance'
+                        }
+            }) }}
+
+            <label for="adresse">Adresse</label>
+            {{ form_widget(form.adresse, {
+                    attr: {
+                        class: 'adresse'
+                        }
+            }) }}
+
+            <label for="telephone">Numéro de téléphone </label>
+            {{ form_widget(form.telephone, {
+                    attr: {
+                        class: 'telephone'
+                        }
+            }) }}
+
+            <div class="checkbox-group">
+                <label class="checkbox-label">Chauffeur
+                    {{ form_widget(form.isChauffeur, { 
+                            attr: { 
+                                class: "custom-checkbox" 
+                            } 
+                    }) }}
+                </label>
+            
+                <label class="checkbox-label">Passager
+                    {{ form_widget(form.isPassager, { 
+                        attr: { 
+                            class: "custom-checkbox" 
+                        } 
+                    }) }}
+                </label>
+            </div>
+            
+
+            <div class='photo-upload-wrapper'>
+                <label for='{{ form.photo.vars.id }}' class='custom-upload'>Choisir une photo</label>
+                {{ form_widget(form.photo, {
+                        attr: {
+                            id: form.photo.vars.id,
+                            class: 'hidden-input',
+                            accept: 'image/*'
+                        }
+                }) }}
+
+                <span id="file-name" class="file-name-display">Aucun fichier choisi</span>
+            </div>
+
+            <button type="submit" class='btn-modification'>Enregistrer mes modifications</button>
+        {{ form_end(form) }}
+    </div>
+
+    <script src="{{ asset('js/photo-upload.js') }}"></script>
+{% endblock %}

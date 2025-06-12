@@ -69,8 +69,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         'value' => 'today -18 years',
         'message' => 'Vous devez avoir au moins 18 ans pour vous inscrire.'
     ])]
-    private ?\DateTimeInterface $date_naissance = null;
+     private ?\DateTimeInterface $dateNaissance = null;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private ?bool $isChauffeur = false;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private ?bool $isPassager = false;
+   
+
+        // Setter et Getter
     public function getId(): ?int
     {
         return $this->id;
@@ -232,13 +240,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getDateNaissance(): ?\DateTimeInterface
     {
-        return $this->date_naissance;
+        return $this->dateNaissance;
     }
 
-    public function setDateNaissance(\DateTimeInterface $date_naissance): static
+    public function setDateNaissance(\DateTimeInterface $dateNaissance): static
     {
-        $this->date_naissance = $date_naissance;
+        $this->dateNaissance = $dateNaissance;
+        return $this;
+    }
 
+    public function isChauffeur(): bool
+    {
+        return $this->isChauffeur ?? false;
+    }
+
+    public function setIsChauffeur(bool $isChauffeur): self
+    {
+        $this->isChauffeur = $isChauffeur;
+        return $this;
+    }
+
+    public function isPassager(): bool
+    {
+        return $this->isPassager ?? false;
+    }
+
+    public function setIsPassager(bool $isPassager): self
+    {
+        $this->isPassager = $isPassager;
         return $this;
     }
 }
