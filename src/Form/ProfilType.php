@@ -39,6 +39,12 @@ class ProfilType extends AbstractType
                 'mapped' => false,
                 'label' => 'Photo de profil (JPG/PNG)',
             ])
+            ->add('deletePhoto', CheckboxType::class, [
+            'label' => 'Supprimer la photo actuelle',
+            'mapped' => false,
+            'required' => false,
+            ])
+            
             ->add('dateNaissance', DateType::class, [
                 'label' => 'Date de naissance',
                 'widget' => 'single_text',

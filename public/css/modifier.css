@@ -124,10 +124,21 @@ input[type="tel"] {
     width: fit-content;
 }
 
+/* Affichage du nom du fichier sélectionné */
 .file-name-display {
     margin-top: 8px;
     font-size: 10px;
 }
+
+/* Affichage miniature de la nouvelle photo de profil sélectionnée */
+.preview-image {
+    margin-top: 10px;
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 10px;
+    display: block;
+}
+
 
 /* Bouton de validation des modifications */
 .btn-modification {

@@ -33,26 +33,13 @@
                                 <a href="/contact">Contact</a>
                                 <span class="separator">|</span>
                                 {% if app.user %}
-                                    <a href="{{ path('app_profil') }}">
-                                        {% if app.user.photo %}
-                                            <img 
-                                                src="data:image/jpeg;base64,{{ app.user.photo|base64 }}" 
-                                                alt="Photo de profil" 
-                                                class="photo-profil-header"
-                                            >
-                                        {% else %}
-                                            <img 
-                                                src="{{ asset('images/user-icon.svg') }}" 
-                                                alt="Profil" 
-                                                class="user-icon"
-                                            >
-                                        {% endif %}
-                                    </a>
+                                    <a href="{{ path('app_profil') }}">Mon Compte</a>
+                                    <span class="separator">|</span>
                                     <a href="{{ path('app_logout') }}">Déconnexion</a>
                                 {% else %}
                                     <a href="{{ path('app_login') }}">
                                         <img src="{{ asset('images/user-icon.svg') }}" alt="Connexion" class="user-icon">
-                                        Connexion
+                                        Se connecter
                                     </a>
                                 {% endif %}
                             </nav>

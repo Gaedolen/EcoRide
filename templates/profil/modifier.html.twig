@@ -73,23 +73,29 @@
                 </label>
             </div>
             
-
             <div class='photo-upload-wrapper'>
                 <label for='{{ form.photo.vars.id }}' class='custom-upload'>Choisir une photo</label>
                 {{ form_widget(form.photo, {
-                        attr: {
-                            id: form.photo.vars.id,
-                            class: 'hidden-input',
-                            accept: 'image/*'
-                        }
+                    attr: {
+                        id: form.photo.vars.id,
+                        class: 'hidden-input',
+                        accept: 'image/*'
+                    }
                 }) }}
-
                 <span id="file-name" class="file-name-display">Aucun fichier choisi</span>
+                <img id="photo-preview" class="preview-image" src="" alt="Aperçu de la photo" style="display: none;" />
             </div>
 
-            <button type="submit" class='btn-modification'>Enregistrer mes modifications</button>
-        {{ form_end(form) }}
-    </div>
+            <div class="delete-photo-wrapper">
+                <label class="checkbox-label">
+                    {{ form_widget(form.deletePhoto, { attr: { class: 'custom-checkbox' } }) }}
+                    Supprimer la photo actuelle
+                </label>
+            </div>
+
+                <button type="submit" class='btn-modification'>Enregistrer mes modifications</button>
+            {{ form_end(form) }}
+        </div>
 
     <script src="{{ asset('js/photo-upload.js') }}"></script>
 {% endblock %}

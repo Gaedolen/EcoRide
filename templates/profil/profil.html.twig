@@ -7,50 +7,103 @@
 {% endblock %}
 
 {% block body %}
-
-    <h1>Mon profil</h1>
-
-    <a href="{{ path('modifier_profil') }}" class="btn-modifier">Modifier mon profil</a>
-
-    <div class='profil-container'>
-        <ul>
-            <li>Pseudo : {{ user.pseudo }}</li>
-            <li>Email : {{ user.email }}</li>
-            <li>Nom : {{ user.nom }}</li>
-            <li>Prénom : {{ user.prenom }}</li>
-            <li>Adresse : {{ user.adresse }}</li>
-            <li>Téléphone : {{ user.telephone }}</li>
-            <li>Date de naissance : {{ user.dateNaissance|date('d/m/Y') }}</li>
-            {% if user.photo %}
-                <li><img src="data:image/jpeg;base64,{{ user.photo|base64 }}" alt="Photo de profil" style="max-width: 150px;"></li>
-            {% endif %}
-        </ul>
+    <div class="profil-header">
+        <h1>Mon profil</h1>
+        <a href="{{ path('modifier_profil') }}" class="btn-modifier">Modifier le profil</a>
     </div>
 
-    <a href="{{ path('ajouter_voiture') }}" class="btn-ajouter-voiture">Ajouter une voiture</a>
+    <div class='profil-container'>
+        <ul style="list-style-type:none;">
+            <div class="noms-photo-container">
+                <div class="noms-container">
+                    <li><span class="label">Pseudo :</span> <span class="value">{{ user.pseudo }}</span></li>
+                    <li><span class="label">Nom :</span> <span class="value">{{ user.nom }}</span></li>
+                    <li><span class="label">Prénom :</span> <span class="value">{{ user.prenom }}</span></li>
+                </div>
+                <div class="photo-container">
+                    <li>
+                        {% if photoBase64 %}
+                            <img src="data:image/jpeg;base64,{{ photoBase64 }}" alt="Photo de profil" class="photo-profil">
+                        {% else %}
+                            <img src="{{ asset('images/se-connecter.png') }}" alt="Photo de profil" class="photo-profil">
+                        {% endif %}
+                    </li>  
+                </div>
+            </div>
+            <li><span class="label">Email :</span> <span class="value">{{ user.email }}</span></li>
+            <li><span class="label">Adresse :</span> <span class="value">{{ user.adresse }}</span></li>
+            <li><span class="label">Téléphone :</span> <span class="value">{{ user.telephone }}</span></li>
+            <li><span class="label">Date de naissance :</span> <span class="value">{{ user.dateNaissance|date('d/m/Y') }}</span></li>
+            <li><span class="label">Chauffeur :</span> <span class="value">{{ user.isChauffeur ? 'Oui' : 'Non' }}</span></li>
+            <li><span class="label">Passager :</span> <span class="value">{{ user.isPassager ? 'Oui' : 'Non' }}</span></li>
+           
+        </ul>
+    </div>
     
-    <h2>Mes voitures</h2>
+    {% if user.isChauffeur %}
+        <div class="car-section">
+            <div class="voitures-header">
+                <h1>Mes voitures</h1>
+                <a href="{{ path('ajouter_voiture') }}" class="btn-ajouter-voiture">Ajouter une voiture</a>
+            </div>
 
-    {% if voitures is not empty and user.isChauffeur == true %}
-        <a href="{{ path('ajouter_voiture') }}" class="btn-ajouter-voiture">Ajouter une voiture</a>
-    
-        <h1>Mes voitures</h1>
+            {% if voituresData is not empty %}
+                <div class="car-scroll-wrapper">
+                    <div class="car-container">
+                        {% for form in voitureForms %}
+                            {% set voiture = voituresData[loop.index0] %}
+                            <div class="car-card">
+                                <ul style="list-style-type:none;">
+                                    <li><span class="label">Marque :</span> <span class="value">{{ voiture.marque }}</span></li>
+                                    <li><span class="label">Modèle :</span> <span class="value">{{ voiture.modele }}</span></li>
+                                    <li><span class="label">Immatriculation :</span> <span class="value">{{ voiture.immatriculation }}</span></li>
+                                    <li><span class="label">Energie :</span> <span class="value">{{ voiture.energie }}</span></li>
+                                    <li><span class="label">Date de première immatriculation :</span> <span class="value">{{ voiture.date_premiere_immatriculation|date('d/m/Y') }}</span></li>
+                                    <li><span class="label">Places disponibles :</span> <span class="value">{{ voiture.nb_places }}</span></li>
+                                    <li><span class="label">Fumeur :</span> <span class="value">{{ voiture.fumeur ? 'Oui' : 'Non' }}</span></li>
+                                    <li><span class="label">Animaux :</span> <span class="value">{{ voiture.animaux ? 'Oui' : 'Non' }}</span></li>
+                                </ul>
+                                
+                                <div class="car-actions"> <!-- Boutons de modification et de suppression d'une voiture -->
+                                    <a href="{{ path('modifier_voiture', { id: voiture.id }) }}" class="btn-modifier-voiture">Modifier</a>
 
-        {% for voiture in voitures %}
-            <ul class="voiture-item">
-                <li>Marque : {{ voiture.marque }}</li>
-                <li>Modèle : {{ voiture.modele }}</li>
-                <li>Plaque d'immatriculation : {{ voiture.immatriculation }}</li>
-                <li>Date de première immatriculation : {{ voiture.date_premiere_immatriculation|date('d/m/Y') }}</li>
-                <li>Nombre de places : {{ voiture.nb_places }}</li>
-                <li>Énergie : {{ voiture.energie }}</li>
-                <li>Couleur : {{ voiture.couleur }}</li>
-                <li>Fumeur : {{ voiture.fumeur ? 'Oui' : 'Non' }}</li>
-                <li>Animaux : {{ voiture.animaux ? 'Oui' : 'Non' }}</li>
-            </ul>
-        {% endfor %}
+                                    <form method="POST" action="{{ path('supprimer_voiture', { id: voiture.id }) }}" class="delete-form">
+                                        <button type="button" class="btn-supprimer" data-voiture-id="{{ voiture.id }}">Supprimer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <p class="no-car-message">Vous n'avez pas encore ajouté de voiture.</p>
+            {% endif %}
+        </div>
     {% else %}
-        <p>Vous n'avez pas encore enregistré de voiture.</p>
+        <div class="car-section">
+            <div class="voitures-header">
+                <h1>Mes voitures</h1>
+                <a href="#" class="btn-ajouter-voiture disabled" title="Vous devez être indiqué comme chauffeur pour ajouter votre voiture" onclick="return false;">Ajouter une voiture</a>
+            </div>
+        </div>
     {% endif %}
 
+    {% if user.isChauffeur %}
+        <h1>Mes covoiturages</h1>
+        <a class="btn-ajout-covoiturage">Ajouter un covoiturage</a>
+    {% endif %}
+
+    <h1>Mes avis</h1>
+
+    <div id="confirmation-modal" class="modal hidden"> <!-- Fenêtre pop-up de suppression d'une voiture -->
+        <div class="modal-content">
+            <p>Êtes-vous sûr de vouloir supprimer cette voiture ?</p>
+            <div class="modal-buttons">
+                <button id="confirm-yes" class="btn-confirm-yes">Oui</button>
+                <button id="confirm-no" class="btn-confirm-no">Non</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ asset('js/delete-voiture.js') }}"></script>
 {% endblock %}
