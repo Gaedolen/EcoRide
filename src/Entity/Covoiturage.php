@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\CovoiturageRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\User;
 
 #[ORM\Entity(repositoryClass: CovoiturageRepository::class)]
 class Covoiturage
@@ -13,6 +14,10 @@ class Covoiturage
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    #[ORM\ManyToOne(inversedBy: 'covoiturages')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $utilisateur = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date_depart = null;
@@ -40,6 +45,10 @@ class Covoiturage
 
     #[ORM\Column]
     private ?float $prix_personne = null;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?\App\Entity\Voiture $voiture = null;
 
     public function getId(): ?int
     {
@@ -151,6 +160,28 @@ class Covoiturage
     {
         $this->prix_personne = $prix_personne;
 
+        return $this;
+    }
+
+    public function getVoiture(): ?\App\Entity\Voiture
+    {
+        return $this->voiture;
+    }
+
+    public function setVoiture(?\App\Entity\Voiture $voiture): static
+    {
+        $this->voiture = $voiture;
+        return $this;
+    }
+
+    public function getUtilisateur(): ?User
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?User $utilisateur): self
+    {
+        $this->utilisateur = $utilisateur;
         return $this;
     }
 }

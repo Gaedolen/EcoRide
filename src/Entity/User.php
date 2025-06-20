@@ -9,6 +9,8 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_EMAIL', fields: ['email'])]
@@ -19,6 +21,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Voiture::class)]
+    private Collection $voitures;
 
     #[ORM\Column(length: 180)]
     #[Assert\NotBlank(message: 'L’email est obligatoire.')]
@@ -273,5 +278,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->isPassager = $isPassager;
         return $this;
+    }
+
+    public function __construct()
+    {
+        $this->voitures = new ArrayCollection();
+    }
+
+    public function getVoitures(): Collection
+    {
+        return $this->voitures;
     }
 }

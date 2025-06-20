@@ -88,10 +88,38 @@
         </div>
     {% endif %}
 
-    {% if user.isChauffeur %}
-        <h1>Mes covoiturages</h1>
-        <a class="btn-ajout-covoiturage">Ajouter un covoiturage</a>
-    {% endif %}
+    <div class="covoiturages-section">
+        <div class="covoiturages-header">
+            <h1>Mes covoiturages conducteurs</h1>
+
+            {% if user.isChauffeur %}
+                <a href="{{ path('ajouter_covoiturage') }}" class="btn-ajouter-covoiturage">Ajouter un covoiturage</a>
+            {% else %}
+            <a href="#" class="btn-ajouter-voiture disabled" title="Vous devez être indiqué comme chauffeur pour ajouter votre voiture" onclick="return false;">Ajouter un covoiturage</a>
+            {% endif %}
+        </div>
+
+        {% if covoiturages is not empty %}
+            <div class="covoiturages-container">
+                {% for covoiturage in covoiturages %}
+                    <div class="covoiturage-card">
+                        <p><strong>Trajet :</strong> {{ covoiturage.lieu_depart }} → {{ covoiturage.lieu_arrivee }}</p>
+                        <p><strong>Date :</strong> {{ covoiturage.date_depart|date('d/m/Y') }} à {{ covoiturage.heure_depart|date('H:i') }}</p>
+                        <p><strong>Statut :</strong> {{ covoiturage.statut|capitalize }}</p>
+
+                        <a href="{{ path('modifier_covoiturage', { id: covoiturage.id }) }}" class="btn btn-modifier">Modifier</a>
+                        <form method="post" action="{{ path('supprimer_covoiturage', { id: covoiturage.id }) }}" onsubmit="return confirm('Êtes-vous sûr ?')">
+                            <button type="submit" class="btn btn-supprimer">Supprimer</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-covoiturage-message">Vous n'avez pas encore créé de covoiturage.</p>
+        {% endif %}
+
+    </div>
+
 
     <h1>Mes avis</h1>
 

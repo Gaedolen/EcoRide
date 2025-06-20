@@ -6,6 +6,7 @@ use App\Repository\VoitureRepository;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\User;
 
 #[ORM\Entity(repositoryClass: VoitureRepository::class)]
 class Voiture
@@ -14,6 +15,10 @@ class Voiture
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+
+    #[ORM\ManyToOne(inversedBy: 'voitures')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $utilisateur = null;
 
     #[ORM\Column(length: 50)]
     private ?string $modele = null;
@@ -165,6 +170,17 @@ class Voiture
     public function setAnimaux(bool $animaux): self
     {
         $this->animaux = $animaux;
+        return $this;
+    }
+
+    public function getUtilisateur(): ?User
+    {
+        return $this->utilisateur;
+    }
+
+    public function setUtilisateur(?User $utilisateur): self
+    {
+        $this->utilisateur = $utilisateur;
         return $this;
     }
 

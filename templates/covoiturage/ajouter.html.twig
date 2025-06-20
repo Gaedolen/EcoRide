@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un covoiturage{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('css/ajoutCovoiturage.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="form-container">
+        <h1>Ajouter un covoiturage</h1>
+
+        {% for message in app.flashes('success') %}
+            <div class="flash-success">{{ message }}</div>
+        {% endfor %}
+
+        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+            <div class="input">
+                <label for="date_depart">Date de départ</label>
+                {{ form_widget(form.date_depart, {
+                        attr: {
+                            class: 'date_depart'
+                            }
+                }) }}
+
+                <label for="heure_depart">Heure de départ</label>
+                {{ form_widget(form.heure_depart, {
+                        attr: {
+                            class: 'heure_depart'
+                            }
+                }) }}
+
+                <label for="lieu_depart">Lieu de départ</label>
+                {{ form_widget(form.lieu_depart, {
+                        attr: {
+                            class: 'lieu_depart'
+                            }
+                }) }}
+
+                <label for="date_arrivee">Date d'arrivée</label>
+                {{ form_widget(form.date_arrivee, {
+                        attr: {
+                            class: 'date_arrivee'
+                            }
+                }) }}
+
+                <label for="heure_arrivee">Heure d'arrivée</label>
+                {{ form_widget(form.heure_arrivee, {
+                        attr: {
+                            class: 'heure_arrivee'
+                            }
+                }) }}
+
+                <label for="lieu_arrivee">Lieu d'arrivée</label>
+                {{ form_widget(form.lieu_arrivee, {
+                        attr: {
+                            class: 'lieu_arrivee'
+                            }
+                }) }}
+
+                <label for="nb_place">Nombre de places disponibles</label>
+                {{ form_widget(form.nb_place, {
+                        attr: {
+                            class: 'nb_place'
+                            }
+                }) }}
+
+                <label for="prix_personne">Prix par personne</label>
+                {{ form_widget(form.prix_personne, {
+                        attr: {
+                            class: 'prix_personne'
+                            }
+                }) }}
+
+                <label for="voiture">Voiture utilisée</label>
+                {{ form_widget(form.voiture, {
+                    attr: { class: 'voiture-select' },
+                }) }}
+
+
+                <button type="submit">Créer le covoiturage</button>
+            </div>
+        {{ form_end(form, { render_rest: false }) }}
+    </div>
+{% endblock %}
