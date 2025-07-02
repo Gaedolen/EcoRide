@@ -4,15 +4,16 @@ namespace App\Controller;
 
 use App\Entity\Covoiturage;
 use App\Entity\Voiture;
-use App\Form\CovoiturageType;
 use App\Form\ProfilType;
 use App\Form\VoitureType;
 use DateTime;
+use PDO;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Security;
 
 class ProfilController extends AbstractController
 {
@@ -26,26 +27,15 @@ class ProfilController extends AbstractController
             throw $this->createAccessDeniedException('Vous devez être connecté pour voir votre profil.');
         }
 
-        // Préparation de la photo
-        $photoData = null;
-        if ($utilisateur->getPhoto() && is_resource($utilisateur->getPhoto())) {
-            $photo = $utilisateur->getPhoto();
+        $photoBase64 = $utilisateur->getPhotoData();
 
-            if ($photo !== null) {
-                $photoData = base64_encode($photo);
-            } else {
-                $photoData = null;
-            }
-
-            $utilisateur->setPhoto($photoData); 
-        }
-
-        $pdo = new \PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
+        $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
 
         // Récupération des voitures
         $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = :id");
         $stmt->execute(['id' => $utilisateur->getId()]);
-        $voituresData = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $voituresData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         $voitureForms = [];
         foreach ($voituresData as $index => $row) {
@@ -56,7 +46,7 @@ class ProfilController extends AbstractController
                 ->setModele($row['modele'])
                 ->setImmatriculation($row['immatriculation'])
                 ->setDatePremiereImmatriculation(new DateTime($row['date_premiere_immatriculation']))
-                ->setNbPlaces($row['nb_places'])
+                ->setNbPlaces((int)$row['nb_places'])
                 ->setEnergie($row['energie'])
                 ->setCouleur($row['couleur'])
                 ->setFumeur((bool) $row['fumeur'])
@@ -66,73 +56,62 @@ class ProfilController extends AbstractController
             $voitureForms[] = $form->createView();
         }
 
-        // Récupérer les covoiturages du chauffeur
+        // Récupération des covoiturages
         $covoiturages = [];
         if ($utilisateur->isChauffeur()) {
             $stmt = $pdo->prepare("SELECT * FROM covoiturage WHERE utilisateur_id = :id");
             $stmt->execute(['id' => $utilisateur->getId()]);
-            $covoiturages = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+            $covoiturages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         return $this->render('profil/profil.html.twig', [
-            'user' => $utilisateur,
+            'user' => $utilisateur, 
             'voitureForms' => $voitureForms,
             'voituresData' => $voituresData,
-            'photoBase64' => $photoData,
+            'photoBase64' => $photoBase64, 
             'covoiturages' => $covoiturages,
         ]);
     }
+
 
     #[Route('/profil/modifier', name: 'modifier_profil')]
     public function modifierProfil(Request $request): Response
     {
         /** @var \App\Entity\User $sessionUser */
-        $sessionUser = $this->getUser();
+        $sessionUser = $this->getUser(); 
 
         if (!$sessionUser) {
             throw $this->createAccessDeniedException('Vous devez être connecté pour modifier votre profil.');
         }
 
-        $pdo = new \PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
-        $stmt = $pdo->prepare("SELECT * FROM user WHERE id = :id");
-        $stmt->execute(['id' => $sessionUser->getId()]);
-        $data = $stmt->fetch(\PDO::FETCH_ASSOC);
-
-        if (!$data) {
-            throw $this->createNotFoundException('Utilisateur introuvable.');
-        }
-
-        $sessionUser->setPseudo($data['pseudo']);
-        $sessionUser->setNom($data['nom']);
-        $sessionUser->setPrenom($data['prenom']);
-        $sessionUser->setDateNaissance(new DateTime($data['date_naissance']));
-        $sessionUser->setAdresse($data['adresse']);
-        $sessionUser->setTelephone($data['telephone']);
-        $sessionUser->setIsChauffeur((bool) $data['is_chauffeur']);
-        $sessionUser->setIsPassager((bool) $data['is_passager']);
-
-        $photo = $data['photo'];
-        if (is_resource($photo)) {
-            $photo = stream_get_contents($photo);
-        }
-        $sessionUser->setPhoto($photo);
+        $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         $form = $this->createForm(ProfilType::class, $sessionUser);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $photoFile = $form->get('photo')->getData();
-            $deletePhoto = $form->get('deletePhoto')->getData();
-            $photoData = null;
+            $photoFile = $form->get('photo')->getData(); 
+            $deletePhoto = $form->get('deletePhoto')->getData(); 
+
+            $binaryPhotoContent = null; 
 
             if ($deletePhoto) {
-                $photoData = null;
-                $sessionUser->setPhoto(null);
+                $binaryPhotoContent = null; 
             } elseif ($photoFile) {
-                $photoData = file_get_contents($photoFile->getPathname());
-                $sessionUser->setPhoto($photoData);
+                $binaryPhotoContent = file_get_contents($photoFile->getPathname()); 
+            } else {
+                $currentPhoto = $sessionUser->getPhoto();
+                if ($currentPhoto && is_resource($currentPhoto)) {
+                    $binaryPhotoContent = stream_get_contents($currentPhoto);
+                } elseif ($currentPhoto) {
+                    $binaryPhotoContent = $currentPhoto;
+                }
             }
 
+            $sessionUser->setPhoto($binaryPhotoContent);
+
+            // Préparer la requête UPDATE pour PDO.
             $setClauses = [
                 'pseudo = :pseudo',
                 'nom = :nom',
@@ -142,40 +121,42 @@ class ProfilController extends AbstractController
                 'is_chauffeur = :isChauffeur',
                 'is_passager = :isPassager',
                 'date_naissance = :dateNaissance',
+                'photo = :photo',
             ];
-
-            if ($photoData !== null || $deletePhoto) {
-                $setClauses[] = 'photo = :photo';
-            }
 
             $sql = "UPDATE user SET " . implode(", ", $setClauses) . " WHERE id = :id";
-
             $stmt = $pdo->prepare($sql);
 
-            $params = [
-                'pseudo' => $sessionUser->getPseudo(),
-                'nom' => $sessionUser->getNom(),
-                'prenom' => $sessionUser->getPrenom(),
-                'adresse' => $sessionUser->getAdresse(),
-                'telephone' => $sessionUser->getTelephone(),
-                'isChauffeur' => $sessionUser->isChauffeur() ? 1 : 0,
-                'isPassager' => $sessionUser->isPassager() ? 1 : 0,
-                'dateNaissance' => $sessionUser->getDateNaissance()?->format('Y-m-d'),
-                'id' => $sessionUser->getId(),
-            ];
-
-            if ($photoData !== null || $deletePhoto) {
-                $params['photo'] = $photoData;
+            if ($binaryPhotoContent === null) {
+                $stmt->bindValue(':photo', null, PDO::PARAM_NULL);
+            } else {
+                $stmt->bindParam(':photo', $binaryPhotoContent, PDO::PARAM_LOB);
             }
 
-            $stmt->execute($params);
+            // Lie les autres paramètres
+            $stmt->bindValue(':pseudo', $sessionUser->getPseudo());
+            $stmt->bindValue(':nom', $sessionUser->getNom());
+            $stmt->bindValue(':prenom', $sessionUser->getPrenom());
+            $stmt->bindValue(':adresse', $sessionUser->getAdresse());
+            $stmt->bindValue(':telephone', $sessionUser->getTelephone());
+            $stmt->bindValue(':isChauffeur', $sessionUser->isChauffeur() ? 1 : 0);
+            $stmt->bindValue(':isPassager', $sessionUser->isPassager() ? 1 : 0);
+            $stmt->bindValue(':dateNaissance', $sessionUser->getDateNaissance()?->format('Y-m-d'));
+            $stmt->bindValue(':id', $sessionUser->getId());
+
+            $stmt->execute(); // Exécute la requête après avoir lié tous les paramètres
 
             $this->addFlash('success', 'Profil mis à jour avec succès.');
             return $this->redirectToRoute('app_profil');
         }
 
+        $currentPhotoBase64 = null;
+        $currentPhotoBase64 = $sessionUser->getPhotoData();
+
         return $this->render('profil/modifier.html.twig', [
             'form' => $form->createView(),
+            'user' => $sessionUser,
+            'currentPhotoBase64' => $sessionUser->getPhotoData(),
         ]);
     }
 }

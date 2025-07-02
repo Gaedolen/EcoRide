@@ -69,7 +69,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $telephone = null;
 
     #[ORM\Column(type: 'blob', nullable: true)]
-    private $photo = null;
+    private $photo;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     #[Assert\NotBlank(message: 'La date de naissance est requise.')]
@@ -234,19 +234,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getPhoto(): ?string
+    /**
+     * @return resource|null
+     */
+    public function getPhoto()
     {
-        if (is_resource($this->photo)) {
-            $this->photo = stream_get_contents($this->photo); 
-        }
         return $this->photo;
     }
 
-
-    public function setPhoto($photo): self
+    /**
+     * @param resource|string|null $photo
+     */
+    public function setPhoto($photo): static
     {
         $this->photo = $photo;
-
         return $this;
     }
 
@@ -318,5 +319,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return $this;
+    }
+
+    public function getPhotoData(): ?string
+    {
+        if ($this->photo === null) {
+            return null;
+        }
+
+        if (is_resource($this->photo)) {
+            $this->photo = stream_get_contents($this->photo);
+        }
+
+        return base64_encode($this->photo);
     }
 }

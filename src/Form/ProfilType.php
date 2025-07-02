@@ -11,6 +11,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Validator\Constraints\File;
 
 class ProfilType extends AbstractType
 {
@@ -35,16 +36,25 @@ class ProfilType extends AbstractType
                 'required' => false,
             ])
             ->add('photo', FileType::class, [
+                'label' => 'Photo de profil (JPG, PNG)',
+                'mapped' => false, 
+                'required' => false, 
+                'constraints' => [
+                    new File([
+                        'maxSize' => '5M', 
+                        'mimeTypes' => [
+                            'image/jpeg',
+                            'image/png',
+                        ],
+                        'mimeTypesMessage' => 'Veuillez télécharger une image valide (JPG ou PNG).',
+                    ])
+                ],
+            ])
+            ->add('deletePhoto', CheckboxType::class, [ 
+                'label' => 'Supprimer la photo actuelle',
                 'required' => false,
-                'mapped' => false,
-                'label' => 'Photo de profil (JPG/PNG)',
+                'mapped' => false, 
             ])
-            ->add('deletePhoto', CheckboxType::class, [
-            'label' => 'Supprimer la photo actuelle',
-            'mapped' => false,
-            'required' => false,
-            ])
-            
             ->add('dateNaissance', DateType::class, [
                 'label' => 'Date de naissance',
                 'widget' => 'single_text',
