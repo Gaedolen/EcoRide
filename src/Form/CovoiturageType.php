@@ -9,6 +9,8 @@ use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -21,31 +23,55 @@ class CovoiturageType extends AbstractType
         $builder
             ->add('date_depart', DateType::class, [
                 'widget' => 'single_text',
-                'label' => 'Date de départ'
+                'label' => 'Date de départ',
+                'attr' => [
+                    'class' => 'form-input',
+                ]
             ])
             ->add('heure_depart', TimeType::class, [
                 'widget' => 'single_text',
-                'label' => 'Heure de départ'
+                'label' => 'Heure de départ',
+                'attr' => [
+                    'class' => 'form-input',
+                ]
             ])
             ->add('lieu_depart', TextType::class, [
-                'label' => 'Lieu de départ'
+                'label' => 'Lieu de départ',
+                'attr' => [
+                    'class' => 'form-input',
+                    'placeholder' => 'Entrez la ville de départ',
+                ]
             ])
             ->add('date_arrivee', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date d’arrivée'
             ])
-            ->add('heure_arrivee', TextType::class, [
-                'label' => 'Heure d’arrivée (HH:MM)'
+            ->add('heureArrivee', TimeType::class, [
+                'label' => 'Heure d\'arrivée',
+                'widget' => 'single_text',
+                'input' => 'datetime',
+                'html5' => true,
             ])
             ->add('lieu_arrivee', TextType::class, [
-                'label' => 'Lieu d’arrivée'
+                'label' => 'Lieu d’arrivée',
+                'attr' => [
+                    'class' => 'form-input',
+                    'placeholder' => 'Entrez la ville d\'arrivée',
+                ]
             ])
-            ->add('nb_place', NumberType::class, [
-                'label' => 'Nombre de places disponibles'
+            ->add('nb_place', IntegerType::class, [
+                'label' => 'Nombre de places',
+                'attr' => [
+                    'min' => 1,
+                    'step' => 1,
+                ],
+                'data' => 1,
             ])
-            ->add('prix_personne', NumberType::class, [
-                'label' => 'Prix par personne (€)',
-                'scale' => 2
+            ->add('prixPersonne', NumberType::class, [
+                'label' => 'Prix par personne',
+                'scale' => 2,
+                'html5' => true,
+                'attr' => ['class' => 'form-input prix-input'],
             ])
             ->add('voiture', EntityType::class, [
                 'class' => Voiture::class,
@@ -70,6 +96,9 @@ class CovoiturageType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Covoiturage::class,
             'user' => null,
+            'csrf_protection' => true,
+            'csrf_field_name' => '_token',
+            'csrf_token_id'   => 'covoiturage',
         ]);
     }
 }

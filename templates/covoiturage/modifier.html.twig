@@ -1,76 +1,76 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier mon profil{% endblock %}
+{% block title %}Modifier le covoiturage{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ asset('css/modifier.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/ajoutCovoiturage.css') }}">
 {% endblock %}
 
 {% block body %}
+    <div class="form-container">
+        <h1>Modifier le covoiturage</h1>
 
-    <div class='modification-container'>
-        <h1>Modifier mon covoiturage</h1>
+        {{ form_start(form) }}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="date_depart">Date de départ</label>
+                    {{ form_widget(form.date_depart, { attr: { class: 'form-input' } }) }}
+                </div>
 
-        {{ form_start(form, {'attr': {'enctype': 'multipart/form-data'}}) }}
+                <div class="form-group">
+                    <label for="heure_depart">Heure de départ</label>
+                    {{ form_widget(form.heure_depart, { attr: { class: 'form-input' } }) }}
+                </div>
 
-            <label for="date_depart">Date de départ</label>
-            {{ form_widget(form.date_depart, {
-                    attr: {
-                        class: 'date_depart'
-                        }
-            }) }}
+                <div class="form-group">
+                    <label for="lieu_depart">Lieu de départ</label>
+                    {{ form_widget(form.lieu_depart, { attr: { class: 'form-input' } }) }}
+                </div>
+            </div>
 
-            <label for="heure_depart">Heure de départ</label>
-            {{ form_widget(form.heure_depart, {
-                    attr: {
-                        class: 'heure_depart'
-                        }
-            }) }}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="date_arrivee">Date d'arrivée</label>
+                    {{ form_widget(form.date_arrivee, { attr: { class: 'form-input' } }) }}
+                </div>
 
-            <label for="lieu_depart">Lieu de départ</label>
-            {{ form_widget(form.lieu_depart, {
-                    attr: {
-                        class: 'lieu_depart'
-                        }
-            }) }}
+                <div class="form-group">
+                    <label for="heure_arrivee">Heure d'arrivée</label>
+                    {{ form_widget(form.heureArrivee, { attr: { class: 'form-input' } }) }}
+                </div>
 
-            <label for="date_arrivee">Date d'arrivée</label>
-            {{ form_widget(form.date_arrivee, {
-                    attr: {
-                        class: 'date_arrivee'
-                        }
-            }) }}
+                <div class="form-group">
+                    <label for="lieu_arrivee">Lieu d'arrivée</label>
+                    {{ form_widget(form.lieu_arrivee, { attr: { class: 'form-input' } }) }}
+                </div>
+            </div>
 
-            <label for="heure_arrivee">Heure d'arrivée</label>
-            {{ form_widget(form.heure_arrivee, {
-                    attr: {
-                        class: 'heure_arrivee'
-                        }
-            }) }}
+            <div class="form-row">
+                <div class="form-group double">
+                    <label for="nb_place">Nombre de places disponibles</label>
+                    {{ form_widget(form.nb_place, { attr: { class: 'form-input', min: 1 } }) }}
+                </div>
 
-            <label for="lieu_arrivee">Lieu d'arrivée</label>
-            {{ form_widget(form.lieu_arrivee, {
-                    attr: {
-                        class: 'lieu_arrivee'
-                        }
-            }) }}
+                <div class="form-group double">
+                    <label for="prix_personne">Prix par personne</label>
+                    <div class="input-with-symbol">
+                        {{ form_widget(form.prixPersonne, { attr: { 
+                            class: 'form-input',
+                            placeholder: 'Entrez un prix'
+                             } }) }}
+                        <span class="currency-symbol">€</span>
+                    </div>
+                </div>
+            </div>
 
-            <label for="nb_place">Nombre de places disponibles</label>
-            {{ form_widget(form.nb_place, {
-                    attr: {
-                        class: 'nb_place'
-                        }
-            }) }}
+            <div class="form-group">
+                <label for="voiture">Voiture utilisée</label>
+                {{ form_widget(form.voiture, { attr: { class: 'form-input' } }) }}
+            </div>
 
-            <label for="prix_personne">Prix par personne</label>
-            {{ form_widget(form.prix_personne, {
-                    attr: {
-                        class: 'prix_personne'
-                        }
-            }) }}
+            {{ form_rest(form) }}
 
-                <button type="submit" class='btn-modification'>Enregistrer mes modifications</button>
-            {{ form_end(form) }}
-        </div>
-
+            <button type="submit" class='bouton'>Modifier le covoiturage</button>
+        {{ form_end(form) }}
+    </div>
 {% endblock %}

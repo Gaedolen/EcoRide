@@ -22,7 +22,7 @@ class Covoiturage
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date_depart = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[ORM\Column(type: Types::TIME_MUTABLE)]
     private ?\DateTimeInterface $heure_depart = null;
 
     #[ORM\Column(length: 50)]
@@ -31,8 +31,8 @@ class Covoiturage
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date_arrivee = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $heure_arrivee = null;
+    #[ORM\Column(type: Types::TIME_MUTABLE)]
+    private ?\DateTimeInterface $heureArrivee = null;
 
     #[ORM\Column(length: 50)]
     private ?string $lieu_arrivee = null;
@@ -103,15 +103,14 @@ class Covoiturage
         return $this;
     }
 
-    public function getHeureArrivee(): ?string
+    public function getHeureArrivee(): ?\DateTimeInterface
     {
-        return $this->heure_arrivee;
+        return $this->heureArrivee;
     }
 
-    public function setHeureArrivee(string $heure_arrivee): static
+    public function setHeureArrivee(\DateTimeInterface $heureArrivee): self
     {
-        $this->heure_arrivee = $heure_arrivee;
-
+        $this->heureArrivee = $heureArrivee;
         return $this;
     }
 

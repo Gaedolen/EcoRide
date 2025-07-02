@@ -1,25 +1,53 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const modal = document.getElementById("confirmation-modal");
-    const btnYes = document.getElementById("confirm-yes");
-    const btnNo = document.getElementById("confirm-no");
+document.addEventListener('DOMContentLoaded', () => {
+    // Supprimer une voiture
+    const voitureButtons = document.querySelectorAll('button[data-voiture-id]');
+    const voitureModal = document.getElementById('confirmation-modal');
+    const voitureConfirmYes = document.getElementById('confirm-yes');
+    const voitureConfirmNo = document.getElementById('confirm-no');
+    let currentVoitureForm = null;
 
-    let currentForm = null;
-
-    document.querySelectorAll(".btn-supprimer").forEach(button => {
-        button.addEventListener("click", () => {
-            currentForm = button.closest("form");
-            modal.classList.remove("hidden");
+    voitureButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            currentVoitureForm = button.closest('form');
+            voitureModal.classList.remove('hidden');
         });
     });
 
-    btnYes.addEventListener("click", () => {
-        if (currentForm) {
-            currentForm.submit();
-        }
+    voitureConfirmYes.addEventListener('click', () => {
+        if (currentVoitureForm) currentVoitureForm.submit();
+        voitureModal.classList.add('hidden');
     });
 
-    btnNo.addEventListener("click", () => {
-        modal.classList.add("hidden");
-        currentForm = null;
+    voitureConfirmNo.addEventListener('click', () => {
+        voitureModal.classList.add('hidden');
+        currentVoitureForm = null;
+    });
+
+    // Supprimer un covoiturage
+    const covoiturageButtons = document.querySelectorAll('button[data-covoiturage-id]');
+    const covoiturageModal = document.getElementById('confirmation-modal-covoiturage');
+    const confirmYesCovoiturage = document.getElementById('confirm-yes-covoiturage');
+    const confirmNoCovoiturage = document.getElementById('confirm-no-covoiturage');
+    let currentCovoiturageForm = null;
+
+    covoiturageButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            event.preventDefault();
+            currentCovoiturageForm = button.closest('form');
+            covoiturageModal.classList.remove('hidden');
+        });
+    });
+
+    confirmYesCovoiturage.addEventListener('click', () => {
+        if (currentCovoiturageForm) {
+            currentCovoiturageForm.submit();
+            currentCovoiturageForm = null;
+        }
+        covoiturageModal.classList.add('hidden');
+    });
+
+    confirmNoCovoiturage.addEventListener('click', () => {
+        covoiturageModal.classList.add('hidden');
+        currentCovoiturageForm = null;
     });
 });

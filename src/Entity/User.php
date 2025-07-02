@@ -25,6 +25,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Voiture::class)]
     private Collection $voitures;
 
+    #[ORM\OneToMany(mappedBy: 'utilisateur', targetEntity: Covoiturage::class)]
+    private Collection $covoiturages;
+
     #[ORM\Column(length: 180)]
     #[Assert\NotBlank(message: 'L’email est obligatoire.')]
     #[Assert\Email(message: "L'adresse email '{{ value }}' n'est pas valide.")]    
@@ -283,10 +286,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function __construct()
     {
         $this->voitures = new ArrayCollection();
+        $this->covoiturages = new ArrayCollection();
     }
 
     public function getVoitures(): Collection
     {
         return $this->voitures;
+    }
+
+    public function getCovoiturages(): Collection
+    {
+        return $this->covoiturages;
+    }
+
+    public function addCovoiturage(Covoiturage $covoiturage): static
+    {
+        if (!$this->covoiturages->contains($covoiturage)) {
+            $this->covoiturages[] = $covoiturage;
+            $covoiturage->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCovoiturage(Covoiturage $covoiturage): static
+    {
+        if ($this->covoiturages->removeElement($covoiturage)) {
+            if ($covoiturage->getUtilisateur() === $this) {
+                $covoiturage->setUtilisateur(null);
+            }
+        }
+
+        return $this;
     }
 }

@@ -155,6 +155,6 @@ input[type="tel"] {
     cursor: pointer;
 }
 
-.btn-modification {
+.btn-modification:hover {
     background: linear-gradient(#8ed657, #317d31);
 }

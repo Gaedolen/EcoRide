@@ -1,118 +1,189 @@
-/* Conteneur du profil utilisateur */
-.profil-container{
-    background-color: #f0f0f0;
-    border-radius: 20px;
-    padding: 30px;
-    width: 550px;
-    margin: 40px;
-    margin-top: 20px;
+/* Base */
+body {
     font-family: 'Comfortaa', sans-serif;
-    line-height: 40px;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
 }
 
-/* Titres */
 h1 {
-    font-size: 28px;
-    color: #4a86e8;
-    margin-bottom: 10px;
-}
-
-/* Boutons */
-.btn-ajouter-voiture,
-.btn-modifier {
-    text-decoration: none;
-    text-align: center;
-}
-
-/* Titre "profil" + bonton alignés */
-.profil-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    padding: 0 40px;
-    margin-bottom: 18px;
-    margin-top: 20px;
-}
-
-.profil-header h1 {
     font-size: 28px;
     color: #4a86e8;
     margin: 0;
 }
 
+/* Section profil */
+.profil-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 0 40px;
+    margin-top: 30px;
+}
+
 .btn-modifier {
     background: linear-gradient(#a2e76d, yellowgreen);
-    border: none;
     color: white;
-    border-radius: 20px;
+    border: none;
+    border-radius: 25px;
     padding: 10px 18px;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
+    text-decoration: none;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    max-width: 200px;
-    width: auto;
-    text-align: center;
-    text-decoration: none;
 }
 
 .btn-modifier:hover {
     background: linear-gradient(#8ed657, #317d31);
 }
 
-li {
-    font-size: 20px;
+.profil-container {
+    background-color: #f0f0f0;
+    border-radius: 20px;
+    padding: 30px;
+    width: 550px;
+    margin: 20px 40px;
+    line-height: 40px;
 }
 
-.label {
-    font-weight: bold;
-}
-
-/* Conteneur de gestion des noms et de la photo de profil */
 .noms-photo-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-.noms-container {
-    display: flex;
-    flex-direction: column;
-}
-
-.photo-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Photo de profil utilisateur */
 .photo-profil {
     height: 120px;
     width: 120px;
     border-radius: 50%;
     object-fit: cover;
-    margin-right: 10px;
 }
 
-/* Bouton désactivé car utilisateur pas chauffeur */
+.label {
+    font-weight: bold;
+}
+
+li {
+    font-size: 20px;
+}
+
+/* En-tête de Voiture et Covoiturage */
+.voitures-header,
+.covoiturages-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin: 40px 40px 10px 40px;
+}
+
+.btn-ajouter-voiture,
+.btn-covoiturage {
+    background: linear-gradient(#a2e76d, yellowgreen);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 18px;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-ajouter-voiture:hover,
+.btn-covoiturage:hover {
+    background: linear-gradient(#8ed657, #317d31);
+}
+
 .btn-ajouter-voiture.disabled {
-    background-color: #cccccc;
+    background-color: #ccc;
     cursor: not-allowed;
-    pointer-events: all; 
 }
 
-.btn-ajouter-voiture.disabled:hover {
-    background-color: #cccccc;
+/* Cartes voiture et covoiturage */
+.car-container,
+.covoiturage-container {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 20px;
+    padding: 0 40px 20px 40px;
+    overflow-x: auto;
 }
 
-/* Page pop-up */
+.car-card,
+.covoiturage-card {
+    background-color: #f5f5f5;
+    border-radius: 20px;
+    padding: 20px;
+    min-width: 550px;
+    font-family: 'Comfortaa', sans-serif;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.car-card ul,
+.covoiturage-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    line-height: 32px;
+}
+
+.car-card li,
+.covoiturage-card li {
+    font-size: 18px;
+}
+
+/* Boutons de modification et de suppression */
+.card-actions,
+.btns {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.btn-card-action {
+    background: linear-gradient(#a2e76d, yellowgreen);
+    border: none;
+    color: white;
+    border-radius: 25px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-family: 'Comfortaa', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 110px;
+    max-width: 120px;
+    height: 38px;
+    line-height: normal;
+}
+
+
+.btn-card-action:hover {
+    background: linear-gradient(#8ed657, #317d31);
+}
+
+/* Covoiturage fermé */
+.covoiturage-ferme {
+    background-color: #ddd !important;
+    opacity: 0.6;
+    pointer-events: none;
+    filter: grayscale(100%);
+}
+
+
+
+/* Fenêtre pop-up de confirmation de suppression */
 .modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
@@ -139,7 +210,8 @@ li {
     justify-content: space-around;
 }
 
-.btn-confirm-yes, .btn-confirm-no {
+.btn-confirm-yes,
+.btn-confirm-no {
     padding: 10px 20px;
     border: none;
     font-weight: bold;
@@ -157,122 +229,8 @@ li {
     color: black;
 }
 
-/* Conteneur des cartes voitures du chauffeur */
-.voitures-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin: 40px 40px 10px 40px;
-}
-
-.voitures-header h1 {
-    font-size: 28px;
-    color: #4a86e8;
-    margin: 0;
-}
-
-.car-scroll-wrapper {
-    overflow-x: auto;
-    padding: 10px 40px;
-}
-
-.car-container {
-    display: flex;
-    flex-direction: row;
-    align-content: flex-start;
-    gap: 5px;
-    flex-wrap: nowrap;
-}
-
-.car-card {
-    background-color: #f0f0f0;
-    border-radius: 20px;
-    padding: 30px;
-    width: 550px;
-    margin: 40px;
-    margin-top: 20px;
-    font-family: 'Comfortaa', sans-serif;
-    line-height: 40px;
-}
-
-/* Bouton d'ajout d'une voiture */
-.btn-ajouter-voiture {
-    background: linear-gradient(#a2e76d, yellowgreen);
-    border: none;
-    color: white;
-    border-radius: 20px;
-    font-size: 18px;
-    width: auto;
-    padding: 10px 18px;
-    max-width: 300px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin: 0;
-}
-
-.btn-ajouter-voiture:hover {
-    background: linear-gradient(#8ed657, #317d31);
-}
-
-.btn-ajouter-voiture.disabled {
-    background: #ccc;
-    cursor: not-allowed;
-}
-
+/* Messages */
 .no-car-message {
     padding: 10px 40px;
     font-style: italic;
-}
-
-/* Boutons de modification et suppression d'une voiture */
-.car-actions {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 12px;
-}
-
-.car-actions a.btn-modifier-voiture {
-    font-family: 'Comfortaa', sans-serif;
-    padding: 10px;
-    width: 30%;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    box-sizing: border-box;
-}
-
-.btn-modifier-voiture {
-    background-color: #4a86e8;
-    color: white;
-}
-
-.btn-modifier-voiture:hover {
-    background-color: #375dbb;
-}
-
-button.btn-supprimer {
-    all: unset;
-    font-family: 'Comfortaa', sans-serif;
-    display: inline-block;
-    text-align: center;
-    width: 100%;
-    padding: 10px;
-    background-color: #e74c3c;
-    color: white;
-    border-radius: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-button.btn-supprimer:hover {
-    background-color: #c0392b;
 }
