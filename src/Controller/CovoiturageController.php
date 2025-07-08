@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Form\CovoiturageType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,12 +22,28 @@ class CovoiturageController extends AbstractController
         $date = $request->query->get('date_depart');
         $heure = $request->query->get('heure_depart');
 
-        //Connexion PDO manuelle
+        // Connexion PDO
         $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        //Requête préparée sécurisée
-        $stmt = $pdo->prepare("SELECT * FROM covoiturage WHERE lieu_depart = :depart AND lieu_arrivee = :arrivee AND date_depart = :date AND heure_depart >= :heure");
+        // Requête avec jointure sur la table "user" et "voiture
+       $stmt = $pdo->prepare("
+            SELECT 
+                c.*, 
+                u.nom AS user_pseudo,
+                u.nom AS user_nom,
+                u.prenom AS user_prenom,
+                u.photo AS user_photo,
+                u.note AS user_note,
+                v.energie AS voiture_energie
+            FROM covoiturage c
+            JOIN user u ON u.id = c.utilisateur_id
+            JOIN voiture v ON v.id = c.voiture_id
+            WHERE c.lieu_depart = :depart 
+            AND c.lieu_arrivee = :arrivee 
+            AND c.date_depart = :date 
+            AND c.heure_depart >= :heure
+        ");
 
         $stmt->execute([
             ':depart' => $depart,
@@ -37,10 +54,47 @@ class CovoiturageController extends AbstractController
 
         $trajets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    
+        // Encoder les photos BLOB en base64
+        foreach ($trajets as &$trajet) {
+            if (!empty($trajet['user_photo'])) {
+                $trajet['user_photo'] = base64_encode($trajet['user_photo']);
+            } else {
+                $trajet['user_photo'] = null;
+            }
+            // Conversion des heures et dates en objets DateTime pour Twig
+            $trajet['heure_depart'] = new DateTime($trajet['heure_depart']);
+            $trajet['heure_arrivee'] = new DateTime($trajet['heure_arrivee']);
+            $trajet['date_depart'] = new DateTime($trajet['date_depart']);
+            $trajet['date_arrivee'] = new DateTime($trajet['date_arrivee']);
+        }
+
         return $this->render('covoiturage/resultats.html.twig', [
-            'controller_name' => 'CovoiturageController',
-            'trajets' => $trajets,
+            'trajets' => $trajets
+        ]);
+    }
+
+    #[Route('/covoiturage/{id}', name: 'details_trajet')]
+    public function details(int $id): Response
+    {
+        $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $stmt = $pdo->prepare("
+            SELECT c.*, u.nom AS user_nom, u.prenom AS user_prenom, u.photo AS user_photo, v.energie AS voiture_energie
+            FROM covoiturage c
+            JOIN user u ON u.id = c.utilisateur_id
+            JOIN voiture v ON v.id = c.voiture_id
+            WHERE c.id = :id
+        ");
+        $stmt->execute(['id' => $id]);
+        $trajet = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$trajet) {
+            throw $this->createNotFoundException('Trajet introuvable.');
+        }
+
+        return $this->render('covoiturage/details.html.twig', [
+            'trajet' => $trajet,
         ]);
     }
 

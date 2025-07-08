@@ -1,52 +1,285 @@
-/* Formulaire de modification*/
+/* Base */
+body {
+    font-family: 'Comfortaa', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    color: #333;
+}
+
+/* Mise en page générale */
+.resultats-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+    padding: 40px;
+    box-sizing: border-box;
+}
+
+/* Sidebar des filtres de recherche */
+.sidebar-filtres {
+    width: 280px;
+    background: #f7f7f7;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 40px;
+}
+
+.sidebar-filtres h2 {
+    font-size: 22px;
+    color: #4a86e8;
+    margin-bottom: 20px;
+}
+
+.filtre-group {
+    margin-bottom: 20px;
+}
+
+.filtre-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 6px;
+    font-size: 15px;
+    color: #333;
+}
+
+.filtre-group input,
+.filtre-group select {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.btn-filtres {
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient(#a2e76d, yellowgreen);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.btn-filtres:hover {
+    background: linear-gradient(#8ed657, #317d31);
+}
+
+/* Zone de formulaire et des cartes */
+.zone-resultats {
+    flex: 1;
+}
+
+/* Formulaire de modification */
 .formulaire-modification {
     background-color: #4A90E2;
-    padding: 10px;
-    border-radius: 20px;
-    margin: 20px;
-    margin-top: 5px;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
 }
 
-.titre-formulaire-modification { /* Titre formulaire */
+.titre-formulaire-modification {
+    font-size: 20px;
     color: white;
-    margin-left: 10px;
-    margin-top: 5px;
+    margin-bottom: 15px;
 }
 
-input {
+.champs-saisie {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+    
+}
+
+.champs-saisie input {
+    flex: 1;
+    min-width: 180px;
+    padding: 10px;
+    font-size: 15px;
     background-color: white;
     text-decoration: none;
     border-radius: 20px;
     border-style: none;
     font-family: 'Comfortaa', sans-serif;
-    padding: 12px;
-    width: 400px;
-    font-size: 15px;
     margin-bottom: 10px;
 }
 
-.champs-saisie {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    
+.recherche-center {
+    text-align: center;
+    margin-top: 10px;
 }
 
-.rechercher { /* Bouton de recherche */
-    background-color: #a2e76d;
+.rechercher {
+    background: linear-gradient(#a2e76d, yellowgreen);    
     color: white;
-    padding: 12px;
-    font-size: 25px;
-    width: 300px;
+    font-family: 'Comfortaa', sans-serif;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 20px;
     font-weight: bold;
-    display: block;
-    margin: 0 auto;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background 0.3s ease;
 }
 
+.rechercher:hover {
+    background: linear-gradient(#8ed657, #317d31);
+}
 
+/* Listing */
+.liste-trajets {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Cartes covoiturages */
+.trajet-card {
+    background-color: #f9f9f9;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto 20px auto;
+}
+
+.trajet-card-content {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 40px;
+    padding: 10px 20px;
+    min-height: 100px;
+}
+
+/* Infos chauffeur */
+.chauffeur-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 180px;
+}
+
+.chauffeur-photo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.chauffeur-nom {
+    font-weight: bold;
+    font-size: 16px;
+    margin: 0;
+}
+
+.chauffeur-nom,
+.date-heure p,
+.place-eco p,
+.prix,
+.details-link {
+    font-size: 17px;
+}
+
+/* Ligne de séparation entre les infos utilisateur et du trajet */
+.vertical-separator {
+    width: 1px;
+    height: 80%;
+    background-color: #ccc;
+    margin: 0 10px;
+    align-self: stretch;
+}
+
+/* Infos trajet */
+.infos-trajet {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 16px;
+}
+
+.infos-trajet p {
+    margin: 0;
+    font-size: 15px;
+}
+
+.eco-badge {
+    display: inline-block;
+    background-color: #d4edda;
+    color: #2f7f40;
+    font-weight: bold;
+    padding: 4px 8px;
+    border-radius: 15px;
+    font-size: 14px;
+    white-space: nowrap;
+    width: fit-content;
+}
+
+/* Prix */
+.prix-et-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    min-width: 120px;
+    gap: 10px;
+}
+
+.prix {
+    font-size: 22px;
+    font-weight: bold;
+    color: #4a86e8;
+    margin-bottom: 8px;
+}
+
+/* Bouton de détail */
+.details-link {
+    background: linear-gradient(#a2e76d, yellowgreen);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    transition: background 0.3s ease;
+}
+
+.details-link:hover {
+    background: linear-gradient(#8ed657, #317d31);
+}
+
+/* Responsive */
+@media screen and (max-width: 1000px) {
+    .resultats-layout {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .sidebar-filtres {
+        width: 100%;
+        position: static;
+    }
+
+    .trajet-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .prix-et-details {
+        align-self: flex-end;
+    }
+}

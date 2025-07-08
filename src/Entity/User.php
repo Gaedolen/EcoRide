@@ -84,6 +84,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private ?bool $isPassager = false;
+
+    #[ORM\Column(type: 'float', nullable: true)]
+    private ?float $note = null;
    
 
         // Setter et Getter
@@ -332,5 +335,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         return base64_encode($this->photo);
+    }
+
+    public function getNote(): ?float
+    {
+        return $this->note;
+    }
+
+    public function setNote(?float $note): static
+    {
+        $this->note = $note;
+        return $this;
     }
 }
