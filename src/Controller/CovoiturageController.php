@@ -14,54 +14,86 @@ use \PDO;
 
 class CovoiturageController extends AbstractController
 {
-    #[Route('/covoiturage', name: 'app_covoiturage')]
+        #[Route('/covoiturage', name: 'app_covoiturage')]
     public function rechercher(Request $request): Response
     {
+        // Paramètres de recherche
         $depart = $request->query->get('lieu_depart');
         $arrivee = $request->query->get('lieu_arrivee');
         $date = $request->query->get('date_depart');
         $heure = $request->query->get('heure_depart');
 
+        // Paramètres de filtre
+        $noteMin = $request->query->get('note_min');
+        $ecologique = $request->query->get('ecologique');
+        $prixMin = $request->query->get('prix_min');
+        $prixMax = $request->query->get('prix_max');
+        $heuresMax = (int) $request->query->get('temps_max_heures');
+        $minutesMax = (int) $request->query->get('temps_max_minutes');
+        $tempsMaxTotal = ($heuresMax * 60) + $minutesMax;
+
+
         // Connexion PDO
         $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // Requête avec jointure sur la table "user" et "voiture
-       $stmt = $pdo->prepare("
+        // Construction dynamique de la requête SQL
+        $sql = "
             SELECT 
                 c.*, 
-                u.nom AS user_pseudo,
-                u.nom AS user_nom,
-                u.prenom AS user_prenom,
+                u.pseudo AS user_pseudo,
                 u.photo AS user_photo,
                 u.note AS user_note,
                 v.energie AS voiture_energie
             FROM covoiturage c
             JOIN user u ON u.id = c.utilisateur_id
             JOIN voiture v ON v.id = c.voiture_id
-            WHERE c.lieu_depart = :depart 
-            AND c.lieu_arrivee = :arrivee 
-            AND c.date_depart = :date 
+            WHERE c.lieu_depart = :depart
+            AND c.lieu_arrivee = :arrivee
+            AND c.date_depart = :date
             AND c.heure_depart >= :heure
-        ");
+        ";
 
-        $stmt->execute([
+        $params = [
             ':depart' => $depart,
             ':arrivee' => $arrivee,
             ':date' => $date,
             ':heure' => $heure,
-        ]);
+        ];
 
+        // Filtres dynamiques
+        if ($noteMin !== null && $noteMin !== '') {
+            $sql .= " AND u.note >= :note_min";
+            $params[':note_min'] = (int)$noteMin;
+        }
+
+        if ($ecologique === '1') {
+            $sql .= " AND v.energie IN ('Électrique', 'Electrique')";
+        }
+
+        if ($prixMin !== null && $prixMin !== '') {
+            $sql .= " AND c.prix_personne >= :prix_min";
+            $params[':prix_min'] = (float)$prixMin;
+        }
+
+        if ($prixMax !== null && $prixMax !== '') {
+            $sql .= " AND c.prix_personne <= :prix_max";
+            $params[':prix_max'] = (float)$prixMax;
+        }
+
+        if ($tempsMaxTotal > 0) {
+            $sql .= " AND TIME_TO_SEC(TIMEDIFF(c.heure_arrivee, c.heure_depart)) <= :temps_max_sec";
+            $params[':temps_max_sec'] = $tempsMaxTotal * 60;
+        }
+
+        // Préparation et exécution
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
         $trajets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Encoder les photos BLOB en base64
+        // Traitement des trajets
         foreach ($trajets as &$trajet) {
-            if (!empty($trajet['user_photo'])) {
-                $trajet['user_photo'] = base64_encode($trajet['user_photo']);
-            } else {
-                $trajet['user_photo'] = null;
-            }
-            // Conversion des heures et dates en objets DateTime pour Twig
+            $trajet['user_photo'] = !empty($trajet['user_photo']) ? base64_encode($trajet['user_photo']) : null;
             $trajet['heure_depart'] = new DateTime($trajet['heure_depart']);
             $trajet['heure_arrivee'] = new DateTime($trajet['heure_arrivee']);
             $trajet['date_depart'] = new DateTime($trajet['date_depart']);
@@ -72,6 +104,7 @@ class CovoiturageController extends AbstractController
             'trajets' => $trajets
         ]);
     }
+
 
     #[Route('/covoiturage/{id}', name: 'details_trajet')]
     public function details(int $id): Response
@@ -111,8 +144,8 @@ class CovoiturageController extends AbstractController
         $covoiturage = new Covoiturage();
 
         // Définir l'heure à 12:00 par défaut
-        $covoiturage->setHeureDepart(new \DateTime('12:00'));
-        $covoiturage->setHeureArrivee(new \DateTime('12:00'));
+        $covoiturage->setHeureDepart(new DateTime('12:00'));
+        $covoiturage->setHeureArrivee(new DateTime('12:00'));
 
         $form = $this->createForm(CovoiturageType::class, $covoiturage, [
             'user' => $user
@@ -128,7 +161,7 @@ class CovoiturageController extends AbstractController
             $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            $now = new \DateTime();
+            $now = new DateTime();
             $date = $covoiturage->getDateDepart();
             $heure = $covoiturage->getHeureDepart();
 
@@ -224,11 +257,11 @@ class CovoiturageController extends AbstractController
         // Reconstituer l'entité Covoiturage
         $covoiturage = new Covoiturage();
         $covoiturage
-            ->setDateDepart(new \DateTime($row['date_depart']))
-            ->setHeureDepart(new \DateTime($row['heure_depart']))
+            ->setDateDepart(new DateTime($row['date_depart']))
+            ->setHeureDepart(new DateTime($row['heure_depart']))
             ->setLieuDepart($row['lieu_depart'])
-            ->setDateArrivee(new \DateTime($row['date_arrivee']))
-            ->setHeureArrivee(new \DateTime($row['heure_arrivee']))
+            ->setDateArrivee(new DateTime($row['date_arrivee']))
+            ->setHeureArrivee(new DateTime($row['heure_arrivee']))
             ->setLieuArrivee($row['lieu_arrivee'])
             ->setNbPlace((int) $row['nb_place'])
             ->setPrixPersonne((float) $row['prix_personne']);
@@ -249,7 +282,7 @@ class CovoiturageController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Recalculer le statut
-            $now = new \DateTime();
+            $now = new DateTime();
             $isPast = ($covoiturage->getDateDepart() < $now) || ($covoiturage->getDateDepart() == $now && $covoiturage->getHeureDepart() < $now);
             $statut = $isPast ? 'ferme' : (($covoiturage->getNbPlace() <= 0) ? 'complet' : 'ouvert');
 

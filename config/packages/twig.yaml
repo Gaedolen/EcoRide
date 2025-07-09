@@ -1,5 +1,11 @@
 twig:
     file_name_pattern: '*.twig'
+    default_path: '%kernel.project_dir%/templates'
+    globals: ~
+    form_themes: ['bootstrap_5_layout.html.twig']
+    date:
+        timezone: Europe/Paris
+    paths: []
 
 when@test:
     twig:
