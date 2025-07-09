@@ -109,27 +109,47 @@ class CovoiturageController extends AbstractController
     #[Route('/covoiturage/{id}', name: 'details_trajet')]
     public function details(int $id): Response
     {
-        $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo = new \PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
+        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
         $stmt = $pdo->prepare("
-            SELECT c.*, u.nom AS user_nom, u.prenom AS user_prenom, u.photo AS user_photo, v.energie AS voiture_energie
+            SELECT 
+                c.*, 
+                u.pseudo AS chauffeur_pseudo,
+                u.note AS chauffeur_note,
+                u.photo AS chauffeur_photo,
+                v.marque, v.modele, v.energie, v.nb_places, v.couleur, v.animaux, v.fumeur
             FROM covoiturage c
             JOIN user u ON u.id = c.utilisateur_id
             JOIN voiture v ON v.id = c.voiture_id
             WHERE c.id = :id
         ");
+
         $stmt->execute(['id' => $id]);
-        $trajet = $stmt->fetch(PDO::FETCH_ASSOC);
+        $trajet = $stmt->fetch(\PDO::FETCH_ASSOC);
 
         if (!$trajet) {
-            throw $this->createNotFoundException('Trajet introuvable.');
+            throw $this->createNotFoundException("Ce covoiturage n'existe pas.");
         }
 
+        // Encodage de la photo s'il y en a une
+        if (!empty($trajet['chauffeur_photo'])) {
+            $trajet['chauffeur_photo'] = base64_encode($trajet['chauffeur_photo']);
+        } else {
+            $trajet['chauffeur_photo'] = null;
+        }
+
+        // Convertir les dates et heures
+        $trajet['date_depart'] = new DateTime($trajet['date_depart']);
+        $trajet['heure_depart'] = new DateTime($trajet['heure_depart']);
+        $trajet['date_arrivee'] = new DateTime($trajet['date_arrivee']);
+        $trajet['heure_arrivee'] = new DateTime($trajet['heure_arrivee']);
+
         return $this->render('covoiturage/details.html.twig', [
-            'trajet' => $trajet,
+            'trajet' => $trajet
         ]);
     }
+
 
     #[Route('/covoiturage/ajouter', name: 'ajouter_covoiturage')]
     public function ajouterCovoiturage(Request $request): Response

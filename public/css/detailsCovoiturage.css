@@ -1,0 +1,106 @@
+.details-container {
+    max-width: 1000px;
+    margin: 60px auto;
+    padding: 20px;
+    font-family: 'Comfortaa', sans-serif;
+}
+
+.details-card {
+    display: flex;
+    justify-content: space-between;
+    background-color: #fafafa;
+    border-radius: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 40px;
+    gap: 40px;
+}
+
+.left-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+}
+
+.right-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+}
+
+.separator-vertical {
+    width: 1px;
+    background-color: #ccc;
+    height: auto;
+}
+
+.chauffeur-section {
+    text-align: center;
+}
+
+.chauffeur-photo {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+}
+
+.chauffeur-name {
+    font-weight: bold;
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.voiture-section {
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.voiture-section p {
+    margin: 3px 0;
+    text-align: left;
+}
+
+.btn-reserver {
+    background: linear-gradient(#a2e76d, yellowgreen);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: bold;
+    width: fit-content;
+    margin-top: 20px;
+    transition: 0.3s;
+}
+
+.btn-reserver:hover {
+    background: linear-gradient(#8ed657, #317d31);
+}
+
+.btn-retour {
+    display: inline-block;
+    margin-top: 30px;
+    background: #ddd;
+    padding: 8px 16px;
+    border-radius: 15px;
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+.avis-section {
+    margin-top: 50px;
+    padding-top: 30px;
+    border-top: 1px solid #ddd;
+    text-align: center;
+}
+
+.avis-section h2 {
+    color: #4a86e8;
+    margin-bottom: 10px;
+}
