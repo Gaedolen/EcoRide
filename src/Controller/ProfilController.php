@@ -64,12 +64,50 @@ class ProfilController extends AbstractController
             $covoiturages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
+        // Récupération des réservations de l'utilisateur
+        $stmt = $pdo->prepare("
+            SELECT 
+                r.id AS reservation_id,
+                c.*,
+                u.pseudo AS chauffeur_pseudo,
+                u.photo AS chauffeur_photo,
+                v.energie AS voiture_energie,
+                v.couleur,
+                v.nb_places,
+                v.fumeur,
+                v.animaux
+            FROM reservation r
+            JOIN covoiturage c ON r.covoiturage_id = c.id
+            JOIN user u ON u.id = c.utilisateur_id
+            JOIN voiture v ON v.id = c.voiture_id
+            WHERE r.utilisateur_id = :user_id
+        ");
+        $stmt->execute(['user_id' => $utilisateur->getId()]);
+        $reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Encodage photo chauffeur
+        foreach ($reservations as &$resa) {
+            if (!empty($resa['chauffeur_photo'])) {
+                $resa['chauffeur_photo'] = base64_encode($resa['chauffeur_photo']);
+            } else {
+                $resa['chauffeur_photo'] = null;
+            }
+
+            // Conversion dates/heures
+            $resa['date_depart'] = new DateTime($resa['date_depart']);
+            $resa['heure_depart'] = new DateTime($resa['heure_depart']);
+            $resa['date_arrivee'] = new DateTime($resa['date_arrivee']);
+            $resa['heure_arrivee'] = new DateTime($resa['heure_arrivee']);
+        }
+
+
         return $this->render('profil/profil.html.twig', [
             'user' => $utilisateur, 
             'voitureForms' => $voitureForms,
             'voituresData' => $voituresData,
             'photoBase64' => $photoBase64, 
             'covoiturages' => $covoiturages,
+            'reservations' => $reservations,
         ]);
     }
 

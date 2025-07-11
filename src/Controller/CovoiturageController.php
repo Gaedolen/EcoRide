@@ -423,5 +423,29 @@ class CovoiturageController extends AbstractController
         return $this->redirectToRoute('app_profil');
     }
 
+    #[Route('/reservation/{id}/annuler', name: 'annuler_reservation', methods: ['POST'])]
+    public function annulerReservation(int $id): Response
+    {
+        $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+        // Récupérer le covoiturage lié à la réservation
+        $stmt = $pdo->prepare("SELECT covoiturage_id FROM reservation WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result) {
+            $covoiturageId = $result['covoiturage_id'];
+
+            // Supprimer la réservation
+            $stmt = $pdo->prepare("DELETE FROM reservation WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+
+            // Ré-incrémenter les places
+            $stmt = $pdo->prepare("UPDATE covoiturage SET nb_place = nb_place + 1 WHERE id = :id");
+            $stmt->execute(['id' => $covoiturageId]);
+        }
+
+        return $this->redirectToRoute('app_profil');
+    }
 }
