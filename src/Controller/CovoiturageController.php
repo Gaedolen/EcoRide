@@ -109,8 +109,8 @@ class CovoiturageController extends AbstractController
     #[Route('/covoiturage/{id}', name: 'details_trajet')]
     public function details(int $id): Response
     {
-        $pdo = new \PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         $stmt = $pdo->prepare("
             SELECT 
@@ -145,8 +145,21 @@ class CovoiturageController extends AbstractController
         $trajet['date_arrivee'] = new DateTime($trajet['date_arrivee']);
         $trajet['heure_arrivee'] = new DateTime($trajet['heure_arrivee']);
 
+        // Récupération des avis sur le conducteur
+        $stmt = $pdo->prepare("
+            SELECT a.note, a.commentaire, u.pseudo AS auteur_pseudo
+            FROM avis a
+            JOIN user u ON u.id = a.auteur_id
+            WHERE a.cible_id = :conducteur_id
+            ORDER BY a.id DESC
+        ");
+        $stmt->execute(['conducteur_id' => $trajet['utilisateur_id']]);
+        $avis = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
         return $this->render('covoiturage/details.html.twig', [
-            'trajet' => $trajet
+            'trajet' => $trajet,
+            'avis' => $avis,
         ]);
     }
 

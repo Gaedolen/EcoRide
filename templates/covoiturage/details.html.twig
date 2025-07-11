@@ -7,46 +7,80 @@
 {% endblock %}
 
 {% block body %}
-<div class="details-container">
-    <div class="details-card">
-        <div class="left-column">
-            <div class="chauffeur-section">
-                <img src="{{ trajet.chauffeur_photo ? 'data:image/jpeg;base64,' ~ trajet.chauffeur_photo : asset('images/default-user.png') }}" class="chauffeur-photo" alt="Photo">
-                <p class="chauffeur-name">{{ trajet.chauffeur_pseudo }}</p>
-                <p>Note : {{ trajet.chauffeur_note ?? 'Non noté' }}/5</p>
-            </div>
+    <div class="details-header">
+        <h2>Détails du covoiturage</h2>
+        <a href="#" class="btn-reserver">Covoiturer !</a>
+    </div>
 
-            <div class="trajet-section">
-                <h2>Trajet</h2>
-                <p><strong>Départ :</strong> {{ trajet.lieu_depart }} - {{ trajet.date_depart|date('d/m/Y') }} à {{ trajet.heure_depart|date('H:i') }}</p>
-                <p><strong>Arrivée :</strong> {{ trajet.lieu_arrivee }} - {{ trajet.date_arrivee|date('d/m/Y') }} à {{ trajet.heure_arrivee|date('H:i') }}</p>
-
-                {% set duree = trajet.heure_arrivee.timestamp - trajet.heure_depart.timestamp %}
-                {% set h = duree // 3600 %}
-                {% set m = (duree % 3600) // 60 %}
-                <p><strong>Durée :</strong> {{ h }}h{% if m > 0 %}{{ m }}min{% endif %}</p>
-
-                <p><strong>Prix :</strong> {{ trajet.prix_personne }} €</p>
-                <p><strong>Statut :</strong> {{ trajet.statut|capitalize }}</p>
-            </div>
+    <div class="carte-details">
+        <div class="details-col conducteur">
+            <img src="{{ trajet.chauffeur_photo ? 'data:image/jpeg;base64,' ~ trajet.chauffeur_photo : asset('images/default-user.png') }}" class="chauffeur-photo" alt="Photo">
+            <p class="chauffeur-name">{{ trajet.chauffeur_pseudo }}</p>
+            <p><strong>Note : </strong>{{ trajet.chauffeur_note ?? 'Non noté' }}/5</p>
         </div>
 
         <div class="separator-vertical"></div>
 
-        <div class="right-column">
-            <div class="voiture-section">
-                <h3>Véhicule</h3>
-                <p><strong>Marque :</strong> {{ trajet.marque }}</p>
-                <p><strong>Modèle :</strong> {{ trajet.modele }}</p>
-                <p><strong>Énergie :</strong> {{ trajet.energie }}</p>
-                <p><strong>Couleur :</strong> {{ trajet.couleur }}</p>
-                <p><strong>Places :</strong> {{ trajet.nb_place }}</p>
-                <p><strong>Animaux :</strong> {{ trajet.animaux ? 'Oui' : 'Non' }}</p>
-                <p><strong>Fumeur :</strong> {{ trajet.fumeur ? 'Oui' : 'Non' }}</p>
-            </div>
+        <div class="details-col trajet">
+            <h3>Trajet</h3>
+            <p><strong>Départ :</strong> {{ trajet.lieu_depart }} - {{ trajet.date_depart|date('d/m') }} à {{ trajet.heure_depart|date('H:i') }}</p>
+            <p><strong>Arrivée :</strong> {{ trajet.lieu_arrivee }} - {{ trajet.date_arrivee|date('d/m') }} à {{ trajet.heure_arrivee|date('H:i') }}</p>
 
-            <a href="#" class="btn-reserver">Réserver ce trajet</a>
+            {% set duree = trajet.heure_arrivee.timestamp - trajet.heure_depart.timestamp %}
+            {% set h = duree // 3600 %}
+            {% set m = (duree % 3600) // 60 %}
+            <p><strong>Durée :</strong> {{ h }}h{% if m > 0 %}{{ m }}min{% endif %}</p>
+
+            <p><strong>Places disponibles :</strong> {{ trajet.nb_place }}</p>
+            <p><strong>Prix :</strong> {{ trajet.prix_personne }} €</p>
+            {% if trajet.energie in ['Électrique', 'Electrique'] %}
+                <span class="eco-badge">🌱 Écologique</span>
+            {% endif %}
+        </div>
+
+        <div class="separator-vertical"></div>
+
+        <div class="details-col voiture">
+            <h3>Véhicule</h3>
+            <p><strong>Marque :</strong> {{ trajet.marque }}</p>
+            <p><strong>Modèle :</strong> {{ trajet.modele }}</p>
+            <p><strong>Énergie :</strong> {{ trajet.energie }}</p>
+            <p><strong>Couleur :</strong> {{ trajet.couleur }}</p>
+            <p><strong>Animaux :</strong> {{ trajet.animaux ? 'Oui' : 'Non' }}</p>
+            <p><strong>Fumeur :</strong> {{ trajet.fumeur ? 'Oui' : 'Non' }}</p>
         </div>
     </div>
-</div>
+
+
+    <div class="btn-retour-wrapper">
+        <a href="{{ path('app_covoiturage', {
+            lieu_depart: app.request.get('lieu_depart'),
+            lieu_arrivee: app.request.get('lieu_arrivee'),
+            date_depart: app.request.get('date_depart'),
+            heure_depart: app.request.get('heure_depart'),
+            note_min: app.request.get('note_min'),
+            ecologique: app.request.get('ecologique'),
+            prix_min: app.request.get('prix_min'),
+            prix_max: app.request.get('prix_max'),
+            temps_max: app.request.get('temps_max')
+        }) }}" class="btn-retour">← Retour à la recherche</a>
+    </div>
+
+    <div class="avis-section">
+        <h2>Avis sur le conducteur</h2>
+
+        {% if avis is not empty %}
+            {% for avisItem in avis %}
+                <div class="avis-card">
+                    <p class="avis-note">Note : {{ avisItem.note }}/5</p>
+                    <p class="avis-commentaire">"{{ avisItem.commentaire }}"</p>
+                    <p class="avis-auteur">Posté par {{ avisItem.auteur_pseudo ?? 'Utilisateur anonyme' }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="no-avis">Ce conducteur n'a pas encore d'avis.</p>
+        {% endif %}
+    </div>
+
+
 {% endblock %}
