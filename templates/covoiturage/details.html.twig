@@ -9,7 +9,9 @@
 {% block body %}
     <div class="details-header">
         <h2>Détails du covoiturage</h2>
-        <a href="#" class="btn-reserver">Covoiturer !</a>
+        <form method="POST" action="{{ path('reserver_trajet', { id: trajet.id }) }}">
+            <button type="submit" class="btn-reserver">Covoiturer !</button>
+        </form>
     </div>
 
     <div class="carte-details">
@@ -82,5 +84,14 @@
         {% endif %}
     </div>
 
+    {% if app.request.query.get('reserved') %}
+        <div id="popup-confirmation" class="popup-overlay">
+            <div class="popup-content">
+                <p>Vous avez réservé ce covoiturage !</p>
+                <p>Vous pouvez gérer votre réservation sur votre <a href="{{ path('app_profil') }}">page de profil</a>.</p>
+                <button onclick="document.getElementById('popup-confirmation').style.display='none'">Fermer</button>
+            </div>
+        </div>
+    {% endif %}
 
 {% endblock %}

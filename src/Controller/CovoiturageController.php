@@ -126,7 +126,7 @@ class CovoiturageController extends AbstractController
         ");
 
         $stmt->execute(['id' => $id]);
-        $trajet = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $trajet = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if (!$trajet) {
             throw $this->createNotFoundException("Ce covoiturage n'existe pas.");
@@ -162,6 +162,57 @@ class CovoiturageController extends AbstractController
             'avis' => $avis,
         ]);
     }
+
+    #[Route('/covoiturage/{id}/reserver', name: 'reserver_trajet', methods: ['POST'])]
+    public function reserver(int $id): Response
+    {
+        /** @var \App\Entity\User $utilisateur */
+        $utilisateur = $this->getUser();
+
+        if (!$utilisateur) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Vérifier si le covoiturage existe et a des places
+        $stmt = $pdo->prepare("SELECT nb_place FROM covoiturage WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $covoiturage = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$covoiturage || $covoiturage['nb_place'] <= 0) {
+            $this->addFlash('error', 'Ce covoiturage n’est plus disponible.');
+            return $this->redirectToRoute('details_trajet', ['id' => $id]);
+        }
+
+        // Insérer la réservation
+        try {
+            $stmt = $pdo->prepare("
+                INSERT INTO reservation (utilisateur_id, covoiturage_id)
+                VALUES (:utilisateur_id, :covoiturage_id)
+            ");
+            $stmt->execute([
+                'utilisateur_id' => $utilisateur->getId(),
+                'covoiturage_id' => $id
+            ]);
+
+            // Décrémenter le nombre de places
+            $stmt = $pdo->prepare("UPDATE covoiturage SET nb_place = nb_place - 1 WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+
+            $this->addFlash('success', 'Réservation confirmée !');
+
+        } catch (\PDOException $e) {
+            $this->addFlash('error', 'Vous avez déjà réservé ce covoiturage.');
+        }
+
+        return $this->redirectToRoute('details_trajet', [
+            'id' => $id,
+            'reserved' => 1,
+        ]);
+    }
+
 
 
     #[Route('/covoiturage/ajouter', name: 'ajouter_covoiturage')]
