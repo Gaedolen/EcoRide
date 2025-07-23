@@ -6,6 +6,7 @@ use App\Entity\Covoiturage;
 use App\Entity\Voiture;
 use App\Form\ProfilType;
 use App\Form\VoitureType;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use DateTime;
 use PDO;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -71,6 +72,10 @@ class ProfilController extends AbstractController
                 c.*,
                 u.pseudo AS chauffeur_pseudo,
                 u.photo AS chauffeur_photo,
+                u.note AS chauffeur_note,
+                u.id AS chauffeur_id,
+                v.marque,
+                v.modele,
                 v.energie AS voiture_energie,
                 v.couleur,
                 v.nb_places,
@@ -82,10 +87,10 @@ class ProfilController extends AbstractController
             JOIN voiture v ON v.id = c.voiture_id
             WHERE r.utilisateur_id = :user_id
         ");
+
         $stmt->execute(['user_id' => $utilisateur->getId()]);
         $reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Encodage photo chauffeur
         foreach ($reservations as &$resa) {
             if (!empty($resa['chauffeur_photo'])) {
                 $resa['chauffeur_photo'] = base64_encode($resa['chauffeur_photo']);
@@ -98,7 +103,15 @@ class ProfilController extends AbstractController
             $resa['heure_depart'] = new DateTime($resa['heure_depart']);
             $resa['date_arrivee'] = new DateTime($resa['date_arrivee']);
             $resa['heure_arrivee'] = new DateTime($resa['heure_arrivee']);
+
+            $finTrajet = clone $resa['date_arrivee'];
+            $heureArrivee = $resa['heure_arrivee']->format('H:i:s');
+            $finTrajet->setTime(...explode(':', $heureArrivee));
+            $resa['fin_trajet'] = $finTrajet;
+
+            $resa['est_passe'] = $finTrajet < new DateTime();
         }
+
 
 
         return $this->render('profil/profil.html.twig', [
@@ -197,4 +210,74 @@ class ProfilController extends AbstractController
             'currentPhotoBase64' => $sessionUser->getPhotoData(),
         ]);
     }
+
+    #[Route('/reservation/{id}/annuler', name: 'annuler_reservation', methods: ['POST'])]
+    public function annulerReservation(int $id): RedirectResponse
+    {
+        /** @var \App\Entity\User $utilisateur */
+        $utilisateur = $this->getUser();
+
+        if (!$utilisateur) {
+            throw $this->createAccessDeniedException("Vous devez être connecté.");
+        }
+
+        $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Récupérer la réservation
+        $stmt = $pdo->prepare("SELECT * FROM reservation WHERE id = :id AND utilisateur_id = :user_id");
+        $stmt->execute(['id' => $id, 'user_id' => $utilisateur->getId()]);
+        $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$reservation) {
+            throw $this->createNotFoundException('Réservation non trouvée.');
+        }
+
+        $covoiturageId = $reservation['covoiturage_id'];
+
+        // Supprimer la réservation
+        $stmt = $pdo->prepare("DELETE FROM reservation WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+
+        // Réaugmenter le nombre de places disponibles du covoiturage
+        $stmt = $pdo->prepare("UPDATE covoiturage SET nb_place = nb_place + 1 WHERE id = :id");
+        $stmt->execute(['id' => $covoiturageId]);
+
+        return $this->redirectToRoute('app_profil');
+    }
+
+
+    #[Route('/laisser-avis', name: 'laisser_avis', methods: ['POST'])]
+    public function laisserAvis(Request $request): Response
+    {
+        /** @var \App\Entity\User $utilisateur */
+        $utilisateur = $this->getUser();
+
+        if (!$utilisateur) {
+            throw $this->createAccessDeniedException("Vous devez être connecté.");
+        }
+
+        $cibleId = $request->request->get('cible_id');
+        $note = (int) $request->request->get('note');
+        $commentaire = $request->request->get('commentaire');
+
+        // Connexion PDO manuelle
+        $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $stmt = $pdo->prepare("
+            INSERT INTO avis (auteur_id, cible_id, note, commentaire, date_avis)
+            VALUES (:auteur_id, :cible_id, :note, :commentaire, NOW())
+        ");
+
+        $stmt->execute([
+            ':auteur_id' => $utilisateur->getId(),
+            ':cible_id' => $cibleId,
+            ':note' => $note,
+            ':commentaire' => $commentaire
+        ]);
+
+        return $this->redirectToRoute('app_profil');
+    }
+
 }

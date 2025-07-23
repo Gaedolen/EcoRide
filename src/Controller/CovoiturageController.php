@@ -106,7 +106,7 @@ class CovoiturageController extends AbstractController
     }
 
 
-    #[Route('/covoiturage/{id}', name: 'details_trajet')]
+    #[Route('/covoiturage/{id}', name: 'details_trajet', requirements: ['id' => '\d+'])]
     public function details(int $id): Response
     {
         $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');

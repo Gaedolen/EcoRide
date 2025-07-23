@@ -6,60 +6,96 @@ use App\Repository\AvisRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AvisRepository::class)]
+#[ORM\HasLifecycleCallbacks]
 class Avis
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $commentaire = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $auteur = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $note = null;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $cible = null;
 
-    #[ORM\Column(length: 50)]
-    private ?string $statut = null;
+    #[ORM\Column(type: 'integer')]
+    private int $note;
+
+    #[ORM\Column(type: 'text')]
+    private string $commentaire;
+
+    #[ORM\Column(type: 'datetime')]
+    private ?\DateTimeInterface $dateAvis = null;
+
+    #[ORM\PrePersist]
+    public function setDateAvisAutomatically(): void
+    {
+        if ($this->dateAvis === null) {
+            $this->dateAvis = new \DateTimeImmutable();
+        }
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getCommentaire(): ?string
+    public function getAuteur(): ?User
     {
-        return $this->commentaire;
+        return $this->auteur;
     }
 
-    public function setCommentaire(string $commentaire): static
+    public function setAuteur(?User $auteur): self
     {
-        $this->commentaire = $commentaire;
-
+        $this->auteur = $auteur;
         return $this;
     }
 
-    public function getNote(): ?string
+    public function getCible(): ?User
+    {
+        return $this->cible;
+    }
+
+    public function setCible(?User $cible): self
+    {
+        $this->cible = $cible;
+        return $this;
+    }
+
+    public function getNote(): int
     {
         return $this->note;
     }
 
-    public function setNote(string $note): static
+    public function setNote(int $note): self
     {
         $this->note = $note;
-
         return $this;
     }
 
-    public function getStatut(): ?string
+    public function getCommentaire(): string
     {
-        return $this->statut;
+        return $this->commentaire;
     }
 
-    public function setStatut(string $statut): static
+    public function setCommentaire(string $commentaire): self
     {
-        $this->statut = $statut;
+        $this->commentaire = $commentaire;
+        return $this;
+    }
 
+    public function getDateAvis(): ?\DateTimeInterface
+    {
+        return $this->dateAvis;
+    }
+
+    public function setDateAvis(\DateTimeInterface $dateAvis): self
+    {
+        $this->dateAvis = $dateAvis;
         return $this;
     }
 }

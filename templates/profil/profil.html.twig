@@ -134,59 +134,70 @@
     {% endif %}
 
     <!-- Affichage des réservations -->
-    <h1>Mes réservations</h1>
-        {% if reservations is not empty %}
+   <h1>Mes réservations</h1>
+    {% if reservations is not empty %}
         <div class="reservations-section">
+            {% set now = "now"|date %}
             {% for resa in reservations %}
-                <div class="trajet-details-card">
-                    <div class="trajet-header">
-                        <h2>Covoiturage à destination de {{resa.lieu_arrivee}} ({{ resa.date_depart|date('d/m/Y') }})</h2>
-                        {% if resa.date_depart > "now"|date %}
-                            <form method="POST" action="{{ path('annuler_reservation', { id: resa.reservation_id }) }}">
-                                <button type="submit" class="btn-annuler">Annuler</button>
+                {% set now = date() %}
+                <div class="details-card {% if resa.fin_trajet < now %}past-reservation{% endif %}">
+                    <div class="details-card-header">
+                        <div class="details-title">
+                            <h2>Trajet du {{ resa.date_depart|date('d/m/Y') }} vers {{ resa.lieu_arrivee }}{% if resa.fin_trajet < now %}<span class="past-label">(passé)</span>{% endif %}</h2>
+                        </div>
+
+                        {% if resa.fin_trajet > now %}
+                            <form method="POST">
+                                <button type="button" class="btn-annuler open-cancel-popup" data-reservation-id="{{ resa.reservation_id }}" data-action-url="{{ path('annuler_reservation', { id: resa.reservation_id }) }}">Annuler</button>                            
                             </form>
                         {% else %}
-                            <a href="{{ path('laisser_avis', { id: resa.reservation_id }) }}" class="btn-reserver">Laisser un avis</a>
+                            <button type="button" class="btn-avis open-avis-popup" data-cible-id="{{ resa.utilisateur_id }}">
+                                Laisser un avis
+                            </button>
                         {% endif %}
                     </div>
 
-                    <div class="details-content">
-                        <!-- Bloc détails du conducteur -->
-                        <div class="bloc bloc-conducteur">
-                            <h3>Conducteur</h3>
-                            <img src="{{ resa.chauffeur_photo ? 'data:image/jpeg;base64,' ~ resa.chauffeur_photo : asset('images/default-user.png') }}" alt="photo" class="chauffeur-photo">
-                            <p class="chauffeur-nom">{{ resa.chauffeur_pseudo }}</p>
-                            <p>Note : {{ resa.chauffeur_note ?? 'Non noté' }}/5</p>
-                        </div>
+                    <div class="grayscale-wrapper">
+                        <div class="details-content">
+                            <!-- Bloc conducteur -->
+                            <div class="bloc bloc-conducteur">
+                                <h3>Conducteur</h3>
+                                <img src="{{ resa.chauffeur_photo ? 'data:image/jpeg;base64,' ~ resa.chauffeur_photo : asset('images/default-user.png') }}" alt="Photo" class="chauffeur-photo">
+                                <p><strong>{{ resa.chauffeur_pseudo }}</strong></p>
+                                <p><strong>Note : </strong>{{ resa.chauffeur_note ?? 'Non noté' }}/5</p>
+                            </div>
 
-                        <div class="separator-vertical"></div>
+                            <!-- Ligne verticale -->
+                            <div class="separator-vertical"></div>
 
-                        <!-- Bloc détails du trajet -->
-                        <div class="bloc bloc-trajet">
-                            <h3>Trajet</h3>
-                            <p><strong>Départ :</strong> {{ resa.lieu_depart }} le {{ resa.date_depart|date('d/m') }} à {{ resa.heure_depart|date('H:i') }}</p>
-                            <p><strong>Arrivée :</strong> {{ resa.lieu_arrivee }} le {{ resa.date_arrivee|date('d/m') }} à {{ resa.heure_arrivee|date('H:i') }}</p>
+                            <!-- Bloc trajet -->
+                            <div class="bloc bloc-trajet">
+                                <h3>Trajet</h3>
+                                <p><strong>Départ :</strong> {{ resa.lieu_depart }}, {{ resa.date_depart|date('d/m/Y') }} à {{ resa.heure_depart|date('H:i') }}</p>
+                                <p><strong>Arrivée :</strong> {{ resa.lieu_arrivee }}, {{ resa.date_arrivee|date('d/m/Y') }} à {{ resa.heure_arrivee|date('H:i') }}</p>
+                                <p><strong>Prix :</strong> {{ resa.prix_personne|number_format(2, ',', ' ') }} €</p>
+                                {% set duree = resa.heure_arrivee.timestamp - resa.heure_depart.timestamp %}
+                                {% set h = duree // 3600 %}
+                                {% set m = (duree % 3600) // 60 %}
+                                <p><strong>Durée :</strong> {{ h }}h{% if m > 0 %}{{ m }}min{% endif %}</p>
 
-                            {% set duree = resa.heure_arrivee.timestamp - resa.heure_depart.timestamp %}
-                            {% set h = duree // 3600 %}
-                            {% set m = (duree % 3600) // 60 %}
-                            <p><strong>Durée :</strong> {{ h }}h{% if m > 0 %}{{ m }}min{% endif %}</p>
+                                {% if resa.voiture_energie in ['Électrique', 'Electrique'] %}
+                                    <span class="eco-badge">🌱 Écologique</span>
+                                {% endif %}
+                            </div>
 
-                            {% if resa.voiture_energie in ['Électrique', 'Electrique'] %}
-                                <span class="eco-badge">🌱 Écologique</span>
-                            {% endif %}
-                        </div>
+                            <!-- Ligne verticale -->
+                            <div class="separator-vertical"></div>
 
-                        <div class="separator-vertical"></div>
-
-                        <!-- Bloc détails de la voiture utilisée -->
-                        <div class="bloc bloc-voiture">
-                            <h3>Voiture</h3>
-                            <p><strong>Énergie :</strong> {{ resa.voiture_energie }}</p>
-                            <p><strong>Couleur :</strong> {{ resa.couleur }}</p>
-                            <p><strong>Places :</strong> {{ resa.nb_places }}</p>
-                            <p><strong>Fumeur :</strong> {{ resa.fumeur ? 'Oui' : 'Non' }}</p>
-                            <p><strong>Animaux :</strong> {{ resa.animaux ? 'Oui' : 'Non' }}</p>
+                            <!-- Bloc voiture -->
+                            <div class="bloc bloc-voiture">
+                                <h3>Véhicule</h3>
+                                <p><strong>Marque :</strong> {{ resa.marque }}</p>
+                                <p><strong>Modèle :</strong> {{ resa.modele }}</p>
+                                <p><strong>Couleur :</strong> {{ resa.couleur }}</p>
+                                <p><strong>Énergie :</strong> {{ resa.voiture_energie }}</p>
+                                <p><strong>Places :</strong> {{ resa.nb_places }}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -195,9 +206,6 @@
     {% else %}
         <p class="no-car-message">Vous n'avez pas encore réservé de covoiturage.</p>
     {% endif %}
-
-
-
 
     <h1>Mes avis</h1>
 
@@ -218,6 +226,39 @@
                 <button id="confirm-yes-covoiturage" class="btn-confirm-yes">Oui</button>
                 <button id="confirm-no-covoiturage" class="btn-confirm-no">Non</button>
             </div>
+        </div>
+    </div>
+
+    <div id="cancel-reservation-modal" class="modal hidden"> <!-- Fenêtre pop-up de suppression d'une réservation -->
+        <div class="modal-content">
+            <p>Êtes-vous sûr de vouloir annuler cette réservation ?</p>
+            <form id="cancel-reservation-form" method="POST">
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-confirm-yes">Oui</button>
+                    <button type="button" class="btn-confirm-no">Non</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+    <div id="avis-popup" class="popup-overlay" style="display: none;"> <!-- Fenêtre pop-up permettant de laisser un avis après un trajet -->
+        <div class="popup-content">
+            <span class="close-popup">&times;</span>
+            <h3>Laisser un avis</h3>
+            <form method="POST" action="{{ path('laisser_avis') }}">
+                <input type="hidden" name="cible_id" id="cible_id">
+                <label for="note">Note (/5) :</label>
+                <select name="note" required>
+                    {% for i in 1..5 %}
+                        <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select>
+                <label for="commentaire">Avis :</label>
+                <textarea name="commentaire" rows="4" required></textarea>
+                <button type="submit" class="btn-reserver">Envoyer</button>
+            </form>
         </div>
     </div>
 

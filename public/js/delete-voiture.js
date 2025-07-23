@@ -50,4 +50,48 @@ document.addEventListener('DOMContentLoaded', () => {
         covoiturageModal.classList.add('hidden');
         currentCovoiturageForm = null;
     });
+
+    // Annulation d'une réservation
+    const cancelButtons = document.querySelectorAll('.open-cancel-popup');
+    const modal = document.getElementById('cancel-reservation-modal');
+    const form = document.getElementById('cancel-reservation-form');
+    const cancelNo = modal.querySelector('.btn-confirm-no');
+
+    cancelButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const actionUrl = this.getAttribute('data-action-url');
+            form.setAttribute('action', actionUrl);
+            modal.classList.remove('hidden');
+        });
+    });
+
+    cancelNo.addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+
+    // Laisser un avis après un trajet
+    const avisButtons = document.querySelectorAll('.open-avis-popup');
+    const avisPopup = document.getElementById('avis-popup');
+    const avisClose = document.querySelector('.close-popup');
+    const cibleIdInput = document.getElementById('cible_id');
+
+    avisButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const cibleId = button.getAttribute('data-cible-id');
+            cibleIdInput.value = cibleId;
+            avisPopup.style.display = 'flex';
+        });
+    });
+
+
+    avisClose.addEventListener('click', () => {
+        avisPopup.style.display = 'none';
+    });
+
+    window.addEventListener('click', (e) => {
+        if (e.target === avisPopup) {
+            avisPopup.style.display = 'none';
+        }
+    });
 });
