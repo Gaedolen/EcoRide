@@ -17,6 +17,10 @@ use Doctrine\Common\Collections\Collection;
 #[UniqueEntity(fields: ['email'], message: 'There is already an account with this email')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    #[ORM\ManyToOne(targetEntity: Role::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Role $role = null;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -90,6 +94,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
    
 
         // Setter et Getter
+    public function getRole(): ?Role
+    {
+        return $this->role;
+    }
+
+    public function setRole(?Role $role): static
+    {
+        $this->role = $role;
+        return $this;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -124,12 +139,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        $roles = [];
+
+        if ($this->role !== null) {
+            $roles[] = 'ROLE_' . strtoupper($this->role->getLibelle());
+        }
+
+        $roles[] = 'ROLE_USER'; // exige que chaque utilisateur ait au moins le ROLE_USER
 
         return array_unique($roles);
     }
+
 
     /**
      * @param list<string> $roles
