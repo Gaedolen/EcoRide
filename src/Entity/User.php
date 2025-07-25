@@ -91,6 +91,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'float', nullable: true)]
     private ?float $note = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private ?bool $isSuspended = false;
    
 
         // Setter et Getter
@@ -365,6 +368,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setNote(?float $note): static
     {
         $this->note = $note;
+        return $this;
+    }
+    
+    public function isSuspended(): bool
+    {
+        return $this->isSuspended ?? false;
+    }
+
+    public function setIsSuspended(bool $isSuspended): static
+    {
+        $this->isSuspended = $isSuspended;
         return $this;
     }
 }
