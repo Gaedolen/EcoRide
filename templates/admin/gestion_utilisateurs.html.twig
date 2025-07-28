@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block body %}
+<h1>Gestion des utilisateurs</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Pseudo</th>
+            <th>Email</th>
+            <th>Signalements</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+            <tr>
+                <td>{{ user.pseudo }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    {% if reportsByUser[user.id] is defined %}
+                        ⚠️
+                        <ul>
+                            {% for report in reportsByUser[user.id] %}
+                                <li>{{ report.message }} (signalé par {{ report.reportedBy.pseudo }})</li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if user.isSuspended %}
+                        <button disabled>Compte suspendu</button>
+                    {% else %}
+                        <form method="post" action="{{ path('admin_suspendre_utilisateur', {'id': user.id}) }}" onsubmit="return confirm('Confirmer la suspension du compte ?')">
+                            <input type="hidden" name="_token" value="{{ csrf_token('suspend_user_' ~ user.id) }}">
+                            <button type="submit">Suspendre</button>
+                        </form>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

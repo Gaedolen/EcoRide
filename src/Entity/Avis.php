@@ -31,6 +31,10 @@ class Avis
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateAvis = null;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $isValidated = false;
+
+
     #[ORM\PrePersist]
     public function setDateAvisAutomatically(): void
     {
@@ -96,6 +100,18 @@ class Avis
     public function setDateAvis(\DateTimeInterface $dateAvis): self
     {
         $this->dateAvis = $dateAvis;
+        return $this;
+    }
+
+    public function isValidated(): bool
+    {
+        return $this->isValidated;
+    }
+
+    public function setIsValidated(bool $isValidated): self
+    {
+        $this->isValidated = $isValidated;
+
         return $this;
     }
 }

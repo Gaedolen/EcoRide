@@ -3,6 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   forms.forEach(form => {
     form.addEventListener('submit', function(event) {
+      // Si déjà confirmé, on laisse passer
+      if (form.classList.contains('confirmed')) return;
+
       event.preventDefault();
 
       // Création de la modale si elle n'existe pas
@@ -13,21 +16,34 @@ document.addEventListener('DOMContentLoaded', () => {
       const modal = document.querySelector('.modal-confirm');
       modal.style.display = 'block';
 
-      // Boutons de la modale
       const btnConfirm = modal.querySelector('.modal-confirm-yes');
       const btnCancel = modal.querySelector('.modal-confirm-no');
 
-      // Si on clique sur "Oui", on soumet le formulaire
+      // Nettoie les anciens handlers pour éviter doublons
+      btnConfirm.onclick = null;
+      btnCancel.onclick = null;
+
+      // Confirmation
       btnConfirm.onclick = () => {
         modal.style.display = 'none';
-        form.submit();
+        form.classList.add('confirmed');
+
+        // Création d’un bouton submit invisible
+        const realSubmit = document.createElement('button');
+        realSubmit.type = 'submit';
+        realSubmit.style.display = 'none';
+        form.appendChild(realSubmit);
+
+        // On déclenche un clic sur ce bouton
+        realSubmit.click();
       };
 
-      // Si on clique sur "Non" ou en dehors, on ferme la modale
+      // Annulation
       btnCancel.onclick = () => {
         modal.style.display = 'none';
       };
 
+      // Clic hors de la modale ferme la modale
       window.onclick = (e) => {
         if (e.target === modal) {
           modal.style.display = 'none';
@@ -35,19 +51,4 @@ document.addEventListener('DOMContentLoaded', () => {
       };
     });
   });
-
-  function createModal() {
-    const modalHtml = `
-      <div class="modal-confirm">
-        <div class="modal-content">
-          <p>Voulez-vous vraiment supprimer cet employé ? Cette action est irréversible.</p>
-          <div class="modal-buttons">
-            <button class="modal-confirm-yes">Oui</button>
-            <button class="modal-confirm-no">Non</button>
-          </div>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', modalHtml);
-  }
-});
+})

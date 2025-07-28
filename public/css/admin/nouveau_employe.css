@@ -1,0 +1,97 @@
+/* nouveau_employe.css */
+
+body {
+    background-color: #f9f9f9;
+    font-family: "Comfortaa", sans-serif;
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 50px auto;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e3e3e3;
+}
+
+.form-container h1 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #4a86e8;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+    font-weight: 500;
+}
+
+form input,
+form select {
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+form input:focus {
+    outline: none;
+    border-color: #39b385;
+    box-shadow: 0 0 0 2px rgba(57, 179, 133, 0.2);
+}
+
+.btn-container {
+    text-align: center;
+}
+
+.btn-submit {
+    background: linear-gradient(#a2e76d, yellowgreen);
+    border: none;
+    color: white;
+    border-radius: 25px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-family: 'Comfortaa', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 110px;
+    max-width: 120px;
+    height: 38px;
+    line-height: 1;
+    white-space: nowrap;
+    margin: 20px auto 0 auto;
+}
+
+.btn-submit:hover {
+    background: linear-gradient(#8ed657, #317d31);
+}
+
+
+.error {
+    color: #c0392b;
+    font-size: 14px;
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    color: #842029;
+    border: 1px solid #f5c2c7;
+    padding: 8px;
+    border-radius: 6px;
+    margin-top: 6px;
+    font-size: 14px;
+    font-family: 'Comfortaa', sans-serif;
+}
+

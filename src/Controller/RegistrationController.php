@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Entity\Role;
 use App\Form\RegistrationFormType;
 use App\Security\UsersAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
@@ -34,9 +35,21 @@ class RegistrationController extends AbstractController
                 $user->setPhoto($binaryData);
             }
 
+            // Affectation du rôle "USER"
+            $roleUser = $entityManager->getRepository(Role::class)->findOneBy(['libelle' => 'USER']);
+            if (!$roleUser) {
+                $roleUser = new Role();
+                $roleUser->setLibelle('USER');
+                $entityManager->persist($roleUser);
+            }
+            $user->setRole($roleUser);
+
             // Encodage du mot de passe
             $plainPassword = $form->get('plainPassword')->getData();
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
+
+            // Activation directe du compte :
+            $user->setIsVerified(true);
 
             // Enregistrement en base
             $entityManager->persist($user);

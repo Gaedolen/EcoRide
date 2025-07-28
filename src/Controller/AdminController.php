@@ -8,11 +8,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use App\Form\EmployeType;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Entity\User;
 use App\Entity\Role;
+use App\Entity\Report;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
@@ -25,20 +27,27 @@ class AdminController extends AbstractController
         return $this->render('admin/dashboard.html.twig');
     }
 
-    #[Route('/admin/utilisateurs', name: 'admin_utilisateurs')]
-    public function utilisateurs(UserRepository $userRepository, Request $request): Response
+    #[Route('/admin/utilisateurs', name: 'admin_gestion_utilisateurs')]
+    public function gestionUtilisateurs(EntityManagerInterface $em, UserRepository $userRepository): Response
     {
-        $filtre = $request->query->get('filtre'); // EMPLOYE ou USER
+        // Récupérer uniquement les utilisateurs avec le rôle USER
+        $users = $userRepository->findByRoleLibelle('USER');
 
-        if ($filtre) {
-            $users = $userRepository->findByRole($filtre);
-        } else {
-            $users = $userRepository->findAll();
+        // Pareil pour les signalements
+        $reports = $em->getRepository(Report::class)->findAll();
+
+        $reportsByUser = [];
+        foreach ($reports as $report) {
+            $userId = $report->getReportedUser()->getId();
+            if (!isset($reportsByUser[$userId])) {
+                $reportsByUser[$userId] = [];
+            }
+            $reportsByUser[$userId][] = $report;
         }
 
-        return $this->render('admin/utilisateurs.html.twig', [
-            'utilisateurs' => $users,
-            'filtre' => $filtre
+        return $this->render('admin/gestion_utilisateurs.html.twig', [
+            'users' => $users,
+            'reportsByUser' => $reportsByUser,
         ]);
     }
 
@@ -83,17 +92,28 @@ class AdminController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/utilisateur/suspendre/{id}', name: 'admin_suspendre_utilisateur')]
-    public function suspendreUser(User $user, EntityManagerInterface $em): RedirectResponse
+    #[Route('/admin/utilisateur/suspendre/{id}', name: 'admin_suspendre_utilisateur', methods: ['POST'])]
+    public function suspendreUtilisateur(Request $request, User $user, EntityManagerInterface $em, CsrfTokenManagerInterface $csrfTokenManager): RedirectResponse
     {
-        $user->setIsSuspended(!$user->isSuspended());
+        $submittedToken = $request->request->get('_token');
+
+        if (!$csrfTokenManager->isTokenValid(new \Symfony\Component\Security\Csrf\CsrfToken('suspend_user_' . $user->getId(), $submittedToken))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('admin_gestion_utilisateurs');
+        }
+
+        $user->setIsSuspended(true);
         $em->flush();
 
-        return $this->redirectToRoute('admin_utilisateurs');
+        // Envoyer un email à l'utilisateur pour informer de la suspension
+
+        $this->addFlash('success', 'Utilisateur suspendu avec succès.');
+
+        return $this->redirectToRoute('admin_gestion_utilisateurs');
     }
 
     #[Route('/admin/utilisateur/supprimer/{id}', name: 'admin_supprimer_utilisateur')]
-    public function supprimerUser(int $id, EntityManagerInterface $em, UserRepository $userRepository, Request $request): RedirectResponse
+    public function supprimerUser(int $id, UserRepository $userRepository, EntityManagerInterface $em, Request $request): RedirectResponse
     {
         $user = $userRepository->find($id);
         if (!$user) {
@@ -103,12 +123,25 @@ class AdminController extends AbstractController
         $em->remove($user);
         $em->flush();
 
-        $filtre = $request->query->get('filtre');
+        return $this->redirectToRoute('admin_gestion_utilisateurs', ['filtre' => 'EMPLOYE']);
+    }
 
-        if ($filtre) {
-            return $this->redirectToRoute('admin_utilisateurs', ['filtre' => $filtre]);
+   #[Route('/admin/employe/supprimer/{id}', name: 'admin_supprimer_employe', methods: ['POST'])]
+    public function supprimerEmploye(int $id, Request $request, UserRepository $userRepository, EntityManagerInterface $em, CsrfTokenManagerInterface $csrfTokenManager): RedirectResponse {
+        $user = $userRepository->find($id);
+
+        if (!$user || $user->getRole()->getLibelle() !== 'EMPLOYE') {
+            throw $this->createNotFoundException('Employé non trouvé');
         }
 
-        return $this->redirectToRoute('admin_utilisateurs');
+        $submittedToken = $request->request->get('_token');
+        if (!$csrfTokenManager->isTokenValid(new \Symfony\Component\Security\Csrf\CsrfToken('delete-employe-' . $id, $submittedToken))) {
+            throw $this->createAccessDeniedException('Jeton CSRF invalide.');
+        }
+
+        $em->remove($user);
+        $em->flush();
+
+        return $this->redirectToRoute('admin_employes');
     }
 }

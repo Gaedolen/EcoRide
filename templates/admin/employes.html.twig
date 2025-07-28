@@ -35,7 +35,8 @@
                         <td>{{ employe.telephone }}</td>
                         <td>{{ employe.adresse }}</td>
                          <td>
-                            <form method="post" action="{{ path('admin_supprimer_utilisateur', {'id': employe.id}) }}?filtre=EMPLOYE" class="form-delete">
+                            <form method="post" action="{{ path('admin_supprimer_employe', {'id': employe.id}) }}" class="form-delete">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete-employe-' ~ employe.id) }}">
                                 <button class="btn-delete" type="submit">Supprimer</button>
                             </form>
                         </td>
@@ -52,6 +53,16 @@
         <div class="actions">
             <a href="{{ path('admin_dashboard') }}" class="back-btn">⬅ Retour au dashboard</a>
             <a href="{{ path('admin_creer_employe') }}">Ajouter un employé</a>
+        </div>
+    </div>
+
+    <div class="modal-confirm" style="display: none;"> <!-- Fenêtre pop-up de confirmation de suppression d'un employé -->
+        <div class="modal-content">
+            <p>Voulez-vous vraiment supprimer cet employé ? Cette action est irréversible.</p>
+            <div class="modal-buttons">
+            <button class="modal-confirm-yes">Oui</button>
+            <button class="modal-confirm-no">Non</button>
+            </div>
         </div>
     </div>
 

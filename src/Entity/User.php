@@ -79,7 +79,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\NotBlank(message: 'La date de naissance est requise.')]
     #[Assert\LessThan([
         'value' => 'today -18 years',
-        'message' => 'Vous devez avoir au moins 18 ans pour vous inscrire.'
     ])]
      private ?\DateTimeInterface $dateNaissance = null;
 
@@ -370,7 +369,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->note = $note;
         return $this;
     }
-    
+
     public function isSuspended(): bool
     {
         return $this->isSuspended ?? false;

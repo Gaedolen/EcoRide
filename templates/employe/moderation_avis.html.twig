@@ -1,0 +1,29 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modération des avis{% endblock %}
+
+{% block body %}
+    <h1 class="text-2xl font-bold mb-4">Modération des avis</h1>
+
+    {% for review in avis %}
+        <div class="bg-white shadow-md rounded p-4 mb-4 border">
+            <p><strong>Auteur :</strong> {{ review.user.pseudo }}</p>
+            <p><strong>Note :</strong> {{ review.note }}/5</p>
+            <p><strong>Commentaire :</strong> {{ review.commentaire }}</p>
+            <p><strong>Date :</strong> {{ review.date|date('d/m/Y H:i') }}</p>
+
+            <div class="flex space-x-2 mt-2">
+                <form action="{{ path('employe_valider_avis', { id: review.id }) }}" method="post">
+                    <input type="hidden" name="_token" value="{{ csrf_token('valider_avis_' ~ review.id) }}">
+                    <button type="submit" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600">Valider</button>
+                </form>
+                <form action="{{ path('employe_refuser_avis', { id: review.id }) }}" method="post">
+                    <input type="hidden" name="_token" value="{{ csrf_token('refuser_avis_' ~ review.id) }}">
+                    <button type="submit" class="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600">Refuser</button>
+                </form>
+            </div>
+        </div>
+    {% else %}
+        <p>Aucun avis à modérer.</p>
+    {% endfor %}
+{% endblock %}
