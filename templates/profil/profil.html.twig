@@ -102,16 +102,33 @@
             <div class="covoiturage-scroll-wrapper">
                 <div class="covoiturage-container">
                     {% for covoiturage in covoiturages %}
-                        <div class="covoiturage-card {% if covoiturage.statut == 'ferme' %}covoiturage-ferme{% endif %}">
+                        <div class="covoiturage-card {% if covoiturage.statut == 'termine' %}covoiturage-ferme{% endif %}">
+                            <div class="covoiturage-header-actions">
+                                <div class="covoiturage-header-left">
+                                    <h2 class="titre-covoiturage">Trajet vers {{ covoiturage.lieu_arrivee }} le {{ covoiturage.date_depart|date('d/m/Y') }}</h2>
+                                </div>
+
+                                {% if covoiturage.etat in ['a_venir', 'en_cours'] %}
+                                    <div class="covoiturage-buttons">
+                                        {% if covoiturage.etat == 'a_venir' %}
+                                            <a href="{{ path('chauffeur_covoiturage_demarrer', {'id': covoiturage.id}) }}" class="btn-card-action">Démarrer</a>
+                                        {% elseif covoiturage.etat == 'en_cours' %}
+                                            <a href="{{ path('chauffeur_covoiturage_clore', {'id': covoiturage.id}) }}" class="btn-card-action">Arrivée à destination</a>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
                             <ul>
                                 <li><span class="label">Lieu de départ :</span> <span class="value">{{ covoiturage.lieu_depart }}</span></li>
                                 <li><span class="label">Date et heure de départ :</span> <span class="value">Le {{ covoiturage.date_depart|date('d/m/Y') }} à {{ covoiturage.heure_depart|date('H:i') }}</span></li>
                                 <li><span class="label">Lieu d'arrivée :</span> <span class="value">{{ covoiturage.lieu_arrivee }}</span></li>
                                 <li><span class="label">Date et heure d'arrivée :</span> <span class="value">Le {{ covoiturage.date_arrivee|date('d/m/Y') }} à {{ covoiturage.heure_arrivee|date('H:i') }}</span></li>
                                 <li><span class="label">Nombre de places :</span> <span class="value">{{ covoiturage.nb_place }}</span></li>
-                                <li><span class="label">Prix par personne:</span> <span class="value">{{ covoiturage.prix_personne }} €</span></li>
-                                <li><span class="label">Statut :</span> <span class="value">{{ covoiturage.statut|capitalize }}</span></li>
+                                <li><span class="label">Prix par personne :</span> <span class="value">{{ covoiturage.prix_personne }} €</span></li>
+                                <li><span class="label">Statut :</span> <span class="value">{{ covoiturage.statut | statut_label }}</span></li>
                             </ul>
+
                             <div class="card-actions">
                                 <a href="{{ path('modifier_covoiturage', { id: covoiturage.id }) }}" class="btn-card-action">Modifier</a>
                                 <form method="POST" action="{{ path('supprimer_covoiturage', { id: covoiturage.id }) }}" class="delete-form">

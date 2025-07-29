@@ -11,6 +11,7 @@ class AppExtension extends AbstractExtension
     {
         return [
             new TwigFilter('base64', [$this, 'base64Encode']),
+            new TwigFilter('statut_label', [$this, 'statutLabel']),
         ];
     }
 
@@ -21,5 +22,15 @@ class AppExtension extends AbstractExtension
         }
 
         return base64_encode($data);
+    }
+
+    public function statutLabel(string $statut): string
+    {
+        return match ($statut) {
+            'a_venir' => 'À venir',
+            'en_cours' => 'En cours',
+            'termine' => 'Terminé',
+            default => ucfirst($statut),
+        };
     }
 }

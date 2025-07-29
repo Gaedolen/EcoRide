@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use App\Form\CovoiturageType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Covoiturage;
@@ -260,6 +262,7 @@ class CovoiturageController extends AbstractController
                $statut = 'ouvert';
             }
 
+            $etat = 'a_venir'; // état initial par défaut du covoiturage
 
             $stmt = $pdo->prepare("
                 INSERT INTO covoiturage (
@@ -271,6 +274,7 @@ class CovoiturageController extends AbstractController
                     heure_arrivee,
                     lieu_arrivee,
                     statut,
+                    etat,
                     nb_place,
                     prix_personne,
                     voiture_id
@@ -283,6 +287,7 @@ class CovoiturageController extends AbstractController
                     :heure_arrivee,
                     :lieu_arrivee,
                     :statut,
+                    :etat,
                     :nb_place,
                     :prix_personne,
                     :voiture_id
@@ -299,8 +304,9 @@ class CovoiturageController extends AbstractController
                 'lieu_arrivee'  => $covoiturage->getLieuArrivee(),
                 'nb_place'      => $covoiturage->getNbPlace(),
                 'prix_personne' => $covoiturage->getPrixPersonne(),
-                'voiture_id' => $covoiturage->getVoiture()->getId(),
+                'voiture_id'    => $covoiturage->getVoiture()->getId(),
                 'statut'        => $statut,
+                'etat'          => $etat,
             ]);
 
             $this->addFlash('success', 'Covoiturage enregistré avec succès !');
@@ -446,6 +452,55 @@ class CovoiturageController extends AbstractController
             $stmt->execute(['id' => $covoiturageId]);
         }
 
+        return $this->redirectToRoute('app_profil');
+    }
+
+    #[Route('/chauffeur/covoiturage/{id}/demarrer', name: 'chauffeur_covoiturage_demarrer')]
+    public function demarrerCovoiturage(Covoiturage $covoiturage, EntityManagerInterface $em): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        if ($covoiturage->getEtat() !== Covoiturage::ETAT_A_VENIR) {
+            $this->addFlash('warning', 'Ce covoiturage ne peut pas être démarré.');
+            return $this->redirectToRoute('app_profil');
+        }
+
+        $covoiturage->setEtat(Covoiturage::ETAT_EN_COURS);
+        $em->flush();
+
+        $this->addFlash('success', 'Le covoiturage a bien démarré.');
+        return $this->redirectToRoute('app_profil');
+    }
+
+    #[Route('/chauffeur/covoiturage/{id}/clore', name: 'chauffeur_covoiturage_clore')]
+    public function cloreCovoiturage(Covoiturage $covoiturage, EntityManagerInterface $em, MailerInterface $mailer): Response {
+        $this->denyAccessUnlessGranted('ROLE_USER');
+
+        if ($covoiturage->getEtat() !== Covoiturage::ETAT_EN_COURS) {
+            $this->addFlash('warning', 'Ce covoiturage ne peut pas être clôturé.');
+            return $this->redirectToRoute('app_profil');
+        }
+
+        $covoiturage->setEtat(Covoiturage::ETAT_TERMINE);
+        $em->flush();
+
+        // Envoi des mails aux participants
+        foreach ($covoiturage->getReservations() as $reservation) {
+            $participant = $reservation->getUtilisateur();
+            $email = (new TemplatedEmail())
+                ->from('no-reply@ecoride.com')
+                ->to($participant->getEmail())
+                ->subject('Merci de confirmer le bon déroulement du trajet')
+                ->htmlTemplate('emails/confirmation_trajet.html.twig')
+                ->context([
+                    'participant' => $participant,
+                    'covoiturage' => $covoiturage,
+                ]);
+
+            $mailer->send($email);
+        }
+
+        $this->addFlash('success', 'Le covoiturage a été clôturé. Les participants ont été notifiés.');
         return $this->redirectToRoute('app_profil');
     }
 }

@@ -6,6 +6,7 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Entity\User;
 use App\Entity\Avis;
 use App\Entity\Report;
+use App\Repository\AvisRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Form\ReportType;
@@ -24,32 +25,42 @@ class EmployeController extends AbstractController
         return $this->render('employe/dashboard.html.twig');
     }
 
-    #[Route('/employe/moderation-avis', name: 'employe_moderation_avis')]
-    public function moderationAvis(EntityManagerInterface $em): Response
+    #[Route('/employe/avis/moderer', name: 'employe_moderer_avis')]
+    public function modererAvis(AvisRepository $reviewRepository): Response
     {
-        $avisEnAttente = $em->getRepository(Avis::class)->findBy(['isValidated' => false]);
+        $avis = $reviewRepository->findBy(['isValidated' => false]);
 
         return $this->render('employe/moderation_avis.html.twig', [
-            'avis' => $avisEnAttente
+            'avis' => $avis
         ]);
     }
 
-    #[Route('/employe/avis/{id}/valider', name: 'employe_valider_avis', methods: ['POST'])]
-    public function validerAvis(Avis $avis, EntityManagerInterface $em): RedirectResponse
+    #[Route('/employe/avis/valider/{id}', name: 'employe_valider_avis', methods: ['POST'])]
+    public function validerAvis(int $id, AvisRepository $reviewRepository, EntityManagerInterface $em, Request $request): RedirectResponse
     {
+        $avis = $reviewRepository->find($id);
+        if (!$avis || !$this->isCsrfTokenValid('valider_avis_' . $id, $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
         $avis->setIsValidated(true);
         $em->flush();
 
-        return $this->redirectToRoute('employe_moderation_avis');
+        return $this->redirectToRoute('employe_moderer_avis');
     }
 
-    #[Route('/employe/avis/{id}/refuser', name: 'employe_refuser_avis', methods: ['POST'])]
-    public function refuserAvis(Avis $avis, EntityManagerInterface $em): RedirectResponse
+    #[Route('/employe/avis/refuser/{id}', name: 'employe_refuser_avis', methods: ['POST'])]
+    public function refuserAvis(int $id, AvisRepository $reviewRepository, EntityManagerInterface $em, Request $request): RedirectResponse
     {
+        $avis = $reviewRepository->find($id);
+        if (!$avis || !$this->isCsrfTokenValid('refuser_avis_' . $id, $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException();
+        }
+
         $em->remove($avis);
         $em->flush();
 
-        return $this->redirectToRoute('employe_moderation_avis');
+        return $this->redirectToRoute('employe_moderer_avis');
     }
 
     #[Route('/employe/covoiturages-signales', name: 'employe_covoiturages_signales')]

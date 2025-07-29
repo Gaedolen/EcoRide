@@ -121,6 +121,28 @@ li {
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
+.covoiturage-header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.covoiturage-header-left h2 {
+    margin: 0;
+}
+
+.titre-covoiturage {
+    color: #4a86e8;
+}
+
+.covoiturage-buttons {
+    display: flex;
+    gap: 10px;
+}
+
 .car-card ul,
 .covoiturage-card ul {
     list-style: none;

@@ -3,13 +3,21 @@
 namespace App\Entity;
 
 use App\Repository\CovoiturageRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
+use App\Entity\Reservation;
+
 
 #[ORM\Entity(repositoryClass: CovoiturageRepository::class)]
 class Covoiturage
 {
+    public const ETAT_A_VENIR = 'a_venir';
+    public const ETAT_EN_COURS = 'en_cours';
+    public const ETAT_TERMINE = 'termine';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -49,6 +57,12 @@ class Covoiturage
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?\App\Entity\Voiture $voiture = null;
+
+    #[ORM\OneToMany(mappedBy: 'covoiturage', targetEntity: Reservation::class)]
+    private Collection $reservations;
+
+    #[ORM\Column(length: 20)]
+    private ?string $etat = self::ETAT_A_VENIR;
 
     public function getId(): ?int
     {
@@ -181,6 +195,28 @@ class Covoiturage
     public function setUtilisateur(?User $utilisateur): self
     {
         $this->utilisateur = $utilisateur;
+        return $this;
+    }
+
+    public function __construct()
+    {
+        $this->reservations = new ArrayCollection();
+    }
+
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function getEtat(): ?string
+    {
+        return $this->etat;
+    }
+
+    public function setEtat(string $etat): self
+    {
+        $this->etat = $etat;
+
         return $this;
     }
 }
