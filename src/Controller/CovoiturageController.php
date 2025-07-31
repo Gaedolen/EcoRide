@@ -11,6 +11,7 @@ use Psr\Log\LoggerInterface;
 use App\Form\CovoiturageType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Covoiturage;
+use App\Entity\Reservation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -18,7 +19,7 @@ use \PDO;
 
 class CovoiturageController extends AbstractController
 {
-        #[Route('/covoiturage', name: 'app_covoiturage')]
+    #[Route('/covoiturage', name: 'app_covoiturage')]
     public function rechercher(Request $request): Response
     {
         // Paramètres de recherche
@@ -420,40 +421,33 @@ class CovoiturageController extends AbstractController
 
 
     #[Route('/covoiturage/{id}/supprimer', name: 'supprimer_covoiturage', methods: ['POST'])]
-    public function supprimer(Request $request, int $id): Response
+    public function supprimer(Covoiturage $covoiturage, EntityManagerInterface $em): Response
     {
-        $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $stmt = $pdo->prepare("DELETE FROM covoiturage WHERE id = :id");
-        $stmt->execute(['id' => $id]);
+        $em->remove($covoiturage);
+        $em->flush();
 
         $this->addFlash('success', 'Covoiturage supprimé.');
         return $this->redirectToRoute('app_profil');
     }
 
     #[Route('/reservation/{id}/annuler', name: 'annuler_reservation', methods: ['POST'])]
-    public function annulerReservation(int $id): Response
+    public function annulerReservation(int $id, EntityManagerInterface $em): Response
     {
-        $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        // Récupérer le covoiturage lié à la réservation
-        $stmt = $pdo->prepare("SELECT covoiturage_id FROM reservation WHERE id = :id");
-        $stmt->execute(['id' => $id]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if ($result) {
-            $covoiturageId = $result['covoiturage_id'];
-
-            // Supprimer la réservation
-            $stmt = $pdo->prepare("DELETE FROM reservation WHERE id = :id");
-            $stmt->execute(['id' => $id]);
-
-            // Ré-incrémenter les places
-            $stmt = $pdo->prepare("UPDATE covoiturage SET nb_place = nb_place + 1 WHERE id = :id");
-            $stmt->execute(['id' => $covoiturageId]);
+        $reservation = $em->getRepository(Reservation::class)->find($id);
+        if (!$reservation) {
+            $this->addFlash('error', 'Réservation non trouvée.');
+            return $this->redirectToRoute('app_profil');
         }
 
+        $covoiturage = $reservation->getCovoiturage();
+        if ($covoiturage) {
+            $covoiturage->removeReservation($reservation); // maj automatique du statut
+        }
+
+        $em->remove($reservation);
+        $em->flush();
+
+        $this->addFlash('success', 'Réservation annulée avec succès.');
         return $this->redirectToRoute('app_profil');
     }
 
@@ -462,12 +456,12 @@ class CovoiturageController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_USER');
 
-        if ($covoiturage->getEtat() !== Covoiturage::ETAT_A_VENIR) {
+        if (!in_array($covoiturage->getStatut(), [Covoiturage::STATUT_OUVERT, Covoiturage::STATUT_COMPLET])) {
             $this->addFlash('warning', 'Ce covoiturage ne peut pas être démarré.');
             return $this->redirectToRoute('app_profil');
         }
 
-        $covoiturage->setEtat(Covoiturage::ETAT_EN_COURS);
+        $covoiturage->setStatut(Covoiturage::STATUT_EN_COURS);
         $em->flush();
 
         $this->addFlash('success', 'Le covoiturage a bien démarré.');
@@ -475,9 +469,14 @@ class CovoiturageController extends AbstractController
     }
 
     #[Route('/chauffeur/covoiturage/{id}/clore', name: 'chauffeur_covoiturage_clore')]
-    public function cloreCovoiturage(Covoiturage $covoiturage, EntityManagerInterface $em, MailerInterface $mailer, LoggerInterface $logger): Response {
-        // Met à jour le statut
-        $covoiturage->setStatut('termine');
+    public function cloreCovoiturage(Covoiturage $covoiturage, EntityManagerInterface $em, MailerInterface $mailer, LoggerInterface $logger): Response
+    {
+        if ($covoiturage->getStatut() !== Covoiturage::STATUT_EN_COURS) {
+            $this->addFlash('warning', 'Ce covoiturage ne peut pas être clôturé.');
+            return $this->redirectToRoute('app_profil');
+        }
+
+        $covoiturage->setStatut(Covoiturage::STATUT_FERME);
         $em->flush();
 
         $reservations = $covoiturage->getReservations();
@@ -501,19 +500,12 @@ class CovoiturageController extends AbstractController
 
             try {
                 $mailer->send($email);
-                // Optionnel : visible dans la barre de debug
-                dump('Mail envoyé à ' . $participant->getEmail());
             } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
-                // Log l’erreur (fichier log Symfony)
                 $logger->error('Erreur d\'envoi de mail : ' . $e->getMessage());
-
-                // Optionnel : affiche dans la barre debug (dev uniquement)
-                dump('Erreur envoi : ' . $e->getMessage());
             }
         }
 
         $this->addFlash('success', 'Le covoiturage a été clôturé et les mails ont été envoyés.');
-
         return $this->redirectToRoute('app_profil');
     }
 }

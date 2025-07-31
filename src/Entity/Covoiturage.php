@@ -14,9 +14,17 @@ use App\Entity\Reservation;
 #[ORM\Entity(repositoryClass: CovoiturageRepository::class)]
 class Covoiturage
 {
+    // Constantes d'état ()
     public const ETAT_A_VENIR = 'a_venir';
     public const ETAT_EN_COURS = 'en_cours';
     public const ETAT_TERMINE = 'termine';
+
+    // Constantes de statut ()
+    public const STATUT_OUVERT = 'ouvert';
+    public const STATUT_COMPLET = 'complet';
+    public const STATUT_EN_COURS = 'en_cours';
+    public const STATUT_FERME = 'ferme';
+
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -46,7 +54,7 @@ class Covoiturage
     private ?string $lieu_arrivee = null;
 
     #[ORM\Column(length: 50)]
-    private ?string $statut = null;
+    private ?string $statut = self::STATUT_OUVERT;
 
     #[ORM\Column]
     private ?int $nb_place = null;
@@ -203,6 +211,29 @@ class Covoiturage
         $this->reservations = new ArrayCollection();
     }
 
+    public function addReservation(Reservation $reservation): static
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setCovoiturage($this);
+            $this->updateStatutSelonPlaces();
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            if ($reservation->getCovoiturage() === $this) {
+                $reservation->setCovoiturage(null);
+            }
+            $this->updateStatutSelonPlaces();
+        }
+
+        return $this;
+    }
+
     public function getReservations(): Collection
     {
         return $this->reservations;
@@ -218,5 +249,28 @@ class Covoiturage
         $this->etat = $etat;
 
         return $this;
+    }
+
+    // Fonctions personnalisées
+
+    public function getPlacesDisponibles(): int
+    {
+        return $this->nb_place - $this->reservations->count();
+    }
+
+    public function updateStatutSelonPlaces(): void
+    {
+        if ($this->statut === self::STATUT_OUVERT || $this->statut === self::STATUT_COMPLET) {
+            if ($this->getPlacesDisponibles() <= 0) {
+                $this->statut = self::STATUT_COMPLET;
+            } else {
+                $this->statut = self::STATUT_OUVERT;
+            }
+        }
+    }
+
+    public function estReservable(): bool
+    {
+        return $this->statut === self::STATUT_OUVERT;
     }
 }
