@@ -18,7 +18,7 @@ class Reservation
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?User $utilisateur = null;
 
-    #[ORM\ManyToOne(targetEntity: Covoiturage::class)]
+    #[ORM\ManyToOne(targetEntity: Covoiturage::class, inversedBy: 'reservations')]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Covoiturage $covoiturage = null;
 

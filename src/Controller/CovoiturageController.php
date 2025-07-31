@@ -6,6 +6,8 @@ use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Mime\Email;
+use Psr\Log\LoggerInterface;
 use App\Form\CovoiturageType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Covoiturage;
@@ -473,20 +475,20 @@ class CovoiturageController extends AbstractController
     }
 
     #[Route('/chauffeur/covoiturage/{id}/clore', name: 'chauffeur_covoiturage_clore')]
-    public function cloreCovoiturage(Covoiturage $covoiturage, EntityManagerInterface $em, MailerInterface $mailer): Response {
-        $this->denyAccessUnlessGranted('ROLE_USER');
-
-        if ($covoiturage->getEtat() !== Covoiturage::ETAT_EN_COURS) {
-            $this->addFlash('warning', 'Ce covoiturage ne peut pas être clôturé.');
-            return $this->redirectToRoute('app_profil');
-        }
-
-        $covoiturage->setEtat(Covoiturage::ETAT_TERMINE);
+    public function cloreCovoiturage(Covoiturage $covoiturage, EntityManagerInterface $em, MailerInterface $mailer, LoggerInterface $logger): Response {
+        // Met à jour le statut
+        $covoiturage->setStatut('termine');
         $em->flush();
 
-        // Envoi des mails aux participants
-        foreach ($covoiturage->getReservations() as $reservation) {
+        $reservations = $covoiturage->getReservations();
+
+        foreach ($reservations as $reservation) {
             $participant = $reservation->getUtilisateur();
+
+            if (!$participant || !$participant->getEmail()) {
+                continue;
+            }
+
             $email = (new TemplatedEmail())
                 ->from('no-reply@ecoride.com')
                 ->to($participant->getEmail())
@@ -497,10 +499,21 @@ class CovoiturageController extends AbstractController
                     'covoiturage' => $covoiturage,
                 ]);
 
-            $mailer->send($email);
+            try {
+                $mailer->send($email);
+                // Optionnel : visible dans la barre de debug
+                dump('Mail envoyé à ' . $participant->getEmail());
+            } catch (\Symfony\Component\Mailer\Exception\TransportExceptionInterface $e) {
+                // Log l’erreur (fichier log Symfony)
+                $logger->error('Erreur d\'envoi de mail : ' . $e->getMessage());
+
+                // Optionnel : affiche dans la barre debug (dev uniquement)
+                dump('Erreur envoi : ' . $e->getMessage());
+            }
         }
 
-        $this->addFlash('success', 'Le covoiturage a été clôturé. Les participants ont été notifiés.');
+        $this->addFlash('success', 'Le covoiturage a été clôturé et les mails ont été envoyés.');
+
         return $this->redirectToRoute('app_profil');
     }
 }

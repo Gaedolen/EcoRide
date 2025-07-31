@@ -1,5 +1,5 @@
 {% block body %}
 <h2>Confirmation de trajet</h2>
-<p>Bonjour {{ participant.nom }},</p>
-<p>Le covoiturage vers {{ covoiturage.lieu_arrivee }} vient de se terminer. Merci de confirmer que tout s’est bien déroulé.</p>
+<p>Bonjour {{ participant.nom ?? 'utilisateur' }},</p>
+<p>Le covoiturage vient de se terminer. Merci de confirmer que tout s’est bien déroulé.</p>
 {% endblock %}
