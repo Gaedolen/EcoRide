@@ -2,28 +2,37 @@
 
 {% block title %}Modération des avis{% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/employe/moderation_avis.css') }}">
+{% endblock %}
+
 {% block body %}
-    <h1 class="text-2xl font-bold mb-4">Modération des avis</h1>
+<div class="avis-container">
+    <h2>📝 Modération des avis</h2>
 
-    {% for review in avis %}
-        <div class="bg-white shadow-md rounded p-4 mb-4 border">
-            <p><strong>Auteur :</strong> {{ review.user.pseudo }}</p>
-            <p><strong>Note :</strong> {{ review.note }}/5</p>
-            <p><strong>Commentaire :</strong> {{ review.commentaire }}</p>
-            <p><strong>Date :</strong> {{ review.date|date('d/m/Y H:i') }}</p>
+    {% if avis is empty %}
+        <p class="empty">Aucun avis en attente de modération.</p>
+    {% else %}
+        {% for a in avis %}
+            <div class="avis-item">
+                <div class="avis-header">
+                    <h4>{{ a.auteur.pseudo }} ➡️ {{ a.cible.pseudo }}</h4>
+                    <small>{{ a.date|date('d/m/Y H:i') }}</small>
+                </div>
+                <div class="avis-content">
+                    <strong>Note :</strong> {{ a.note }}/5<br>
+                    <strong>Commentaire :</strong> {{ a.commentaire }}
+                </div>
 
-            <div class="flex space-x-2 mt-2">
-                <form action="{{ path('employe_valider_avis', { id: review.id }) }}" method="post">
-                    <input type="hidden" name="_token" value="{{ csrf_token('valider_avis_' ~ review.id) }}">
-                    <button type="submit" class="bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600">Valider</button>
-                </form>
-                <form action="{{ path('employe_refuser_avis', { id: review.id }) }}" method="post">
-                    <input type="hidden" name="_token" value="{{ csrf_token('refuser_avis_' ~ review.id) }}">
-                    <button type="submit" class="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600">Refuser</button>
+                <form method="post" action="{{ path('employe_moderer_avis_action', {id: a.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('moderation_avis_' ~ a.id) }}">
+                    <div class="moderation-actions">
+                        <button type="submit" name="action" value="approuve" class="approve">✅ Approuver</button>
+                        <button type="submit" name="action" value="refuse" class="refuse">❌ Refuser</button>
+                    </div>
                 </form>
             </div>
-        </div>
-    {% else %}
-        <p>Aucun avis à modérer.</p>
-    {% endfor %}
+        {% endfor %}
+    {% endif %}
+</div>
 {% endblock %}

@@ -6,6 +6,8 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Entity\User;
 use App\Entity\Avis;
 use App\Entity\Report;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use App\Repository\AvisRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Doctrine\ORM\EntityManagerInterface;
@@ -28,36 +30,40 @@ class EmployeController extends AbstractController
     #[Route('/employe/avis/moderer', name: 'employe_moderer_avis')]
     public function modererAvis(AvisRepository $reviewRepository): Response
     {
-        $avis = $reviewRepository->findBy(['isValidated' => false]);
+        $avis = $reviewRepository->findBy(['statut' => 'en_attente']);
 
         return $this->render('employe/moderation_avis.html.twig', [
             'avis' => $avis
         ]);
     }
 
-    #[Route('/employe/avis/valider/{id}', name: 'employe_valider_avis', methods: ['POST'])]
-    public function validerAvis(int $id, AvisRepository $reviewRepository, EntityManagerInterface $em, Request $request): RedirectResponse
-    {
+    #[Route('/employe/avis/moderer/{id}', name: 'employe_moderer_avis_action', methods: ['POST'])]
+    public function modererAvisAction(int $id, AvisRepository $reviewRepository, EntityManagerInterface $em, Request $request, MailerInterface $mailer): RedirectResponse {
         $avis = $reviewRepository->find($id);
-        if (!$avis || !$this->isCsrfTokenValid('valider_avis_' . $id, $request->request->get('_token'))) {
+        if (!$avis || !$this->isCsrfTokenValid('moderation_avis_' . $id, $request->request->get('_token'))) {
             throw $this->createAccessDeniedException();
         }
 
-        $avis->setIsValidated(true);
-        $em->flush();
+        $action = $request->request->get('action');
 
-        return $this->redirectToRoute('employe_moderer_avis');
-    }
+        if ($action === 'approuve') {
+            $avis->setStatut('approuve');
+        } elseif ($action === 'refuse') {
+            $avis->setStatut('refuse');
 
-    #[Route('/employe/avis/refuser/{id}', name: 'employe_refuser_avis', methods: ['POST'])]
-    public function refuserAvis(int $id, AvisRepository $reviewRepository, EntityManagerInterface $em, Request $request): RedirectResponse
-    {
-        $avis = $reviewRepository->find($id);
-        if (!$avis || !$this->isCsrfTokenValid('refuser_avis_' . $id, $request->request->get('_token'))) {
-            throw $this->createAccessDeniedException();
+            // Envoi du mail à l'auteur
+            $email = (new TemplatedEmail())
+                ->from('noreply@ecoride.fr')
+                ->to($avis->getAuteur()->getEmail())
+                ->subject('Votre avis a été refusé')
+                ->htmlTemplate('emails/avis_refuse.html.twig')
+                ->context([
+                    'pseudo' => $avis->getAuteur()->getPseudo(),
+                    'commentaire' => $avis->getCommentaire()
+                ]);
+            $mailer->send($email);
         }
 
-        $em->remove($avis);
         $em->flush();
 
         return $this->redirectToRoute('employe_moderer_avis');

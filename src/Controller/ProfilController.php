@@ -4,12 +4,15 @@ namespace App\Controller;
 
 use App\Entity\Covoiturage;
 use App\Entity\Voiture;
+use App\Entity\User;
 use App\Form\ProfilType;
 use App\Form\VoitureType;
+use App\Repository\AvisRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use DateTime;
 use PDO;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +22,7 @@ use Symfony\Component\Security\Core\Security;
 class ProfilController extends AbstractController
 {
     #[Route('/profil', name: 'app_profil')]
-    public function profil(Request $request, FormFactoryInterface $formFactory): Response
+    public function profil(Request $request, FormFactoryInterface $formFactory,EntityManagerInterface $em, AvisRepository $avisRepository): Response
     {
         /** @var \App\Entity\User $utilisateur */
         $utilisateur = $this->getUser();
@@ -110,9 +113,17 @@ class ProfilController extends AbstractController
             $resa['fin_trajet'] = $finTrajet;
 
             $resa['est_passe'] = $finTrajet < new DateTime();
+
+            $chauffeurId = $resa['chauffeur_id'];
+            $chauffeur = $em->getRepository(User::class)->find($chauffeurId);
+
+            $avisExistant = $avisRepository->findOneBy([
+                'auteur' => $utilisateur,
+                'cible' => $chauffeur,
+            ]);
+
+            $resa['avis_existant'] = $avisExistant;
         }
-
-
 
         return $this->render('profil/profil.html.twig', [
             'user' => $utilisateur, 
@@ -121,6 +132,7 @@ class ProfilController extends AbstractController
             'photoBase64' => $photoBase64, 
             'covoiturages' => $covoiturages,
             'reservations' => $reservations,
+            'avisExistant' => $avisExistant,
         ]);
     }
 
@@ -274,7 +286,8 @@ class ProfilController extends AbstractController
             ':auteur_id' => $utilisateur->getId(),
             ':cible_id' => $cibleId,
             ':note' => $note,
-            ':commentaire' => $commentaire
+            ':commentaire' => $commentaire,
+            ':is_validated' => false,
         ]);
 
         return $this->redirectToRoute('app_profil');

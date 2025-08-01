@@ -249,6 +249,25 @@ li {
     background: linear-gradient(#c0392b, #a0281f);
 }
 
+/* Message de gestion de l'avis */
+.badge {
+    display: inline-block;
+    padding: 0.4em 0.7em;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.badge-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.badge-warning {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
 /* Blocs de détails */
 .details-content {
     display: flex;

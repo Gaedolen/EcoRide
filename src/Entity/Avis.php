@@ -9,6 +9,11 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\HasLifecycleCallbacks]
 class Avis
 {
+    // Constantes de statut ()
+    public const STATUT_EN_ATTENTE_VALIDATION = 'en_attente_validation';
+    public const STATUT_APPROUVE = 'approuve';
+    public const STATUT_REFUSE = 'refuse';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
@@ -30,6 +35,9 @@ class Avis
 
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateAvis = null;
+
+    #[ORM\Column(type: 'string', length: 20)]
+    private string $statut = self::STATUT_EN_ATTENTE_VALIDATION;
 
     #[ORM\Column(type: 'boolean')]
     private bool $isValidated = false;
@@ -103,6 +111,17 @@ class Avis
         return $this;
     }
 
+    public function getStatut(): string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(string $statut): self
+    {
+        $this->statut = $statut;
+        return $this;
+    }
+
     public function isValidated(): bool
     {
         return $this->isValidated;
@@ -111,7 +130,6 @@ class Avis
     public function setIsValidated(bool $isValidated): self
     {
         $this->isValidated = $isValidated;
-
         return $this;
     }
 }

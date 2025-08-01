@@ -102,20 +102,21 @@
             <div class="covoiturage-scroll-wrapper">
                 <div class="covoiturage-container">
                     {% for covoiturage in covoiturages %}
-                        <div class="covoiturage-card {% if covoiturage.statut == 'termine' %}covoiturage-ferme{% endif %}">
+                        <div class="covoiturage-card {% if covoiturage.statut == 'ferme' %}covoiturage-ferme{% endif %}">
                             <div class="covoiturage-header-actions">
                                 <div class="covoiturage-header-left">
                                     <h2 class="titre-covoiturage">Trajet vers {{ covoiturage.lieu_arrivee }} le {{ covoiturage.date_depart|date('d/m/Y') }}</h2>
                                 </div>
 
-                                {% if covoiturage.etat in ['a_venir', 'en_cours'] %}
-                                    <div class="covoiturage-buttons">
-                                        {% if covoiturage.etat == 'a_venir' %}
-                                            <a href="{{ path('chauffeur_covoiturage_demarrer', {'id': covoiturage.id}) }}" class="btn-card-action">Démarrer</a>
-                                        {% elseif covoiturage.etat == 'en_cours' %}
-                                            <a href="{{ path('chauffeur_covoiturage_clore', {'id': covoiturage.id}) }}" class="btn-card-action">Arrivée à destination</a>
-                                        {% endif %}
-                                    </div>
+                                <!-- Gestion du bouton "Démarrer" et "Arrivé à destination" en fonction du statut du trajet -->
+                                {% if covoiturage.statut == 'ouvert' or covoiturage.statut == 'complet' %}
+                                    <form method="post" action="{{ path('chauffeur_covoiturage_demarrer', { id: covoiturage.id }) }}">
+                                        <button type="submit" class="btn-card-action">Démarrer</button>
+                                    </form>
+                                {% elseif covoiturage.statut == 'en_cours' %}
+                                    <form method="post" action="{{ path('chauffeur_covoiturage_clore', { id: covoiturage.id }) }}">
+                                        <button type="submit" class="btn-card-action">Arrivé à destination</button>
+                                    </form>
                                 {% endif %}
                             </div>
 
@@ -154,23 +155,31 @@
    <h1>Mes réservations</h1>
     {% if reservations is not empty %}
         <div class="reservations-section">
-            {% set now = "now"|date %}
             {% for resa in reservations %}
-                {% set now = date() %}
-                <div class="details-card {% if resa.fin_trajet < now %}past-reservation{% endif %}">
+                <div class="details-card {% if resa.statut == 'ferme' %}past-reservation{% endif %}">
                     <div class="details-card-header">
                         <div class="details-title">
-                            <h2>Trajet du {{ resa.date_depart|date('d/m/Y') }} vers {{ resa.lieu_arrivee }}{% if resa.fin_trajet < now %}<span class="past-label">(passé)</span>{% endif %}</h2>
+                            <h2>Trajet du {{ resa.date_depart|date('d/m/Y') }} vers {{ resa.lieu_arrivee }}
+                                {% if resa.statut == 'ferme' %}
+                                    <span class="past-label">(fermé)</span>
+                                {% endif %}
+                            </h2>
                         </div>
 
-                        {% if resa.fin_trajet > now %}
+                        {% if resa.statut != 'ferme' %}
                             <form method="POST">
-                                <button type="button" class="btn-annuler open-cancel-popup" data-reservation-id="{{ resa.reservation_id }}" data-action-url="{{ path('annuler_reservation', { id: resa.reservation_id }) }}">Annuler</button>                            
+                                <button type="button" class="btn-annuler open-cancel-popup" data-reservation-id="{{ resa.reservation_id }}" data-action-url="{{ path('annuler_reservation', { id: resa.reservation_id }) }}">Annuler</button>
                             </form>
                         {% else %}
-                            <button type="button" class="btn-avis open-avis-popup" data-cible-id="{{ resa.utilisateur_id }}">
-                                Laisser un avis
-                            </button>
+                            {% if avisExistant %}
+                                {% if avisExistant.isValidated %}
+                                    <span class="badge badge-success">✅ Avis déposé</span>
+                                {% else %}
+                                    <span class="badge badge-warning">⏳ Avis en attente</span>
+                                {% endif %}
+                            {% else %}
+                                <a href="{{ path('laisser_avis', {id: conducteur.id}) }}" class="btn btn-primary">Laisser un avis</a>
+                            {% endif %}
                         {% endif %}
                     </div>
 

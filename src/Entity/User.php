@@ -93,9 +93,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private ?bool $isSuspended = false;
-   
+
+    #[ORM\OneToMany(mappedBy: 'cible', targetEntity: Avis::class)]
+    private Collection $avisRecus;
+
+    #[ORM\OneToMany(mappedBy: 'auteur', targetEntity: Avis::class)]
+    private Collection $avisDonnes;
 
         // Setter et Getter
+
     public function getRole(): ?Role
     {
         return $this->role;
@@ -313,6 +319,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->voitures = new ArrayCollection();
         $this->covoiturages = new ArrayCollection();
+        $this->avisRecus = new ArrayCollection();
+        $this->avisDonnes = new ArrayCollection();
     }
 
     public function getVoitures(): Collection
@@ -378,6 +386,59 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsSuspended(bool $isSuspended): static
     {
         $this->isSuspended = $isSuspended;
+        return $this;
+    }
+
+    public function getAvisRecus(): Collection
+    {
+        return $this->avisRecus;
+    }
+
+    public function getAvisDonnes(): Collection
+    {
+        return $this->avisDonnes;
+    }
+
+    public function addAvisRecu(Avis $avis): self
+    {
+        if (!$this->avisRecus->contains($avis)) {
+            $this->avisRecus[] = $avis;
+            $avis->setCible($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAvisRecu(Avis $avis): self
+    {
+        if ($this->avisRecus->removeElement($avis)) {
+            if ($avis->getCible() === $this) {
+                $avis->setCible(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function addAvisDonne(Avis $avis): self
+    {
+        if (!$this->avisDonnes->contains($avis)) {
+            $this->avisDonnes[] = $avis;
+            $avis->setAuteur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAvisDonne(Avis $avis): self
+    {
+        if ($this->avisDonnes->removeElement($avis)) {
+            // set the owning side to null (unless already changed)
+            if ($avis->getAuteur() === $this) {
+                $avis->setAuteur(null);
+            }
+        }
+
         return $this;
     }
 }

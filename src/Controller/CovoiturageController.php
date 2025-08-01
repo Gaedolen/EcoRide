@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mime\Email;
+use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use App\Form\CovoiturageType;
 use Doctrine\ORM\EntityManagerInterface;
@@ -37,7 +38,6 @@ class CovoiturageController extends AbstractController
         $minutesMax = (int) $request->query->get('temps_max_minutes');
         $tempsMaxTotal = ($heuresMax * 60) + $minutesMax;
 
-
         // Connexion PDO
         $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -57,6 +57,7 @@ class CovoiturageController extends AbstractController
             AND c.lieu_arrivee = :arrivee
             AND c.date_depart = :date
             AND c.heure_depart >= :heure
+            AND c.statut = 'ouvert'
         ";
 
         $params = [
@@ -191,8 +192,8 @@ class CovoiturageController extends AbstractController
             return $this->redirectToRoute('details_trajet', ['id' => $id]);
         }
 
-        // Insérer la réservation
         try {
+            // Insérer la réservation
             $stmt = $pdo->prepare("
                 INSERT INTO reservation (utilisateur_id, covoiturage_id)
                 VALUES (:utilisateur_id, :covoiturage_id)
@@ -206,6 +207,17 @@ class CovoiturageController extends AbstractController
             $stmt = $pdo->prepare("UPDATE covoiturage SET nb_place = nb_place - 1 WHERE id = :id");
             $stmt->execute(['id' => $id]);
 
+            // Re-vérifier le nombre de places restantes
+            $stmt = $pdo->prepare("SELECT nb_place FROM covoiturage WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+            $updated = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($updated && (int)$updated['nb_place'] === 0) {
+                // Mettre à jour le statut en 'complet'
+                $stmt = $pdo->prepare("UPDATE covoiturage SET statut = 'complet' WHERE id = :id");
+                $stmt->execute(['id' => $id]);
+            }
+
             $this->addFlash('success', 'Réservation confirmée !');
 
         } catch (\PDOException $e) {
@@ -217,8 +229,6 @@ class CovoiturageController extends AbstractController
             'reserved' => 1,
         ]);
     }
-
-
 
     #[Route('/covoiturage/ajouter', name: 'ajouter_covoiturage')]
     public function ajouterCovoiturage(Request $request): Response
@@ -418,8 +428,6 @@ class CovoiturageController extends AbstractController
         ]);
     }
 
-
-
     #[Route('/covoiturage/{id}/supprimer', name: 'supprimer_covoiturage', methods: ['POST'])]
     public function supprimer(Covoiturage $covoiturage, EntityManagerInterface $em): Response
     {
@@ -431,23 +439,37 @@ class CovoiturageController extends AbstractController
     }
 
     #[Route('/reservation/{id}/annuler', name: 'annuler_reservation', methods: ['POST'])]
-    public function annulerReservation(int $id, EntityManagerInterface $em): Response
+    public function annulerReservation(int $id, ManagerRegistry $doctrine): Response
     {
-        $reservation = $em->getRepository(Reservation::class)->find($id);
-        if (!$reservation) {
-            $this->addFlash('error', 'Réservation non trouvée.');
-            return $this->redirectToRoute('app_profil');
+        $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Récupérer le covoiturage lié à la réservation
+        $stmt = $pdo->prepare("SELECT covoiturage_id FROM reservation WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($result) {
+            $covoiturageId = $result['covoiturage_id'];
+
+            // Supprimer la réservation
+            $stmt = $pdo->prepare("DELETE FROM reservation WHERE id = :id");
+            $stmt->execute(['id' => $id]);
+
+            // Ré-incrémentation des places
+            $stmt = $pdo->prepare("UPDATE covoiturage SET nb_place = nb_place + 1 WHERE id = :id");
+            $stmt->execute(['id' => $covoiturageId]);
+
+            // Mettre à jour le statut
+            $em = $doctrine->getManager();
+            $covoiturageEntity = $em->getRepository(Covoiturage::class)->find($covoiturageId);
+
+            if ($covoiturageEntity) {
+                $covoiturageEntity->updateStatutSelonPlaces(); // repasse à "ouvert"
+                $em->flush();
+            }
         }
 
-        $covoiturage = $reservation->getCovoiturage();
-        if ($covoiturage) {
-            $covoiturage->removeReservation($reservation); // maj automatique du statut
-        }
-
-        $em->remove($reservation);
-        $em->flush();
-
-        $this->addFlash('success', 'Réservation annulée avec succès.');
         return $this->redirectToRoute('app_profil');
     }
 
