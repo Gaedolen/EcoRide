@@ -88,6 +88,7 @@
                 <h1>Mes voitures</h1>
                 <a href="#" class="btn-ajouter-voiture disabled" title="Vous devez être indiqué comme chauffeur pour ajouter votre voiture" onclick="return false;">Ajouter une voiture</a>
             </div>
+            <p class="message">Vous devez être chauffeur pour ajouter une voiture. Veuillez modifier votre profil.</p>
         </div>
     {% endif %}
 
@@ -152,7 +153,7 @@
     {% endif %}
 
     <!-- Affichage des réservations -->
-   <h1>Mes réservations</h1>
+   <h1 class="h1">Mes réservations</h1>
     {% if reservations is not empty %}
         <div class="reservations-section">
             {% for resa in reservations %}
@@ -234,7 +235,30 @@
         <p class="no-car-message">Vous n'avez pas encore réservé de covoiturage.</p>
     {% endif %}
 
-    <h1>Mes avis</h1>
+    <h1 class="h1">Mes avis</h1>
+    {% if avisValides is not empty %}
+        {% for avis in avisValides %}
+            <div class="avis-item">
+                {% if avis.auteur and avis.auteur.photoBase64 %}
+                    <img src="data:image/jpeg;base64,{{ avis.auteur.photoBase64 }}" alt="Photo de {{ avis.auteur.pseudo }}" class='avis-photo'>
+                {% else %}
+                    <img src="/images/default-avatar.png" alt="Photo par défaut" class='avis-photo'>
+                {% endif %}
+
+                <span class="separator-vertical"></span>
+                
+                <div class="avis-info">
+                    <div class="avis-pseudo">{{ avis.auteur.pseudo }}</div>
+                    <div class="avis-commentaire">{{ avis.commentaire }}</div>
+                </div>
+                
+                <span class="separator-vertical"></span>
+                <div class="avis-note">{{ avis.note }}/5</div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="message">Aucun avis reçu pour le moment.</p>
+    {% endif %}
 
     <div id="confirmation-modal" class="modal hidden"> <!-- Fenêtre pop-up de suppression d'une voiture -->
         <div class="modal-content">

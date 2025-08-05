@@ -68,6 +68,21 @@ class ProfilController extends AbstractController
             $covoiturages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
+        // Récupération des avis
+        $avisValides = $avisRepository->findBy([
+            'cible'=> $utilisateur,
+            'isValidated'=> true,
+        ]);
+
+        //Ajouter la photo en base64 dans les auteurs
+        foreach($avisValides as $avis) {
+            $auteur = $avis->getAuteur();
+            if ($auteur) {
+                $photo = $auteur->getPhoto();
+                $auteur->photoBase64 = $photo ? base64_encode(stream_get_contents($photo)) : null;
+            }
+        }
+
         // Récupération des réservations de l'utilisateur
         $stmt = $pdo->prepare("
             SELECT 
@@ -141,6 +156,7 @@ class ProfilController extends AbstractController
             'covoiturages' => $covoiturages,
             'reservations' => $reservations,
             'avisDonnes' => $avisDonnes,
+            'avisValides' => $avisValides,
         ]);
     }
 
