@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block body %}
+{{ dump(avis) }}
 <div class="avis-container">
     <h2>📝 Modération des avis</h2>
 
@@ -16,8 +17,8 @@
         {% for a in avis %}
             <div class="avis-item">
                 <div class="avis-header">
-                    <h4>{{ a.auteur.pseudo }} ➡️ {{ a.cible.pseudo }}</h4>
-                    <small>{{ a.date|date('d/m/Y H:i') }}</small>
+                    <h4>Commentaire de {{ a.auteur.pseudo }} à {{ a.cible.pseudo }}</h4>
+                    <small>{{ a.dateAvis|date('d/m/Y H:i') }}</small>
                 </div>
                 <div class="avis-content">
                     <strong>Note :</strong> {{ a.note }}/5<br>

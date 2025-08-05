@@ -77,13 +77,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const cibleIdInput = document.getElementById('cible_id');
 
     avisButtons.forEach(button => {
-        button.addEventListener('click', () => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
             const cibleId = button.getAttribute('data-cible-id');
             cibleIdInput.value = cibleId;
             avisPopup.style.display = 'flex';
         });
     });
-
 
     avisClose.addEventListener('click', () => {
         avisPopup.style.display = 'none';

@@ -117,13 +117,21 @@ class ProfilController extends AbstractController
             $chauffeurId = $resa['chauffeur_id'];
             $chauffeur = $em->getRepository(User::class)->find($chauffeurId);
 
-            $avisExistant = $avisRepository->findOneBy([
-                'auteur' => $utilisateur,
-                'cible' => $chauffeur,
+           $stmtAvis = $pdo->prepare("
+                SELECT * FROM avis 
+                WHERE auteur_id = :auteur_id AND cible_id = :cible_id
+                LIMIT 1
+            ");
+            $stmtAvis->execute([
+                'auteur_id' => $utilisateur->getId(),
+                'cible_id' => $resa['chauffeur_id']
             ]);
 
-            $resa['avis_existant'] = $avisExistant;
+            $avis = $stmtAvis->fetch(PDO::FETCH_ASSOC);
+            $resa['avis_existant'] = $avis ?: null;
         }
+
+        $avisDonnes = $utilisateur->getAvisDonnes();
 
         return $this->render('profil/profil.html.twig', [
             'user' => $utilisateur, 
@@ -132,7 +140,7 @@ class ProfilController extends AbstractController
             'photoBase64' => $photoBase64, 
             'covoiturages' => $covoiturages,
             'reservations' => $reservations,
-            'avisExistant' => $avisExistant,
+            'avisDonnes' => $avisDonnes,
         ]);
     }
 
@@ -273,13 +281,16 @@ class ProfilController extends AbstractController
         $note = (int) $request->request->get('note');
         $commentaire = $request->request->get('commentaire');
 
-        // Connexion PDO manuelle
+        if (!$cibleId || !$note || !$commentaire) {
+            throw new \Exception("Champs manquants dans le formulaire.");
+        }
+
         $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         $stmt = $pdo->prepare("
-            INSERT INTO avis (auteur_id, cible_id, note, commentaire, date_avis)
-            VALUES (:auteur_id, :cible_id, :note, :commentaire, NOW())
+            INSERT INTO avis (auteur_id, cible_id, note, commentaire, date_avis, statut, is_validated)
+            VALUES (:auteur_id, :cible_id, :note, :commentaire, NOW(), :statut, :is_validated)
         ");
 
         $stmt->execute([
@@ -287,10 +298,10 @@ class ProfilController extends AbstractController
             ':cible_id' => $cibleId,
             ':note' => $note,
             ':commentaire' => $commentaire,
+            ':statut' => 'en_attente_validation',
             ':is_validated' => false,
         ]);
 
         return $this->redirectToRoute('app_profil');
     }
-
 }

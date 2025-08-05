@@ -171,14 +171,15 @@
                                 <button type="button" class="btn-annuler open-cancel-popup" data-reservation-id="{{ resa.reservation_id }}" data-action-url="{{ path('annuler_reservation', { id: resa.reservation_id }) }}">Annuler</button>
                             </form>
                         {% else %}
-                            {% if avisExistant %}
-                                {% if avisExistant.isValidated %}
+                            {% set avis = resa.avis_existant %}
+                            {% if avis %}
+                                {% if avis.is_validated %}
                                     <span class="badge badge-success">✅ Avis déposé</span>
                                 {% else %}
                                     <span class="badge badge-warning">⏳ Avis en attente</span>
                                 {% endif %}
                             {% else %}
-                                <a href="{{ path('laisser_avis', {id: conducteur.id}) }}" class="btn btn-primary">Laisser un avis</a>
+                                <button type="button" class="btn btn-avis open-avis-popup" data-cible-id="{{ resa.chauffeur_id }}">Laisser un avis</button>
                             {% endif %}
                         {% endif %}
                     </div>
@@ -267,23 +268,20 @@
         </div>
     </div>
 
-
-
-    <div id="avis-popup" class="popup-overlay" style="display: none;"> <!-- Fenêtre pop-up permettant de laisser un avis après un trajet -->
+    <div id="avis-popup" class="popup-overlay" style="display: none;">
         <div class="popup-content">
-            <span class="close-popup">&times;</span>
             <h3>Laisser un avis</h3>
+
             <form method="POST" action="{{ path('laisser_avis') }}">
                 <input type="hidden" name="cible_id" id="cible_id">
-                <label for="note">Note (/5) :</label>
-                <select name="note" required>
-                    {% for i in 1..5 %}
-                        <option value="{{ i }}">{{ i }}</option>
-                    {% endfor %}
-                </select>
-                <label for="commentaire">Avis :</label>
-                <textarea name="commentaire" rows="4" required></textarea>
-                <button type="submit" class="btn-reserver">Envoyer</button>
+
+                <label for="note">Note :</label>
+                <input type="number" id="note" name="note" min="1" max="5" required>
+
+                <label for="commentaire">Commentaire :</label>
+                <textarea id="commentaire" name="commentaire" required></textarea>
+
+                <button type="submit">Envoyer</button>
             </form>
         </div>
     </div>

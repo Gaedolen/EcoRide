@@ -84,7 +84,7 @@
         {% endif %}
     </div>
 
-    {% if app.request.query.get('reserved') %}
+    {% if app.request.query.get('reserved') %} <!-- Fenêtre pop-up de confirmation et de redirection vers le profil -->
         <div id="popup-confirmation" class="popup-overlay">
             <div class="popup-content">
                 <p>Vous avez réservé ce covoiturage !</p>

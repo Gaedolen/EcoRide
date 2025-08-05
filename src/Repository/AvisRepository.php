@@ -16,6 +16,16 @@ class AvisRepository extends ServiceEntityRepository
         parent::__construct($registry, Avis::class);
     }
 
+    public function findEnAttenteValidation(): array
+    {
+        return $this->createQueryBuilder('a')
+            ->where('a.statut = :statut')
+            ->setParameter('statut', 'en_attente_validation')
+            ->orderBy('a.dateAvis', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
     //    /**
     //     * @return Avis[] Returns an array of Avis objects
     //     */

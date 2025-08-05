@@ -30,7 +30,7 @@ class EmployeController extends AbstractController
     #[Route('/employe/avis/moderer', name: 'employe_moderer_avis')]
     public function modererAvis(AvisRepository $reviewRepository): Response
     {
-        $avis = $reviewRepository->findBy(['statut' => 'en_attente']);
+        $avis = $reviewRepository->findEnAttenteValidation();
 
         return $this->render('employe/moderation_avis.html.twig', [
             'avis' => $avis
@@ -39,7 +39,7 @@ class EmployeController extends AbstractController
 
     #[Route('/employe/avis/moderer/{id}', name: 'employe_moderer_avis_action', methods: ['POST'])]
     public function modererAvisAction(int $id, AvisRepository $reviewRepository, EntityManagerInterface $em, Request $request, MailerInterface $mailer): RedirectResponse {
-        $avis = $reviewRepository->find($id);
+        $avis = $reviewRepository->find( $id);
         if (!$avis || !$this->isCsrfTokenValid('moderation_avis_' . $id, $request->request->get('_token'))) {
             throw $this->createAccessDeniedException();
         }
@@ -48,8 +48,10 @@ class EmployeController extends AbstractController
 
         if ($action === 'approuve') {
             $avis->setStatut('approuve');
+            $avis->setIsValidated(true);
         } elseif ($action === 'refuse') {
             $avis->setStatut('refuse');
+            $avis->setStatut(false);
 
             // Envoi du mail à l'auteur
             $email = (new TemplatedEmail())

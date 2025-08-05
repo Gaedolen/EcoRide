@@ -36,7 +36,7 @@ class Avis
     #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateAvis = null;
 
-    #[ORM\Column(type: 'string', length: 20)]
+    #[ORM\Column(type: 'string', length: 30)]
     private string $statut = self::STATUT_EN_ATTENTE_VALIDATION;
 
     #[ORM\Column(type: 'boolean')]
