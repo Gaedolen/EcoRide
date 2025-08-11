@@ -27,6 +27,10 @@ class Report
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    #[ORM\ManyToOne(targetEntity: Covoiturage::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Covoiturage $covoiturage = null;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
@@ -80,6 +84,17 @@ class Report
     {
         $this->createdAt = $createdAt;
 
+        return $this;
+    }
+
+    public function getCovoiturage(): ?Covoiturage
+    {
+        return $this->covoiturage;
+    }
+
+    public function setCovoiturage(?Covoiturage $covoiturage): static
+    {
+        $this->covoiturage = $covoiturage;
         return $this;
     }
 }

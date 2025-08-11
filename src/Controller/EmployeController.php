@@ -5,6 +5,7 @@ namespace App\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\User;
 use App\Entity\Avis;
+use App\Entity\Covoiturage;
 use App\Entity\Report;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
@@ -81,12 +82,27 @@ class EmployeController extends AbstractController
         ]);
     }
 
-    #[Route('/employe/signaler/{id}', name: 'employe_signaler_utilisateur')]
-    public function signalerUtilisateur(Request $request, User $user, Security $security, EntityManagerInterface $em): Response {
+    #[Route('/employe/signaler/{covoiturageId}/{id}', name: 'employe_signaler_utilisateur')]
+    public function signalerUtilisateur(
+        Request $request,
+        int $covoiturageId,
+        User $user,
+        Security $security,
+        EntityManagerInterface $em
+    ): Response {
+        // Récupérer le covoiturage
+        $covoiturage = $em->getRepository(Covoiturage::class)->find($covoiturageId);
+        if (!$covoiturage) {
+            throw $this->createNotFoundException('Covoiturage introuvable.');
+        }
+
+        // Créer le report
         $report = new Report();
         $report->setReportedUser($user);
         $report->setReportedBy($security->getUser());
+        $report->setCovoiturage($covoiturage);
 
+        // Formulaire
         $form = $this->createForm(ReportType::class, $report);
         $form->handleRequest($request);
 
