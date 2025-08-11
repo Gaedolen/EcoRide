@@ -386,15 +386,29 @@ li {
 .avis-info {
     display: flex;
     flex-direction: column;
-    justify-content: flex-start; /* pseudo en haut */
+    justify-content: flex-start;
     flex-grow: 1;
+}
+
+.avis-pseudo-date {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
 }
 
 .avis-pseudo {
     font-weight: bold;
     font-size: 1.5em;
     color: #4a86e8;
-    margin-bottom: 15px;
+}
+
+.avis-date {
+    font-size: 1em;
+    color: #888;
+    white-space: nowrap;
 }
 
 .avis-commentaire {
@@ -408,7 +422,7 @@ li {
     font-weight: bold;
     color: #4a86e8;
     display: flex;
-    align-items: center; /* vertical center */
+    align-items: center;
     padding: 0 10px;
 }
 

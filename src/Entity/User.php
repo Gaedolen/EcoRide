@@ -361,10 +361,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         }
 
         if (is_resource($this->photo)) {
-            $this->photo = stream_get_contents($this->photo);
+            rewind($this->photo);
+            $photoContent = stream_get_contents($this->photo);
+        } else {
+            $photoContent = $this->photo;
         }
 
-        return base64_encode($this->photo);
+        return base64_encode($photoContent);
     }
 
     public function getNote(): ?float

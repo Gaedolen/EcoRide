@@ -75,11 +75,21 @@ class ProfilController extends AbstractController
         ]);
 
         //Ajouter la photo en base64 dans les auteurs
-        foreach($avisValides as $avis) {
+        foreach ($avisValides as $avis) {
             $auteur = $avis->getAuteur();
             if ($auteur) {
                 $photo = $auteur->getPhoto();
-                $auteur->photoBase64 = $photo ? base64_encode(stream_get_contents($photo)) : null;
+                if ($photo) {
+                    if (is_resource($photo)) {
+                        rewind($photo);
+                        $content = stream_get_contents($photo);
+                    } else {
+                        $content = $photo;
+                    }
+                    $auteur->auteurPhotoBase64 = base64_encode($content);
+                } else {
+                    $auteur->auteurPhotoBase64 = null;
+                }
             }
         }
 
@@ -144,14 +154,18 @@ class ProfilController extends AbstractController
             $chauffeurId = $resa['chauffeur_id'];
             $chauffeur = $em->getRepository(User::class)->find($chauffeurId);
 
+            // Ajout de la condition covoiturage_id pour éviter d'avoir l'avis sur d'autres trajets
             $stmtAvis = $pdo->prepare("
                 SELECT * FROM avis 
-                WHERE auteur_id = :auteur_id AND cible_id = :cible_id
+                WHERE auteur_id = :auteur_id 
+                AND cible_id = :cible_id
+                AND covoiturage_id = :covoiturage_id
                 LIMIT 1
             ");
             $stmtAvis->execute([
                 'auteur_id' => $utilisateur->getId(),
-                'cible_id' => $resa['chauffeur_id']
+                'cible_id' => $resa['chauffeur_id'],
+                'covoiturage_id' => $resa['covoiturage_id'],
             ]);
 
             $avis = $stmtAvis->fetch(PDO::FETCH_ASSOC);
@@ -313,7 +327,7 @@ class ProfilController extends AbstractController
             throw new \Exception("Champs manquants.");
         }
 
-        // Connexion PDO (adapté à ta config)
+        // Connexion PDO
         $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 

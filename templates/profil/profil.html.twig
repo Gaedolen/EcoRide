@@ -239,8 +239,8 @@
     {% if avisValides is not empty %}
         {% for avis in avisValides %}
             <div class="avis-item">
-                {% if avis.auteur and avis.auteur.photoBase64 %}
-                    <img src="data:image/jpeg;base64,{{ avis.auteur.photoBase64 }}" alt="Photo de {{ avis.auteur.pseudo }}" class='avis-photo'>
+                {% if avis.auteur and avis.auteur.auteurPhotoBase64 %}
+                    <img src="data:image/jpeg;base64,{{ avis.auteur.auteurPhotoBase64 }}" alt="Photo de {{ avis.auteur.pseudo }}" class='avis-photo'>
                 {% else %}
                     <img src="/images/default-avatar.png" alt="Photo par défaut" class='avis-photo'>
                 {% endif %}
@@ -248,7 +248,10 @@
                 <span class="separator-vertical"></span>
                 
                 <div class="avis-info">
-                    <div class="avis-pseudo">{{ avis.auteur.pseudo }}</div>
+                    <div class="avis-pseudo-date">
+                        <div class="avis-pseudo">{{ avis.auteur.pseudo }}</div>
+                        <div class="avis-date">{{ avis.dateAvis|date('d/m/Y') }}</div>
+                    </div>
                     <div class="avis-commentaire">{{ avis.commentaire }}</div>
                 </div>
                 
