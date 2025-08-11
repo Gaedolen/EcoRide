@@ -469,31 +469,31 @@ li {
 /* Fenêtre pop-up pour laisser un avis */
 .popup-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0,0,0,0.5);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.6);
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 999;
+    z-index: 9999;
 }
 
 .popup-content {
     background: white;
     padding: 20px;
-    border-radius: 8px;
-    width: 400px;
+    border-radius: 5px;
+    width: 320px;
+    max-width: 90%;
     position: relative;
 }
 
 .close-popup {
     position: absolute;
-    top: 5px;
-    right: 10px;
+    top: 8px;
+    right: 8px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
     cursor: pointer;
-    font-size: 22px;
 }
 
 /* Messages */

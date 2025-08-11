@@ -35,6 +35,9 @@ class Covoiturage
     #[ORM\JoinColumn(nullable: false)]
     private ?User $utilisateur = null;
 
+    #[ORM\OneToMany(mappedBy: "covoiturage", targetEntity: Avis::class)]
+    private Collection $avis;
+
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTimeInterface $date_depart = null;
 
@@ -206,9 +209,15 @@ class Covoiturage
         return $this;
     }
 
+    public function getAvis(): Collection
+    {
+        return $this->avis;
+    }
+
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
+        $this->avis = new ArrayCollection();
     }
 
     public function addReservation(Reservation $reservation): static

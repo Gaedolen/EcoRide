@@ -27,6 +27,10 @@ class Avis
     #[ORM\JoinColumn(nullable: false)]
     private ?User $cible = null;
 
+    #[ORM\ManyToOne(inversedBy: "avis", targetEntity: Covoiturage::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Covoiturage $covoiturage = null;
+
     #[ORM\Column(type: 'integer')]
     private int $note;
 
@@ -75,6 +79,17 @@ class Avis
     public function setCible(?User $cible): self
     {
         $this->cible = $cible;
+        return $this;
+    }
+
+    public function getCovoiturage(): ?Covoiturage
+    {
+        return $this->covoiturage;
+    }
+
+    public function setCovoiturage(?Covoiturage $covoiturage): self
+    {
+        $this->covoiturage = $covoiturage;
         return $this;
     }
 

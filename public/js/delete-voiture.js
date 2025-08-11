@@ -58,7 +58,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelNo = modal.querySelector('.btn-confirm-no');
 
     cancelButtons.forEach(button => {
-        button.addEventListener('click', function () {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
             const actionUrl = this.getAttribute('data-action-url');
             form.setAttribute('action', actionUrl);
             modal.classList.remove('hidden');
@@ -73,14 +74,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Laisser un avis après un trajet
     const avisButtons = document.querySelectorAll('.open-avis-popup');
     const avisPopup = document.getElementById('avis-popup');
-    const avisClose = document.querySelector('.close-popup');
+    const avisClose = avisPopup.querySelector('.close-popup');
     const cibleIdInput = document.getElementById('cible_id');
+    const covoiturageIdInput = document.getElementById('covoiturage_id');
 
     avisButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             e.preventDefault();
             const cibleId = button.getAttribute('data-cible-id');
+            const covoiturageId = button.getAttribute('data-avis-covoiturage-id');
+
             cibleIdInput.value = cibleId;
+            covoiturageIdInput.value = covoiturageId;
+
             avisPopup.style.display = 'flex';
         });
     });

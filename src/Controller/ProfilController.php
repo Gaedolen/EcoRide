@@ -87,7 +87,19 @@ class ProfilController extends AbstractController
         $stmt = $pdo->prepare("
             SELECT 
                 r.id AS reservation_id,
-                c.*,
+                c.id AS covoiturage_id,
+                c.utilisateur_id,
+                c.voiture_id,
+                c.date_depart,
+                c.heure_depart,
+                c.lieu_depart,
+                c.date_arrivee,
+                c.heure_arrivee,
+                c.lieu_arrivee,
+                c.statut,
+                c.nb_place,
+                c.prix_personne,
+                c.etat,
                 u.pseudo AS chauffeur_pseudo,
                 u.photo AS chauffeur_photo,
                 u.note AS chauffeur_note,
@@ -132,7 +144,7 @@ class ProfilController extends AbstractController
             $chauffeurId = $resa['chauffeur_id'];
             $chauffeur = $em->getRepository(User::class)->find($chauffeurId);
 
-           $stmtAvis = $pdo->prepare("
+            $stmtAvis = $pdo->prepare("
                 SELECT * FROM avis 
                 WHERE auteur_id = :auteur_id AND cible_id = :cible_id
                 LIMIT 1
@@ -288,34 +300,43 @@ class ProfilController extends AbstractController
     {
         /** @var \App\Entity\User $utilisateur */
         $utilisateur = $this->getUser();
-
         if (!$utilisateur) {
             throw $this->createAccessDeniedException("Vous devez être connecté.");
         }
 
         $cibleId = $request->request->get('cible_id');
+        $covoiturageId = $request->request->get('covoiturage_id');
         $note = (int) $request->request->get('note');
         $commentaire = $request->request->get('commentaire');
 
-        if (!$cibleId || !$note || !$commentaire) {
-            throw new \Exception("Champs manquants dans le formulaire.");
+        if (!$cibleId || !$covoiturageId || !$note || !$commentaire) {
+            throw new \Exception("Champs manquants.");
         }
 
+        // Connexion PDO (adapté à ta config)
         $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $stmt = $pdo->prepare("
-            INSERT INTO avis (auteur_id, cible_id, note, commentaire, date_avis, statut, is_validated)
-            VALUES (:auteur_id, :cible_id, :note, :commentaire, NOW(), :statut, :is_validated)
-        ");
+        // Vérifie si l'avis existe déjà pour cet utilisateur et ce covoiturage
+        $stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM avis WHERE auteur_id = :auteur_id AND covoiturage_id = :covoiturage_id");
+        $stmtCheck->execute([
+            ':auteur_id' => $utilisateur->getId(),
+            ':covoiturage_id' => $covoiturageId,
+        ]);
+        if ($stmtCheck->fetchColumn() > 0) {
+            throw new \Exception("Vous avez déjà laissé un avis pour ce covoiturage.");
+        }
 
+        // Insertion de l'avis
+        $stmt = $pdo->prepare("INSERT INTO avis (auteur_id, cible_id, covoiturage_id, note, commentaire, date_avis, statut, is_validated) VALUES (:auteur_id, :cible_id, :covoiturage_id, :note, :commentaire, NOW(), :statut, :is_validated)");
         $stmt->execute([
             ':auteur_id' => $utilisateur->getId(),
             ':cible_id' => $cibleId,
+            ':covoiturage_id' => $covoiturageId,
             ':note' => $note,
             ':commentaire' => $commentaire,
             ':statut' => 'en_attente_validation',
-            ':is_validated' => false,
+            ':is_validated' => 0,
         ]);
 
         return $this->redirectToRoute('app_profil');
