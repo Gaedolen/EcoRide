@@ -8,6 +8,10 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: ReportRepository::class)]
 class Report
 {
+    public const STATUT_EN_ATTENTE = 'en_attente';
+    public const STATUT_TRAITE = 'traite';
+    public const STATUT_IGNORE = 'ignore';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -30,6 +34,9 @@ class Report
     #[ORM\ManyToOne(targetEntity: Covoiturage::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?Covoiturage $covoiturage = null;
+
+    #[ORM\Column(type: 'string', length: 20)]
+    private string $statut = self::STATUT_EN_ATTENTE;
 
     public function __construct()
     {
@@ -95,6 +102,21 @@ class Report
     public function setCovoiturage(?Covoiturage $covoiturage): static
     {
         $this->covoiturage = $covoiturage;
+        return $this;
+    }
+
+    public function getStatut(): string
+    {
+        return $this->statut;
+    }
+
+    public function setStatut(string $statut): self
+    {
+        if (!in_array($statut, [self::STATUT_EN_ATTENTE, self::STATUT_TRAITE, self::STATUT_IGNORE])) {
+            throw new \InvalidArgumentException("Statut invalide");
+        }
+
+        $this->statut = $statut;
         return $this;
     }
 }

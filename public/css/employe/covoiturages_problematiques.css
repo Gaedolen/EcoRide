@@ -1,0 +1,94 @@
+/* Pour éviter tout dépassement global */
+* {
+    box-sizing: border-box;
+}
+
+/* Titres */
+h1 {
+    color: #1a73e8;
+    margin-bottom: 10px;
+    margin: 20px;
+}
+h2 {
+    color: #444;
+    margin-top: 30px;
+    margin: 20px;
+}
+
+/* Conteneur global */
+.table-container {
+    padding: 0 20px;
+}
+
+/* Table stylée */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
+    table-layout: auto;
+    word-wrap: break-word;
+}
+
+table thead {
+    background-color: #4A90E2;
+    color: white;
+}
+
+table th, table td {
+    padding: 12px 15px;
+    text-align: left;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #f4f6f8;
+}
+
+/* Hover uniquement sur le corps du tableau */
+table tbody tr:hover {
+    background-color: #e9f0fb;
+}
+
+/* Formulaire */
+form {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 15px;
+    box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
+    margin: 20px;
+}
+
+form label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+form textarea, form select, form input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+/* Bouton */
+button[type="submit"] {
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #155ab6;
+}

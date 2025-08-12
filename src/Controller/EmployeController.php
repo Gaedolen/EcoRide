@@ -72,51 +72,30 @@ class EmployeController extends AbstractController
         return $this->redirectToRoute('employe_moderer_avis');
     }
 
-    #[Route('/employe/covoiturages-signales', name: 'employe_covoiturages_signales')]
-    public function covoituragesSignales(EntityManagerInterface $em): Response
-    {
-        $signalements = $em->getRepository(Report::class)->findAll();
+    #[Route('/employe/covoiturages_problematiques', name: 'employe_covoiturages_problematiques')]
+    public function covoituragesProblematiques(Request $request, EntityManagerInterface $em, Security $security): Response {
+        // Récupération des covoiturages signalés
+        $reports = $em->getRepository(Report::class)->findAll();
 
-        return $this->render('employe/covoiturages_signales.html.twig', [
-            'signalements' => $signalements
-        ]);
-    }
-
-    #[Route('/employe/signaler/{covoiturageId}/{id}', name: 'employe_signaler_utilisateur')]
-    public function signalerUtilisateur(
-        Request $request,
-        int $covoiturageId,
-        User $user,
-        Security $security,
-        EntityManagerInterface $em
-    ): Response {
-        // Récupérer le covoiturage
-        $covoiturage = $em->getRepository(Covoiturage::class)->find($covoiturageId);
-        if (!$covoiturage) {
-            throw $this->createNotFoundException('Covoiturage introuvable.');
-        }
-
-        // Créer le report
+        // Création d'un formulaire de signalement vide
         $report = new Report();
-        $report->setReportedUser($user);
         $report->setReportedBy($security->getUser());
-        $report->setCovoiturage($covoiturage);
 
-        // Formulaire
         $form = $this->createForm(ReportType::class, $report);
         $form->handleRequest($request);
 
+        // Si le formulaire est soumis
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($report);
             $em->flush();
 
-            $this->addFlash('success', 'Signalement envoyé à l\'administrateur.');
-            return $this->redirectToRoute('employe_gestion_utilisateurs');
+            $this->addFlash('success', 'Signalement enregistré.');
+            return $this->redirectToRoute('employe_covoiturages_problematiques');
         }
 
-        return $this->render('employe/signaler.html.twig', [
-            'form' => $form->createView(),
-            'user' => $user
+        return $this->render('employe/covoiturages_problematiques.html.twig', [
+            'reports' => $reports,
+            'form' => $form->createView()
         ]);
     }
 }

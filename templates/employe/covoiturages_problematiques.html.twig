@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon profil{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/employe/covoiturages_problematiques.css') }}">
+{% endblock %}
+
+{% block body %}
+    <h1>Covoiturages problématiques</h1>
+
+    <h2>Liste des signalements</h2>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Utilisateur signalé</th>
+                    <th>Signalé par</th>
+                    <th>Message</th>
+                    <th>Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                    <tr>
+                        <td>{{ report.covoiturage_id }}</td>
+                        <td>{{ report.reportedUser.pseudo }}</td>
+                        <td>{{ report.reportedBy.pseudo }}</td>
+                        <td>{{ report.message }}</td>
+                        <td>{{ report.createdAt|date('d/m/Y H:i') }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align:center; color: #777;">
+                            Aucun signalement pour le moment.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2>✏️ Signaler un utilisateur</h2>
+    {{ form_start(form) }}
+        {{ form_row(form.reportedUser) }}
+        {{ form_row(form.message) }}
+        <button type="submit">📩 Envoyer le signalement</button>
+    {{ form_end(form) }}
+{% endblock %}
