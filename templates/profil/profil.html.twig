@@ -3,7 +3,7 @@
 {% block title %}Mon profil{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ asset('/css/profil.css') }}">
+    <link rel="stylesheet" href="{{ asset('/css/profil/profil.css') }}">
 {% endblock %}
 
 {% block body %}
@@ -173,15 +173,34 @@
                             </form>
                         {% else %}
                             {% set avis = resa.avis_existant %}
-                            {% if avis %}
-                                {% if avis.is_validated %}
-                                    <span class="badge badge-success">✅ Avis déposé</span>
+                            {% set signalement = resa.signalement_existant %}
+
+                            <div class='boutons-container'>
+
+                                <!-- Bloc Avis -->
+                                {% if avis %}
+                                    {% if avis.is_validated %}
+                                        <span class="badge badge-success">✅ Avis déposé</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">⏳ Avis en attente</span>
+                                    {% endif %}
                                 {% else %}
-                                    <span class="badge badge-warning">⏳ Avis en attente</span>
+                                    <button type="button" class="btn btn-avis open-avis-popup" data-avis-covoiturage-id="{{ resa.covoiturage_id }}" data-cible-id="{{ resa.chauffeur_id }}">Laisser un avis</button>
                                 {% endif %}
-                            {% else %}
-                                <button type="button" class="btn btn-avis open-avis-popup" data-avis-covoiturage-id="{{ resa.covoiturage_id }}" data-cible-id="{{ resa.chauffeur_id }}">Laisser un avis</button>
-                            {% endif %}
+
+                                <!-- Bloc Signalement -->
+                                {% if signalement %}
+                                    {% if signalement.statut == 'en_attente' %}
+                                        <span class="badge badge-warning">⏳ Signalement en attente</span>
+                                    {% elseif signalement.statut == 'valide' %}
+                                        <span class="badge badge-success">✅ Traité</span>
+                                    {% elseif signalement.statut == 'ignore' %}
+                                        <span class="badge badge-danger">❌ Ignoré</span>
+                                    {% endif %}
+                                {% else %}
+                                    <button type="button" class="btn btn-signalement open-report-popup" data-reported-user-id="{{ resa.chauffeur_id }}" data-covoiturage-id="{{ resa.covoiturage_id }}">Signaler</button>
+                                {% endif %}
+                            </div>
                         {% endif %}
                     </div>
 
@@ -295,7 +314,7 @@
         </div>
     </div>
 
-    <div id="avis-popup" class="popup-overlay" style="display:none;">
+    <div id="avis-popup" class="popup-overlay" style="display:none;"> <!-- Fenêtre pop-up pour laisser un avis -->
         <div class="popup-content">
             <button class="close-popup" aria-label="Fermer">&times;</button>
 
@@ -318,6 +337,8 @@
             </form>
         </div>
     </div>
+
+    {% include 'report/_form_popup.html.twig' %} <!-- Fenêtre pop-up pour signaler un utilisateur -->
 
     <script src="{{ asset('js/delete-voiture.js') }}"></script>
 {% endblock %}

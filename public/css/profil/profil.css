@@ -341,6 +341,21 @@ li {
     filter: grayscale(90%) brightness(0.9);
 }
 
+/* Conteneur des boutons d'avis et de signalement */
+.boutons-container {
+    display: flex;
+    gap: 10px;
+    position: relative;
+    z-index: 10;
+}
+
+.boutons-container button {
+    flex: 1;
+    position: relative;
+    z-index: 10;
+}
+
+
 /* Bouton d'avis sans effet grisé */
 .past-reservation .btn-avis {
     filter: none;
@@ -357,6 +372,33 @@ li {
     color: #888;
     margin-left: 10px;
 }
+
+/* Bouton de signalement */
+.btn-signalement {
+    filter: none;
+    opacity: 1;
+    background-color: #dc3545;
+    color: white;
+    font-weight: bold;
+    z-index: 10;
+    z-index: 10;
+    border: none;
+    padding: 0.375rem 0.75rem;
+    border-radius: 1.25rem;
+    font-size: 1rem;
+    display: inline-block;
+    width: 100%;
+    max-width: 200px; 
+    text-align: center;
+    position: relative;
+}
+
+.btn-signalement:hover {
+    background-color: #c82333;
+    color: white;
+    cursor: pointer;
+}
+
 
 /* Conteneur des avis */
 .avis-item {
@@ -488,7 +530,7 @@ li {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999;
+    z-index: 1000;
 }
 
 .popup-content {

@@ -1,0 +1,115 @@
+#report-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: none; /* caché par défaut */
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.popup-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    max-width: 90%;
+}
+
+
+/* Contenu principal de la popup */
+#report-popup .popup-content {
+    background: #ffffff;
+    border-radius: 10px;
+    padding: 2em;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+    font-family: Arial, sans-serif;
+}
+
+/* Titre */
+#report-popup h2 {
+    font-size: 1.5em;
+    margin-bottom: 1em;
+    color: #2c3e50;
+    text-align: center;
+}
+
+/* Champs du formulaire */
+#report-popup form .form-group {
+    margin-bottom: 1em;
+}
+
+#report-popup label {
+    display: block;
+    margin-bottom: 0.4em;
+    font-weight: bold;
+    color: #34495e;
+}
+
+#report-popup input[type="text"],
+#report-popup textarea,
+#report-popup select {
+    width: 100%;
+    padding: 0.6em;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+    transition: border-color 0.2s;
+}
+
+#report-popup input[type="text"]:focus,
+#report-popup textarea:focus,
+#report-popup select:focus {
+    border-color: #27ae60;
+    outline: none;
+}
+
+/* Boutons */
+#report-popup .popup-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5em;
+}
+
+#report-popup button {
+    padding: 0.6em 1.2em;
+    font-size: 1em;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#report-popup .btn-cancel {
+    background: #e74c3c;
+    color: white;
+}
+
+#report-popup .btn-cancel:hover {
+    background: #c0392b;
+}
+
+#report-popup .btn-submit {
+    background: #27ae60;
+    color: white;
+}
+
+#report-popup .btn-submit:hover {
+    background: #1e8449;
+}
+
+#report-popup .popup-content {
+  background: white;
+  color: black;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 480px;
+  width: 90%;
+  z-index: 2000; /* au-dessus de l’overlay */
+  position: relative;
+}

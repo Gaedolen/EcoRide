@@ -170,6 +170,26 @@ class ProfilController extends AbstractController
 
             $avis = $stmtAvis->fetch(PDO::FETCH_ASSOC);
             $resa['avis_existant'] = $avis ?: null;
+
+            // Ajout de signalements existants
+            $stmtReport = $pdo->prepare("
+                SELECT * FROM report
+                WHERE reported_by_id = :reported_by_id
+                AND reported_user_id = :reported_user_id
+                AND covoiturage_id = :covoiturage_id
+                LIMIT 1
+            ");
+
+            $stmtReport->execute([
+                'reported_by_id' => $utilisateur->getId(),
+                'reported_user_id' => $resa['chauffeur_id'],
+                'covoiturage_id' => $resa['covoiturage_id'],
+            ]);
+
+            $report = $stmtReport->fetch(PDO::FETCH_ASSOC);
+
+            // On enregistre le résultat dans le tableau pour Twig
+            $resa['signalement_existant'] = $report ?: null;
         }
 
         $avisDonnes = $utilisateur->getAvisDonnes();

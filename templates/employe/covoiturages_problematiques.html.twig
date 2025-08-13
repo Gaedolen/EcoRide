@@ -19,32 +19,73 @@
                     <th>Signalé par</th>
                     <th>Message</th>
                     <th>Date</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for report in reports %}
-                    <tr>
-                        <td>{{ report.covoiturage_id }}</td>
-                        <td>{{ report.reportedUser.pseudo }}</td>
-                        <td>{{ report.reportedBy.pseudo }}</td>
-                        <td>{{ report.message }}</td>
-                        <td>{{ report.createdAt|date('d/m/Y H:i') }}</td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="5" style="text-align:center; color: #777;">
-                            Aucun signalement pour le moment.
-                        </td>
-                    </tr>
-                {% endfor %}
+            {% for report in reports %}
+                <tr>
+                    <td>{{ report.covoiturage.id }}</td>
+                    <td>
+                        {{ report.reportedUser.pseudo }}
+                        <form action="{{ path('employe_contacter_utilisateur', {id: report.reportedUser.id}) }}" method="get" style="display:inline;">
+                        <button type="submit" class="btn-contact">Contacter</button>
+                    </form>
+                    </td>
+                    <td>
+                        {{ report.reportedBy.pseudo }}
+                        <form action="{{ path('employe_contacter_utilisateur', {id: report.reportedBy.id}) }}" method="get" style="display:inline;">
+                        <button type="submit" class="btn-contact">Contacter</button>
+                    </form>
+                    </td>
+                    <td>{{ report.message }}</td>
+                    <td>{{ report.createdAt|date('d/m/Y H:i') }}</td>
+                    <td>
+                        <form action="{{ path('employe_traiter_signalement', {id: report.id}) }}" method="post">
+                            <input type="hidden" name="_token" value="{{ csrf_token('traiter_report_' ~ report.id) }}">
+                            <button type="submit" class="btn-traiter">Traiter</button>
+                        </form>
+
+                        <form action="{{ path('employe_ignorer_signalement', {id: report.id}) }}" method="post">
+                            <input type="hidden" name="_token" value="{{ csrf_token('ignorer_report_' ~ report.id) }}">
+                            <button type="submit" class="btn-ignorer">Ignorer</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" style="text-align:center; color: #777;">
+                        Aucun signalement pour le moment.
+                    </td>
+                </tr>
+            {% endfor %}
             </tbody>
+
         </table>
     </div>
 
-    <h2>✏️ Signaler un utilisateur</h2>
+    <h2>Signaler un utilisateur</h2>
     {{ form_start(form) }}
         {{ form_row(form.reportedUser) }}
         {{ form_row(form.message) }}
-        <button type="submit">📩 Envoyer le signalement</button>
+        <button type="submit">Envoyer le signalement</button>
     {{ form_end(form) }}
+
+    <div id="contactModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="contactForm">
+                <label for="subject">Objet</label>
+                <input type="text" id="subject" name="subject">
+                <label for="message">Message</label>
+                <textarea id="message" name="message"></textarea>
+                <button type="submit">Envoyer</button>
+            </form>
+        </div>
+    </div>
+
+    {% block javascripts %}
+        <script src="{{ asset('js/contact-modal.js') }}"></script>
+    {% endblock %}
+
 {% endblock %}

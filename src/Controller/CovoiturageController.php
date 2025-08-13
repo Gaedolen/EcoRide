@@ -261,14 +261,17 @@ class CovoiturageController extends AbstractController
             $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
             $now = new DateTime();
-            $date = $covoiturage->getDateDepart();
-            $heure = $covoiturage->getHeureDepart();
+            $dateHeureDepart = DateTime::createFromFormat(
+                'Y-m-d H:i:s',
+                $covoiturage->getDateDepart()->format('Y-m-d') . ' ' . $covoiturage->getHeureDepart()->format('H:i:s')
+            );
 
-           $isPast = ($date < $now) || ($date == $now && $heure < $now);
+            $isPast = $dateHeureDepart < $now;
+
            $places = $covoiturage->getNbPlace();
 
             if ($isPast) {
-               $statut = 'fermé';
+               $statut = 'ferme';
             } elseif ($places <= 0) {
                $statut = 'complet';
             } else {
