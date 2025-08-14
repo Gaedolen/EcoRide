@@ -9,10 +9,35 @@ h1 {
     margin-bottom: 10px;
     margin: 20px;
 }
+
 h2 {
     color: #444;
-    margin-top: 30px;
+}
+
+.container-signalement {
+    display: flex;
+    align-items: center;
+    justify-content:flex-start;
     margin: 20px;
+    gap: 10px;
+}
+
+/* Bouton d'historique */
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    margin-bottom: 10px;
+    margin: 20px;
+    background-color: #4A90E2;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 25px;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #357ABD;
 }
 
 /* Conteneur global */
@@ -77,8 +102,11 @@ table th:last-child, table td:last-child {
     border-right: none;
 }
 
-
 /* Formulaire */
+.titre {
+    margin: 20px;
+    margin-top: 30px;
+}
 form {
     background: #fff;
     padding: 20px;
@@ -107,10 +135,11 @@ form textarea, form select, form input[type="text"] {
 button[type="submit"] {
     background-color: #4a86e8;
     color: white;
+    font-weight: bold;
     border: none;
     padding: 10px 18px;
     font-size: 14px;
-    border-radius: 6px;
+    border-radius: 25px;
     cursor: pointer;
     transition: background 0.2s ease;
 }
@@ -153,18 +182,26 @@ button[type="submit"]:hover {
 
 /* Bouton pour contacter un utilisateur */
 .btn-contact {
-    background-color: #4a86e8;
+    background-color: #4A90E2;
     color: white;
+    font-weight: bold;
     border: none;
-    padding: 8px 16px;
-    border-radius: 5px;
-    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 6px;
     font-size: 14px;
-    transition: background-color 0.2s;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    margin-left: 8px;
 }
 
 .btn-contact:hover {
-    background-color: #1C86EE;
+    background-color: #357ABD;
+    transform: translateY(-1px);
+}
+
+.btn-contact:active {
+    transform: translateY(0);
 }
 
 /* Overlay pour modal */
@@ -204,25 +241,35 @@ button[type="submit"]:hover {
 }
 
 /* Champs du formulaire */
-.modal-content input[type="text"],
-.modal-content textarea {
+.modal {
+    display: none; /* cachée par défaut */
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    padding: 8px;
-    margin: 10px 0;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-    font-size: 14px;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
-.modal-content button[type="submit"] {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: 5px;
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.close {
     cursor: pointer;
+    font-size: 24px;
+    font-weight: bold;
 }
 
-.modal-content button[type="submit"]:hover {
-    background-color: #3e8e41;
+.close:hover {
+    color: red;
 }
+
+

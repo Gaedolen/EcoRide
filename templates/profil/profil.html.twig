@@ -192,7 +192,7 @@
                                 {% if signalement %}
                                     {% if signalement.statut == 'en_attente' %}
                                         <span class="badge badge-warning">⏳ Signalement en attente</span>
-                                    {% elseif signalement.statut == 'valide' %}
+                                    {% elseif signalement.statut == 'traite' %}
                                         <span class="badge badge-success">✅ Traité</span>
                                     {% elseif signalement.statut == 'ignore' %}
                                         <span class="badge badge-danger">❌ Ignoré</span>

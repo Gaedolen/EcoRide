@@ -1,0 +1,47 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Historique des signalements{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/employe/historique_signalements.css') }}">
+{% endblock %}
+
+{% block body %}
+    <div class="content-container">
+        <h1>Historique des signalements</h1>
+
+        <a href="{{ path('employe_covoiturages_problematiques') }}" class="btn">Retour au dashboard</a>
+
+        <table class="tableau-signalements">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Utilisateur signalé</th>
+                    <th>Signalé par</th>
+                    <th>Message</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in reports %}
+                    <tr>
+                        <td>{{ report.covoiturage.id }}</td>
+                        <td>{{ report.reportedUser.pseudo }}</td>
+                        <td>{{ report.reportedBy.pseudo }}</td>
+                        <td>{{ report.message }}</td>
+                        <td>{{ report.createdAt|date('d/m/Y') }}</td>
+                        <td>
+                            <span class="badge {% if report.statut == 'traite' %}badge-traite{% elseif report.statut == 'ignore' %}badge-ignore{% endif %}">
+                            {{ report.statut|capitalize }}
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6">Aucun signalement traité ou ignoré.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,108 @@
+/* Base */
+* {
+    font-family: 'Comfortaa', sans-serif;
+}
+
+/* Titre */
+h1 {
+    color: #4a86e8;
+    margin-bottom: 10px;
+}
+
+/* Conteneur pour bouton + tableau seulement */
+.content-container {
+    margin: 20px auto; /* centre horizontalement et ajoute un top/bottom spacing */
+    padding: 0 20px; /* espace à l'intérieur */
+}
+
+/* Table stylée */
+.tableau-signalements {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
+    table-layout: auto;
+    word-wrap: break-word;
+}
+
+
+.tableau-signalements thead {
+    background-color: #4A90E2;
+    color: white;
+}
+
+.tableau-signalements th, 
+.tableau-signalements td {
+    padding: 12px 15px;
+    text-align: center;
+    vertical-align: middle;
+    border-right: 1px solid #ddd;
+}
+
+.tableau-signalements th:last-child, 
+.tableau-signalements td:last-child {
+    border-right: none;
+}
+
+.tableau-signalements tbody tr:nth-child(even) {
+    background-color: #f4f6f8;
+}
+
+.tableau-signalements tbody tr:hover {
+    background-color: #e9f0fb;
+}
+
+/* Badges pour le statut */
+.badge-traite {
+    color: #fff;
+    font-weight: bold;
+    background-color: #9BE365;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.badge-ignore {
+    color: #fff;
+    background-color: #6c757d;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+/* Boutons */
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    margin-bottom: 10px;
+    background-color: #4A90E2;
+    color: #fff;
+    font-weight: bold;
+    text-decoration: none;
+    border-radius: 25px;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #357ABD;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    .tableau-signalements th, 
+    .tableau-signalements td {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.5rem;
+    }
+
+    .btn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+}

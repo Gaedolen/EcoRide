@@ -4,12 +4,18 @@
 
 {% block head %}
     <link rel="stylesheet" href="{{ asset('/css/employe/covoiturages_problematiques.css') }}">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
     <h1>Covoiturages problématiques</h1>
 
-    <h2>Liste des signalements</h2>
+    <div class="container-signalement">
+        <h2>Liste des signalements</h2>
+        <a href="{{ path('employe_historique_signalements') }}" class="btn">Historique des signalements</a>
+    </div>
+
+
     <div class="table-container">
         <table>
             <thead>
@@ -27,19 +33,19 @@
                 <tr>
                     <td>{{ report.covoiturage.id }}</td>
                     <td>
-                        {{ report.reportedUser.pseudo }}
-                        <form action="{{ path('employe_contacter_utilisateur', {id: report.reportedUser.id}) }}" method="get" style="display:inline;">
-                        <button type="submit" class="btn-contact">Contacter</button>
-                    </form>
+                        <div class='contact'>
+                            {{ report.reportedUser.pseudo }}
+                            <button type="button" class="btn-contact"data-id="{{ report.reportedUser.id }}"data-pseudo="{{ report.reportedUser.pseudo }}">Contacter</button>
+                        </div>
                     </td>
                     <td>
-                        {{ report.reportedBy.pseudo }}
-                        <form action="{{ path('employe_contacter_utilisateur', {id: report.reportedBy.id}) }}" method="get" style="display:inline;">
-                        <button type="submit" class="btn-contact">Contacter</button>
-                    </form>
+                        <div class='contact'>
+                            {{ report.reportedBy.pseudo }}
+                            <button type="button" class="btn-contact"data-id="{{ report.reportedBy.id }}"data-pseudo="{{ report.reportedBy.pseudo }}">Contacter</button>
+                        </div>
                     </td>
                     <td>{{ report.message }}</td>
-                    <td>{{ report.createdAt|date('d/m/Y H:i') }}</td>
+                    <td>{{ report.createdAt|date('d/m/Y') }}</td>
                     <td>
                         <form action="{{ path('employe_traiter_signalement', {id: report.id}) }}" method="post">
                             <input type="hidden" name="_token" value="{{ csrf_token('traiter_report_' ~ report.id) }}">
@@ -64,21 +70,24 @@
         </table>
     </div>
 
-    <h2>Signaler un utilisateur</h2>
+    <h2 class='titre'>Signaler un utilisateur</h2>
     {{ form_start(form) }}
-        {{ form_row(form.reportedUser) }}
+        {{ form_row(form.reportedUser, {'attr': {'class': 'user-select', 'data-placeholder': 'Cherchez un pseudo…'}}) }}
         {{ form_row(form.message) }}
         <button type="submit">Envoyer le signalement</button>
     {{ form_end(form) }}
 
+    <!-- Fenêtre pop-up pour envoyer un mail -->
     <div id="contactModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <form id="contactForm">
+            <h2 id="modalTitle">Envoyer un mail</h2>
+            <form id="contactForm" method="POST">
+                <input type="hidden" name="_token" value="{{ csrf_token('contacter_utilisateur') }}">
                 <label for="subject">Objet</label>
-                <input type="text" id="subject" name="subject">
+                <input type="text" id="subject" name="subject" required>
                 <label for="message">Message</label>
-                <textarea id="message" name="message"></textarea>
+                <textarea id="message" name="message" required></textarea>
                 <button type="submit">Envoyer</button>
             </form>
         </div>
@@ -86,6 +95,22 @@
 
     {% block javascripts %}
         <script src="{{ asset('js/contact-modal.js') }}"></script>
+        {{ parent() }}
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+            const $el = $('.user-select');
+            if ($el.length) {
+                $el.select2({
+                width: '100%',
+                placeholder: $el.data('placeholder') || 'Cherchez un pseudo…',
+                allowClear: true,
+                language: 'fr'
+                });
+            }
+            });
+        </script>
     {% endblock %}
 
 {% endblock %}

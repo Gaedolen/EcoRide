@@ -10,6 +10,8 @@ use App\Entity\Report;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use App\Repository\UserRepository;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use App\Repository\AvisRepository;
@@ -76,9 +78,11 @@ class EmployeController extends AbstractController
     }
 
     #[Route('/employe/covoiturages_problematiques', name: 'employe_covoiturages_problematiques')]
-    public function covoituragesProblematiques(Request $request, EntityManagerInterface $em, Security $security): Response {
+    public function covoituragesProblematiques(Request $request, EntityManagerInterface $em, Security $security, UserRepository $userRepository): Response {
         // Récupération des covoiturages signalés
-        $reports = $em->getRepository(Report::class)->findAll();
+        $reports = $em->getRepository(Report::class)->findBy([
+            'statut' => 'en_cours'
+        ], ['createdAt' => 'DESC']);
 
         // Création d'un formulaire de signalement vide
         $report = new Report();
@@ -87,14 +91,21 @@ class EmployeController extends AbstractController
         $form = $this->createForm(ReportType::class, $report);
         $form->handleRequest($request);
 
-        // Si le formulaire est soumis
         if ($form->isSubmitted() && $form->isValid()) {
-            $em->persist($report);
-            $em->flush();
+        $reportedUserId = $request->request->get('reportedUser');
+        $reportedUser = $userRepository->find($reportedUserId);
 
-            $this->addFlash('success', 'Signalement enregistré.');
-            return $this->redirectToRoute('employe_covoiturages_problematiques');
-        }
+        $report->setReportedBy($this->getUser());
+        $report->setReportedUser($reportedUser);
+        $report->setMessage($form->get('message')->getData());
+        $report->setStatut('en_cours');
+
+        $em->persist($report);
+        $em->flush();
+
+        $this->addFlash('success', 'Signalement enregistré.');
+        return $this->redirectToRoute('employe_covoiturages_problematiques');
+    }
 
         return $this->render('employe/covoiturages_problematiques.html.twig', [
             'reports' => $reports,
@@ -134,35 +145,66 @@ class EmployeController extends AbstractController
         return $this->redirectToRoute('employe_covoiturages_problematiques');
     }
 
-    #[Route('/employe/contacter/{id}', name: 'employe_contacter_utilisateur', methods: ['GET', 'POST'])]
+    #[Route('/employe/contacter/{id}', name: 'employe_contacter_utilisateur', methods: ['POST'])]
     public function contacterUtilisateur(Request $request, User $user, MailerInterface $mailer): Response
     {
-        $form = $this->createFormBuilder()
-            ->add('subject', TextType::class, ['label' => 'Sujet'])
-            ->add('message', TextareaType::class, ['label' => 'Message'])
-            ->add('send', SubmitType::class, ['label' => 'Envoyer'])
-            ->getForm();
+        $this->denyAccessUnlessGranted('ROLE_EMPLOYE'); // sécurité
 
-        $form->handleRequest($request);
+        if ($request->isMethod('POST')) {
+            $token = $request->request->get('_token');
+            if (!$this->isCsrfTokenValid('contacter_utilisateur', $token)) {
+                throw $this->createAccessDeniedException('Token CSRF invalide.');
+            }
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
+            $subject = $request->request->get('subject');
+            $message = $request->request->get('message');
 
             $email = (new TemplatedEmail())
                 ->from('contact@ecoride.com')
                 ->to($user->getEmail())
-                ->subject($data['subject'])
-                ->html($data['message']);
+                ->subject($subject)
+                ->html($message);
 
             $mailer->send($email);
 
-            $this->addFlash('success', 'Email envoyé à '.$user->getPseudo());
-            return $this->redirectToRoute('employe_covoiturages_problematiques');
+            $this->addFlash('success', 'Email envoyé à ' . $user->getPseudo());
         }
 
-        return $this->render('employe/contacter.html.twig', [
-            'user' => $user,
-            'form' => $form->createView(),
+        return $this->redirectToRoute('employe_covoiturages_problematiques');
+    }
+
+    #[Route('/employe/signalement/historique', name: 'employe_historique_signalements')]
+    public function historiqueSignalements(EntityManagerInterface $em): Response
+    {
+        $reports = $em->getRepository(Report::class)->findBy(
+            ['statut' => ['traite', 'ignore']],
+            ['createdAt' => 'DESC']
+        );
+
+        return $this->render('employe/historique_signalements.html.twig', [
+            'reports' => $reports
         ]);
+    }
+
+    #[Route('/employe/search-user', name: 'employe_search_user')]
+    public function searchUser(Request $request, UserRepository $userRepository): JsonResponse
+    {
+        $term = $request->query->get('q');
+        $users = $userRepository->createQueryBuilder('u')
+            ->where('u.pseudo LIKE :term')
+            ->setParameter('term', '%'.$term.'%')
+            ->setMaxResults(10)
+            ->getQuery()
+            ->getResult();
+
+        $results = [];
+        foreach ($users as $user) {
+            $results[] = [
+                'id' => $user->getId(),
+                'text' => $user->getPseudo()
+            ];
+        }
+
+        return new JsonResponse($results);
     }
 }

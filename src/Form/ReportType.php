@@ -28,17 +28,30 @@ class ReportType extends AbstractType
                 'required' => true,
             ]);
         } else {
-            $builder->add('reportedUser', EntityType::class, [
-                'class' => User::class,
-                'choice_label' => 'pseudo',
-                'label' => 'Utilisateur signalé',
-                'placeholder' => 'Sélectionnez un utilisateur',
-                'query_builder' => function (UserRepository $ur) {
-                    return $ur->createQueryBuilder('u')
-                        ->where('u.role = 3')
-                        ->orderBy('u.pseudo', 'ASC');
-                },
-            ]);
+            if ($options['reported_user_fixed']) {
+                $builder->add('reportedUser', EntityType::class, [
+                    'class' => User::class,
+                    'choice_label' => 'pseudo',
+                    'label' => false,
+                    'data' => $options['reported_user'],
+                    'disabled' => true,
+                    'attr' => ['hidden' => true],
+                    'required' => true,
+                ]);
+            } else {
+                $builder->add('reportedUser', EntityType::class, [
+                    'class' => User::class,
+                    'choice_label' => 'pseudo',
+                    'label' => 'Utilisateur signalé',
+                    'placeholder' => 'Sélectionnez un utilisateur',
+                    'query_builder' => function (UserRepository $ur) {
+                        return $ur->createQueryBuilder('u')
+                            ->where('u.role = 3')
+                            ->orderBy('u.pseudo', 'ASC');
+                    },
+                ]);
+            }
+
         }
 
         $builder->add('message', TextareaType::class, [
