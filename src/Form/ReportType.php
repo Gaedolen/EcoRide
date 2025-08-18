@@ -17,43 +17,33 @@ class ReportType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         if ($options['reported_user_fixed']) {
-            // Champ reportedUser caché, pas modifiable, juste valeur fixe
             $builder->add('reportedUser', EntityType::class, [
                 'class' => User::class,
                 'choice_label' => 'pseudo',
                 'label' => false,
-                'data' => $options['reported_user'], // injecté depuis controller
+                'data' => $options['reported_user'],
                 'disabled' => true,
                 'attr' => ['hidden' => true],
                 'required' => true,
             ]);
         } else {
-            if ($options['reported_user_fixed']) {
-                $builder->add('reportedUser', EntityType::class, [
-                    'class' => User::class,
-                    'choice_label' => 'pseudo',
-                    'label' => false,
-                    'data' => $options['reported_user'],
-                    'disabled' => true,
-                    'attr' => ['hidden' => true],
-                    'required' => true,
-                ]);
-            } else {
-                $builder->add('reportedUser', EntityType::class, [
-                    'class' => User::class,
-                    'choice_label' => 'pseudo',
-                    'label' => 'Utilisateur signalé',
-                    'placeholder' => 'Sélectionnez un utilisateur',
-                    'query_builder' => function (UserRepository $ur) {
-                        return $ur->createQueryBuilder('u')
-                            ->where('u.role = 3')
-                            ->orderBy('u.pseudo', 'ASC');
-                    },
-                ]);
-            }
-
+            $builder->add('reportedUser', EntityType::class, [
+                'class' => User::class,
+                'choice_label' => 'pseudo',
+                'label' => 'Utilisateur signalé',
+                'placeholder' => 'Sélectionnez un utilisateur',
+                'query_builder' => function (UserRepository $ur) {
+                    return $ur->createQueryBuilder('u')
+                        ->where('u.role = 3')
+                        ->orderBy('u.pseudo', 'ASC');
+                },
+                'attr' => [
+                    'class' => 'user-select',
+                ],
+            ]);
         }
 
+        // Champ message
         $builder->add('message', TextareaType::class, [
             'label' => 'Raison du signalement',
             'attr' => ['rows' => 4, 'placeholder' => 'Décrivez la situation...']

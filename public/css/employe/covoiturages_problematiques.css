@@ -107,28 +107,42 @@ table th:last-child, table td:last-child {
     margin: 20px;
     margin-top: 30px;
 }
-form {
-    background: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    margin-top: 15px;
-    box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
+
+.signalement-container {
     margin: 20px;
 }
 
+form {
+    background: #fff;
+    padding: 25px 30px;
+    border-radius: 10px;
+    margin-top: 15px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.12);
+}
+
+/* Chaque ligne du formulaire */
+form > div {
+    margin-bottom: 20px;
+}
+
+/* Label */
 form label {
     font-weight: bold;
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
 }
 
-form textarea, form select, form input[type="text"] {
+/* Champs */
+form textarea,
+form select,
+form input[type="text"] {
+    display: block;
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border-radius: 6px;
     border: 1px solid #ccc;
-    margin-bottom: 15px;
     font-size: 14px;
+    box-sizing: border-box;
 }
 
 /* Bouton d'envoi */
@@ -136,9 +150,10 @@ button[type="submit"] {
     background-color: #4a86e8;
     color: white;
     font-weight: bold;
+    font-family: 'Comfortaa', sans-serif;
     border: none;
-    padding: 10px 18px;
-    font-size: 14px;
+    padding: 12px 22px;
+    font-size: 16px;
     border-radius: 25px;
     cursor: pointer;
     transition: background 0.2s ease;

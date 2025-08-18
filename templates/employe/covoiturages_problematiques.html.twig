@@ -70,12 +70,16 @@
         </table>
     </div>
 
-    <h2 class='titre'>Signaler un utilisateur</h2>
-    {{ form_start(form) }}
-        {{ form_row(form.reportedUser, {'attr': {'class': 'user-select', 'data-placeholder': 'Cherchez un pseudo…'}}) }}
-        {{ form_row(form.message) }}
-        <button type="submit">Envoyer le signalement</button>
-    {{ form_end(form) }}
+    <h2 class="titre">Signaler un utilisateur</h2>
+
+    <div class="signalement-container">
+        {{ form_start(form) }}
+            {{ form_row(form.reportedUser) }}
+            {{ form_row(form.message) }}
+            <button type="submit">Envoyer le signalement</button>
+        {{ form_end(form) }}
+    </div>
+
 
     <!-- Fenêtre pop-up pour envoyer un mail -->
     <div id="contactModal" class="modal">
