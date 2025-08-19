@@ -16,6 +16,21 @@ class ReportRepository extends ServiceEntityRepository
         parent::__construct($registry, Report::class);
     }
 
+    public function findPendingReportsFromUsers(): array
+    {
+        return $this->createQueryBuilder('r')
+            ->join('r.reportedBy', 'u')
+            ->join('u.role', 'role')
+            ->where('r.statut = :statut')
+            ->andWhere('role.libelle = :role')
+            ->setParameter('statut', 'en_attente')
+            ->setParameter('role', 'USER')
+            ->orderBy('r.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+
     //    /**
     //     * @return Report[] Returns an array of Report objects
     //     */

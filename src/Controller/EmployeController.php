@@ -80,9 +80,7 @@ class EmployeController extends AbstractController
     #[Route('/employe/covoiturages_problematiques', name: 'employe_covoiturages_problematiques')]
     public function covoituragesProblematiques(Request $request, EntityManagerInterface $em, Security $security, UserRepository $userRepository): Response {
         // Récupération des covoiturages signalés
-        $reports = $em->getRepository(Report::class)->findBy([
-            'statut' => 'en_cours'
-        ], ['createdAt' => 'DESC']);
+        $reports = $em->getRepository(Report::class)->findPendingReportsFromUsers();
 
         // Création d'un formulaire de signalement vide
         $report = new Report();
@@ -92,20 +90,24 @@ class EmployeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-        $reportedUserId = $request->request->get('reportedUser');
-        $reportedUser = $userRepository->find($reportedUserId);
 
-        $report->setReportedBy($this->getUser());
-        $report->setReportedUser($reportedUser);
-        $report->setMessage($form->get('message')->getData());
-        $report->setStatut('en_cours');
+            $reportedUser = $report->getReportedUser();
 
-        $em->persist($report);
-        $em->flush();
+            $lastCovoiturage = $em->getRepository(Covoiturage::class)->findOneBy(
+            ['utilisateur' => $reportedUser],
+            ['date_arrivee' => 'DESC']
+            );
 
-        $this->addFlash('success', 'Signalement enregistré.');
-        return $this->redirectToRoute('employe_covoiturages_problematiques');
-    }
+            $report->setReportedBy($this->getUser());
+            $report->setStatut('en_attente');
+            $report->setCovoiturage($lastCovoiturage);
+
+            $em->persist($report);
+            $em->flush();
+
+            $this->addFlash('success', 'Signalement enregistré.');
+            return $this->redirectToRoute('employe_covoiturages_problematiques');
+        }
 
         return $this->render('employe/covoiturages_problematiques.html.twig', [
             'reports' => $reports,

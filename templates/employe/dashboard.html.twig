@@ -2,10 +2,31 @@
 
 {% block title %}Espace Employé{% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/employe/dashboard.css') }}">
+{% endblock %}
+
 {% block body %}
-    <h1>Bienvenue dans l’espace employé</h1>
-    <ul>
-        <li><a href="{{ path('employe_moderer_avis') }}">Valider ou refuser les avis</a></li>
-        <li><a href="{{ path('employe_covoiturages_problematiques') }}">Gestion des signalements et des covoiturages problématiques</a></li>
-    </ul>
+    <div class="employe-dashboard">
+        <h1 class="dashboard-title">Bienvenue dans l’espace employé</h1>
+        <p class="dashboard-subtitle">Choisissez une action à effectuer :</p>
+
+        <div class="dashboard-cards">
+            <a href="{{ path('employe_moderer_avis') }}" class="dashboard-card">
+                <div class="card-icon">⭐</div>
+                <div class="card-content">
+                    <h2>Modération des avis</h2>
+                    <p>Valider ou refuser les avis laissés par les utilisateurs.</p>
+                </div>
+            </a>
+
+            <a href="{{ path('employe_covoiturages_problematiques') }}" class="dashboard-card">
+                <div class="card-icon">⚠️</div>
+                <div class="card-content">
+                    <h2>Signalements</h2>
+                    <p>Gérer les signalements et les covoiturages problématiques.</p>
+                </div>
+            </a>
+        </div>
+    </div>
 {% endblock %}

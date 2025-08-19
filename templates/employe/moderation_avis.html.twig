@@ -7,33 +7,44 @@
 {% endblock %}
 
 {% block body %}
-{{ dump(avis) }}
-<div class="avis-container">
-    <h2>📝 Modération des avis</h2>
+    <h1 class="titre">Modération des Avis</h1>
 
-    {% if avis is empty %}
-        <p class="empty">Aucun avis en attente de modération.</p>
-    {% else %}
-        {% for a in avis %}
-            <div class="avis-item">
-                <div class="avis-header">
-                    <h4>Commentaire de {{ a.auteur.pseudo }} à {{ a.cible.pseudo }}</h4>
-                    <small>{{ a.dateAvis|date('d/m/Y H:i') }}</small>
-                </div>
-                <div class="avis-content">
-                    <strong>Note :</strong> {{ a.note }}/5<br>
-                    <strong>Commentaire :</strong> {{ a.commentaire }}
-                </div>
-
-                <form method="post" action="{{ path('employe_moderer_avis_action', {id: a.id}) }}">
-                    <input type="hidden" name="_token" value="{{ csrf_token('moderation_avis_' ~ a.id) }}">
-                    <div class="moderation-actions">
-                        <button type="submit" name="action" value="approuve" class="approve">✅ Approuver</button>
-                        <button type="submit" name="action" value="refuse" class="refuse">❌ Refuser</button>
-                    </div>
-                </form>
-            </div>
-        {% endfor %}
-    {% endif %}
-</div>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Auteur</th>
+                    <th>Cible</th>
+                    <th>Note donnée</th>
+                    <th>Commentaire</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in avis %}
+                    <tr>
+                        <td>{{ a.auteur.pseudo }}</td>
+                        <td>{{ a.cible.pseudo }}</td>
+                        <td>{{ a.note }}/5</td>
+                        <td>{{ a.commentaire }}</td>
+                        <td>{{ a.dateAvis|date('d/m/Y') }}</td>
+                        <td>
+                             <form method="post" action="{{ path('employe_moderer_avis_action', {id: a.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('moderation_avis_' ~ a.id) }}">
+                                <div class="moderation-actions">
+                                    <button type="submit" name="action" value="approuve" class="approve">Approuver</button>
+                                    <button type="submit" name="action" value="refuse" class="refuse">Refuser</button>
+                                </div>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="5">Aucun avis en attente de modération</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

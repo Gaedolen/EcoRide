@@ -27,19 +27,18 @@ class ReportType extends AbstractType
                 'required' => true,
             ]);
         } else {
-            $builder->add('reportedUser', EntityType::class, [
+            $builder
+            ->add('reportedUser', EntityType::class, [
                 'class' => User::class,
                 'choice_label' => 'pseudo',
-                'label' => 'Utilisateur signalé',
                 'placeholder' => 'Sélectionnez un utilisateur',
-                'query_builder' => function (UserRepository $ur) {
-                    return $ur->createQueryBuilder('u')
-                        ->where('u.role = 3')
-                        ->orderBy('u.pseudo', 'ASC');
+                'query_builder' => function(UserRepository $repo) {
+                    return $repo->createQueryBuilder('u')
+                                ->join('u.role', 'r')
+                                ->where('r.libelle = :role')
+                                ->setParameter('role', 'USER')
+                                ->orderBy('u.pseudo', 'ASC');
                 },
-                'attr' => [
-                    'class' => 'user-select',
-                ],
             ]);
         }
 
