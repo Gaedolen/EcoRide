@@ -3,7 +3,7 @@
 {% block title %}Modifier mon profil{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ asset('css/modifier.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/profil/modifier.css') }}?v=1">
 {% endblock %}
 
 {% block body %}
@@ -56,23 +56,17 @@
             }) }}
 
             <div class="checkbox-group">
-                <label class="checkbox-label">Chauffeur
-                    {{ form_widget(form.isChauffeur, { 
-                            attr: { 
-                                class: "custom-checkbox" 
-                            } 
-                    }) }}
-                </label>
-            
-                <label class="checkbox-label">Passager
-                    {{ form_widget(form.isPassager, { 
-                        attr: { 
-                            class: "custom-checkbox" 
-                        } 
-                    }) }}
-                </label>
+                <input type="checkbox" id="isChauffeur" name="{{ form.isChauffeur.vars.full_name }}" class="custom-checkbox"
+                    {% if form.isChauffeur.vars.value %} checked {% endif %}>
+                <label for="isChauffeur" class="checkbox-label">Je suis chauffeur</label>
             </div>
-            
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="isPassager" name="{{ form.isPassager.vars.full_name }}" class="custom-checkbox"
+                    {% if form.isPassager.vars.value %} checked {% endif %}>
+                <label for="isPassager" class="checkbox-label">Je suis passager</label>
+            </div>
+
             <div class='photo-upload-wrapper'>
                 <label for='{{ form.photo.vars.id }}' class='custom-upload'>Choisir une photo</label>
                 {{ form_widget(form.photo, {
@@ -87,15 +81,16 @@
             </div>
 
             <div class="delete-photo-wrapper">
-                <label class="checkbox-label">
-                    {{ form_widget(form.deletePhoto, { attr: { class: 'custom-checkbox' } }) }}
-                    Supprimer la photo actuelle
-                </label>
+                {{ form_widget(form.deletePhoto, { attr: { class: 'custom-checkbox' } }) }}
+                <label for="{{ form.deletePhoto.vars.id }}" class="checkbox-label">Supprimer la photo</label>
             </div>
 
-                <button type="submit" class='btn-modification'>Enregistrer mes modifications</button>
-            {{ form_end(form) }}
-        </div>
+            <button type="submit" class='btn-modification'>Enregistrer mes modifications</button>
+
+            {% do form.isChauffeur.setRendered() %}
+            {% do form.isPassager.setRendered() %}
+        {{ form_end(form) }}
+    </div>
 
     <script src="{{ asset('js/photo-upload.js') }}"></script>
 {% endblock %}

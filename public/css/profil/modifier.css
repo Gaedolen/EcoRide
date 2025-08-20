@@ -51,19 +51,16 @@ input[type="tel"] {
 /* Checkbox */
 .checkbox-group {
     display: flex;
-    flex-direction: column;
+    align-items: center;
     gap: 10px;
     margin-top: 20px;
 }
 
 .checkbox-label {
-    display: flex;
-    align-items: center;
     font-family: 'Comfortaa', sans-serif;
     color: #4a86e8;
-    font-weight: bold;;
+    font-weight: bold;
     font-size: 20px;
-    gap: 10px;
 }
 
 .custom-checkbox {
@@ -123,6 +120,27 @@ input[type="tel"] {
     transition: background 0.3s ease;
     width: fit-content;
 }
+
+/* Checkbox suppression photo */
+.delete-photo-wrapper,
+.checkbox-group {
+    display: flex;
+    align-items: center; /* aligne verticalement checkbox + label */
+    gap: 10px;
+}
+
+.custom-checkbox {
+    width: 20px;
+    height: 20px;
+    vertical-align: middle; /* aide à corriger le léger décalage */
+}
+
+.checkbox-label {
+    font-weight: bold;
+    font-size: 16px;
+    line-height: 1; /* évite que le texte pousse le label vers le bas */
+}
+
 
 /* Affichage du nom du fichier sélectionné */
 .file-name-display {

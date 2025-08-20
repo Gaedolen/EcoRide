@@ -28,11 +28,11 @@ class ProfilType extends AbstractType
                 'required' => false,
             ])
             ->add('isChauffeur', CheckboxType::class, [
-                'label' => 'Je suis chauffeur',
+                'label' => false,
                 'required' => false,
             ])
             ->add('isPassager', CheckboxType::class, [
-                'label' => 'Je suis passager',
+                'label' => false,
                 'required' => false,
             ])
             ->add('photo', FileType::class, [
@@ -51,7 +51,7 @@ class ProfilType extends AbstractType
                 ],
             ])
             ->add('deletePhoto', CheckboxType::class, [ 
-                'label' => 'Supprimer la photo actuelle',
+                'label' => false,
                 'required' => false,
                 'mapped' => false, 
             ])

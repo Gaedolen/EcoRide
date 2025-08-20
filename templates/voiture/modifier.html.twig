@@ -2,11 +2,106 @@
 
 {% block title %}Modifier une voiture{% endblock %}
 
-{% block body %}
-    <h2>Modifier une voiture</h2>
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/profil/voiture/voiture.css') }}">
+{% endblock %}
 
-    {{ form_start(form) }}
-        {{ form_widget(form) }}
-        <button type="submit">Enregistrer</button>
-    {{ form_end(form) }}
+{% block body %}
+    <div class="form-container">
+        <h2>Modifier une voiture</h2>
+
+        {{ form_start(form) }}
+            <div class="input">
+
+                <label for="immatriculation">Plaque d'immatriculation</label>
+                {{form_widget(form.immatriculation, {
+                    attr: {
+                        class: "immatriculation",
+                        placeholder: "AA-123-AA"
+                    }
+                })}}
+
+                <label for="datePremiereImmatriculation">Date de première immatriculation</label>
+                {{form_widget(form.datePremiereImmatriculation, {
+                    attr: {
+                        class: "date_premiere_immatriculation",
+                    }
+                })}}
+
+                <label for="Marque">Marque</label>
+                {{form_widget(form.marque, {
+                    attr: {
+                        class: "marque",
+                        placeholder: "Ex : Peugeot"
+                    }
+                })}}
+
+                <label for="modele">Modèle</label>
+                {{form_widget(form.modele, {
+                    attr: {
+                        class: "modele",
+                        placeholder: "Ex : 207"
+                    }
+                })}}
+
+                <label for="nbPlaces">Nombre de places disponibles</label>
+                {{form_widget(form.nbPlaces, {
+                    attr: {
+                        class: "nbPlaces",
+                        placeholder: "Ex : 4"
+                    }
+                })}}
+
+                <label for="energie">Énergie</label>
+                {{form_widget(form.energie, {
+                    attr: {
+                        class: "energie",
+                        placeholder: "Electrique"
+                    }
+                })}}
+    
+                <div class="select">
+                    <div class="custom-select-wrapper">
+                        <label for="couleur">Couleur de la voiture</label>
+                        <div class="custom-select-trigger">Choisissez une couleur</div>
+                        <ul class="custom-options">
+                            <li data-value="Rouge" style="--color: red;"><span class="dot"></span> Rouge</li>
+                            <li data-value="Bleu" style="--color: blue;"><span class="dot"></span> Bleu</li>
+                            <li data-value="Vert" style="--color: green;"><span class="dot"></span> Vert</li>
+                            <li data-value="Noir" style="--color: black;"><span class="dot"></span> Noir</li>
+                            <li data-value="Blanc" style="--color: white;"><span class="dot border"></span> Blanc</li>
+                            <li data-value="Gris" style="--color: grey;"><span class="dot"></span> Gris</li>
+                            <li data-value="Jaune" style="--color: yellow;"><span class="dot"></span> Jaune</li>
+                            <li data-value="Rose" style="--color: #fd6c9e;"><span class="dot"></span> Rose</li>
+                            <li data-value="Violet" style="--color: #7f00ff;"><span class="dot"></span> Violet</li>
+                            <li data-value="Marron" style="--color: #654321;"><span class="dot"></span> Marron</li>
+                        </ul>
+                        {{ form_widget(form.couleur) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="checkbox-group">
+                <label class="checkbox-label">
+                    {{ form_widget(form.fumeur, { 
+                        attr: { 
+                            class: "custom-checkbox" 
+                        } 
+                    }) }}
+                </label>
+
+                <label class="checkbox-label">
+                    {{ form_widget(form.animaux, { 
+                        attr: { 
+                            class: "custom-checkbox" 
+                        } 
+                    }) }}
+                </label>
+            </div>
+
+            <button type="submit" class="ajouter">Modifier</button>
+        {{ form_end(form) }}
+    </div>
+
+    <script src="{{ asset('js/color-select.js') }}"></script>
 {% endblock %}

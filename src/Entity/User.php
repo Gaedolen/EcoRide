@@ -100,7 +100,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(mappedBy: 'auteur', targetEntity: Avis::class)]
     private Collection $avisDonnes;
 
-        // Setter et Getter
+    #[ORM\Column(type: 'integer')]
+    private int $credits = 20; // 20 crédits par défaut pour la création d'un compte utilisateur
+
+    // Setter et Getter
 
     public function getRole(): ?Role
     {
@@ -442,6 +445,30 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             }
         }
 
+        return $this;
+    }
+
+    public function getCredits(): int
+    {
+        return $this->credits;
+    }
+
+    public function setCredits(int $credits): self
+    {
+        $this->credits = $credits;
+        return $this;
+    }
+
+    public function addCredits(int $credits): self
+    {
+        $this->credits += $credits;
+        return $this;
+    }
+
+    public function removeCredits(int $credits): self
+    {
+        $this->credits -= $credits;
+        if ($this->credits < 0) $this->credits = 0;
         return $this;
     }
 }

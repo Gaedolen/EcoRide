@@ -3,7 +3,7 @@
 {% block title %}Ajouter une voiture{% endblock %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ asset('/css/voiture.css') }}">
+    <link rel="stylesheet" href="{{ asset('/css/profil/voiture.css') }}">
 {% endblock %}
 
 
@@ -84,7 +84,7 @@
             </div>
 
             <div class="checkbox-group">
-                <label class="checkbox-label">Fumeur
+                <label class="checkbox-label">
                     {{ form_widget(form.fumeur, { 
                         attr: { 
                             class: "custom-checkbox" 
@@ -92,7 +92,7 @@
                     }) }}
                 </label>
 
-                <label class="checkbox-label">Animaux
+                <label class="checkbox-label">
                     {{ form_widget(form.animaux, { 
                         attr: { 
                             class: "custom-checkbox" 
