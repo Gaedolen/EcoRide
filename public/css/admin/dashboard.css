@@ -1,0 +1,108 @@
+/* Espace entre le header et le titre */
+.dashboard-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    text-align: center;
+    margin-top: 3rem;
+    margin-bottom: 0.5rem;
+}
+
+.dashboard-subtitle {
+    font-size: 1.1rem;
+    color: #555;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/* Cartes du dashboard */
+.dashboard-cards {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    max-width: 900px;
+    margin: 0 auto 3rem auto;
+}
+
+/* Cartes */
+.dashboard-card {
+    flex: 1 1 250px;
+    max-width: 350px;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.card-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.card-content h2 {
+    font-size: 1.3rem;
+    color: #4a86e8;
+    margin-bottom: 0.5rem;
+}
+
+.card-content p {
+    font-size: 0.95rem;
+    color: #666;
+}
+
+/* Titre de chaque graphique */
+.grid h2 {
+    font-size: 1.3rem;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+/* Conteneur des graphiques */
+.graphs-container {
+    width: 95%;
+    max-width: 1400px;
+    margin: 2rem auto 2.5rem auto;
+    display: flex;
+    gap: 60px;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+.graphs-container > div h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.graphs-container canvas {
+    width: 100% !important;
+    height: 450px !important;
+    display: block;
+}
+
+.total-credits {
+    margin-top: 30px;
+    padding: 1rem 1.5rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+    font-size: 2rem;
+    text-align: center;
+    color: #2c3e50;
+}
+
+
+
+
+

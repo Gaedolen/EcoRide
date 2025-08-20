@@ -13,6 +13,7 @@ use App\Form\EmployeType;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Entity\User;
+use App\Entity\Covoiturage;
 use App\Entity\Role;
 use App\Entity\Report;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,9 +23,45 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class AdminController extends AbstractController
 {
     #[Route('/admin', name: 'admin_dashboard')]
-    public function dashboard(): Response
+    public function dashboard(EntityManagerInterface $em): Response
     {
-        return $this->render('admin/dashboard.html.twig');
+        $connection = $em->getConnection();
+
+        // Nombre de covoiturages par jour
+        $sql1 = "
+            SELECT DATE(c.date_depart) as jour, COUNT(c.id) as totalCovoiturages
+            FROM covoiturage c
+            WHERE c.statut = 'ferme'
+            GROUP BY jour
+            ORDER BY jour ASC
+        ";
+        $stmt1 = $connection->prepare($sql1);
+        $covoituragesParJour = $stmt1->executeQuery()->fetchAllAssociative();
+
+        // Crédits gagnés par jour
+        $sql2 = "
+            SELECT DATE(c.date_depart) as jour, 
+                SUM(2 + 2 * (
+                    SELECT COUNT(r.id) FROM reservation r WHERE r.covoiturage_id = c.id
+                )) AS credits_plateforme
+            FROM covoiturage c
+            WHERE c.statut = 'ferme'
+            GROUP BY jour
+            ORDER BY jour ASC
+        ";
+        $stmt2 = $connection->prepare($sql2);
+        $creditsParJour = $stmt2->executeQuery()->fetchAllAssociative();
+
+        // Total des crédits gagnés
+        $totalCredits = array_sum(array_column($creditsParJour, 'credits_plateforme'));
+
+        //dd($covoituragesParJour, $creditsParJour, $totalCredits);
+
+        return $this->render('admin/dashboard.html.twig', [
+            'covoituragesParJour' => $covoituragesParJour,
+            'creditsParJour' => $creditsParJour,
+            'totalCredits' => $totalCredits ?? 0
+        ]);
     }
 
     #[Route('/admin/utilisateurs', name: 'admin_gestion_utilisateurs')]

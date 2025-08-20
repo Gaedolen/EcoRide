@@ -2,11 +2,66 @@
 
 {% block title %}Espace Administrateur{% endblock %}
 
-{% block body %}
-    <h1>Bienvenue dans l’espace administrateur</h1>
-    <ul>
-        <li><a href="{{ path('admin_employes') }}">Gérer les comptes employés</a></li>
-        <li><a href="{{ path('admin_gestion_utilisateurs') }}">Gérer les comptes utilisateurs</a></li>
-        <li><a href="#">Voir les statistiques</a></li>
-    </ul>
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/admin/dashboard.css') }}">
 {% endblock %}
+
+{% block body %}
+    <h1 class="dashboard-title">Bienvenue dans l’espace administrateur</h1>
+    <p class="dashboard-subtitle">Choisissez une action à effectuer :</p>
+
+    <div class="dashboard-cards">
+        <a href="{{ path('admin_employes') }}" class="dashboard-card">
+            <div class="card-icon">👔</div>
+            <div class="card-content">
+                <h2>Gérer les comptes employés</h2>
+                <p>Créer, modifier ou supprimer des comptes employés.</p>
+            </div>
+        </a>
+
+        <a href="{{ path('admin_gestion_utilisateurs') }}" class="dashboard-card">
+            <div class="card-icon">👥</div>
+            <div class="card-content">
+                <h2>Gérer les comptes utilisateurs</h2>
+                <p>Suspension, visualisation et gestion des utilisateurs signalés.</p>
+            </div>
+        </a>
+    </div>
+
+    <h1 class="dashboard-title">Statistiques de la plateforme</h1>
+
+    <div class="graphs-container">
+        <div>
+            <h2>Covoiturages par jour</h2>
+            <canvas id="covoituragesChart"></canvas>
+        </div>
+
+        <div>
+            <h2>Crédits par jour</h2>
+            <canvas id="creditsChart"></canvas>
+        </div>
+    </div>
+
+
+    <div class="total-credits">
+        <strong>Total des crédits :</strong> {{ totalCredits }} 💰
+    </div>
+
+  
+    <script> // On expose les données PHP
+        window.dashboardData = {
+            covoiturages: {
+                labels: {{ covoituragesParJour|map(c => c.jour)|json_encode|raw }},
+                values: {{ covoituragesParJour|map(c => c.totalCovoiturages)|json_encode|raw }}
+            },
+            credits: {
+                labels: {{ creditsParJour|map(c => c.jour)|json_encode|raw }},
+                values: {{ creditsParJour|map(c => c.credits_plateforme)|json_encode|raw }}
+            }
+        };
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ asset('js/dashboard.js') }}"></script>
+{% endblock %}
+
