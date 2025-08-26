@@ -103,6 +103,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'integer')]
     private int $credits = 20; // 20 crédits par défaut pour la création d'un compte utilisateur
 
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $suspendReason = null;
+
     // Setter et Getter
 
     public function getRole(): ?Role
@@ -469,6 +472,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->credits -= $credits;
         if ($this->credits < 0) $this->credits = 0;
+        return $this;
+    }
+
+        public function getSuspendReason(): ?string
+    {
+        return $this->suspendReason;
+    }
+
+    public function setSuspendReason(?string $reason): self
+    {
+        $this->suspendReason = $reason;
         return $this;
     }
 }

@@ -35,7 +35,7 @@ h1 {
 }
 
 .table-employes thead {
-    background-color: #6b8cd1;
+    background-color: #4a86e8;
     color: white;
 }
 
@@ -50,10 +50,6 @@ h1 {
 
 .table-employes tbody tr:nth-child(even) {
     background-color: #e0e0e0;
-}
-
-.table-employes tbody tr:hover {
-    background-color: #c7d6f7;
 }
 
 /*Gestion des boutons de retour et d'ajout d'un employé */

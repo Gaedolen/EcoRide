@@ -2,48 +2,92 @@
 
 {% block title %}Gestion des utilisateurs{% endblock %}
 
-{% block body %}
-<h1>Gestion des utilisateurs</h1>
-
-<table>
-    <thead>
-        <tr>
-            <th>Pseudo</th>
-            <th>Email</th>
-            <th>Signalements</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in users %}
-            <tr>
-                <td>{{ user.pseudo }}</td>
-                <td>{{ user.email }}</td>
-                <td>
-                    {% if reportsByUser[user.id] is defined %}
-                        ⚠️
-                        <ul>
-                            {% for report in reportsByUser[user.id] %}
-                                <li>{{ report.message }} (signalé par {{ report.reportedBy.pseudo }})</li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        -
-                    {% endif %}
-                </td>
-                <td>
-                    {% if user.isSuspended %}
-                        <button disabled>Compte suspendu</button>
-                    {% else %}
-                        <form method="post" action="{{ path('admin_suspendre_utilisateur', {'id': user.id}) }}" onsubmit="return confirm('Confirmer la suspension du compte ?')">
-                            <input type="hidden" name="_token" value="{{ csrf_token('suspend_user_' ~ user.id) }}">
-                            <button type="submit">Suspendre</button>
-                        </form>
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/admin/gestion_utilisateurs.css') }}">
 {% endblock %}
+
+{% block body %}
+    <div class="users-container">
+        <h1>Gestion des utilisateurs</h1>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Pseudo</th>
+                    <th>Email</th>
+                    <th>Signalements</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>
+                            {{ user.pseudo }}
+                            {% if reportsByUser[user.id] is defined %}
+                                ⚠️
+                            {% endif %}
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if reportsByUser[user.id] is defined %}
+                                <ul>
+                                    {% for report in reportsByUser[user.id] %}
+                                        <li>{{ report.message }} (signalé par {{ report.reportedBy.pseudo }})</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.isSuspended %}
+                                <div class="user-actions">
+                                    <span class="status suspended">Compte suspendu</span>
+                                    <form method="post" action="{{ path('admin_unsuspendre_utilisateur', {'id': user.id}) }}" class="unsuspend-form">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('unsuspend_user_' ~ user.id) }}">
+                                        <button type="submit" class="btn-reactivate">Réactiver</button>
+                                    </form>
+                                </div>
+                            {% else %}
+                                <button class="btn-suspend" 
+                                        data-user-id="{{ user.id }}" 
+                                        data-user-pseudo="{{ user.pseudo }}"
+                                        data-csrf-token="{{ csrf_token('suspend_user_' ~ user.id) }}">
+                                    Suspendre
+                                </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal de suspension d'un compte -->
+    <div id="modal-suspendre" class="modal" style="display:none; justify-content:center; align-items:center;">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h2>Suspendre <span id="modal-user-pseudo"></span></h2>
+            <form id="form-suspendre">
+                <input type="hidden" id="user-id">
+                <input type="hidden" id="csrf-token">
+                
+                <label for="reason">Raison :</label>
+                <select id="reason" name="reason">
+                    <option value="retard">Retard récurrent</option>
+                    <option value="charte">Non respect des règles du site</option>
+                    <option value="comportement">Comportement inapproprié</option>
+                    <option value="autres">Autres</option>
+                </select>
+                
+                <input type="text" id="other-reason" name="otherReason" placeholder="Précisez la raison" style="display:none; margin-top:10px;">
+                
+                <button type="submit" style="margin-top:15px;">Suspendre</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="{{ asset('js/gestion_utilisateurs.js') }}"></script>
+{% endblock %}
+

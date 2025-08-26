@@ -1,0 +1,206 @@
+/* Container principal */
+.users-container {
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #f9fafb;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Titre principal */
+.users-container h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Table stylisée */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+}
+
+/* En-têtes */
+thead {
+    background: #4a86e8;
+    color: white;
+    text-align: left;
+}
+
+thead th {
+    padding: 1rem;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Lignes */
+tbody tr {
+    border-bottom: 1px solid #e5e7eb;
+    transition: background 0.2s;
+}
+
+tbody tr:hover {
+    background: #f1f5f9;
+}
+
+/* Cellules */
+td {
+    padding: 1rem;
+    font-size: 0.95rem;
+    color: #2c3e50;
+    vertical-align: top;
+}
+
+/* Centrer le texte et le contenu des cellules et headers */
+table th,
+table td {
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Liste des signalements */
+td ul {
+    margin: 0.5rem 0 0 0;
+    padding-left: 0;
+    list-style: disc inside;
+}
+
+td ul li {
+    margin-left: 0;
+    padding-left: 0;
+}
+
+/* Statut du compte */
+.user-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.user-actions form {
+    display: inline;
+    margin: 0;
+}
+
+.status.suspended {
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+/* Boutons */
+button {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Bouton suspendre */
+.btn-suspend {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-suspend:hover {
+    background: #c0392b;
+    transform: scale(1.05);
+}
+
+/* Bouton de réactivation */
+.btn-reactivate {
+    padding: 5px 10px;
+    background-color: #2ecc71;
+    border: none;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-reactivate:hover {
+    background-color: #27ae60;
+}
+
+/* Overlay modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Contenu du modal */
+.modal-content {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    position: relative;
+    text-align: center;
+}
+
+/* Bouton fermer */
+.modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Styles pour le formulaire à l'intérieur */
+#form-suspendre select,
+#form-suspendre input[type="text"] {
+    width: 100%;
+    padding: 8px 10px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+#form-suspendre button {
+    padding: 10px 20px;
+    background-color: #e74c3c;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+#form-suspendre button:hover {
+    background-color: #c0392b;
+}
+
+/* Champ "Autres" masqué par défaut */
+#other-reason {
+    display: none;
+}

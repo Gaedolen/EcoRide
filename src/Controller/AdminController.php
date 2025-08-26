@@ -10,6 +10,8 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 use App\Form\EmployeType;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use App\Entity\User;
@@ -18,6 +20,7 @@ use App\Entity\Role;
 use App\Entity\Report;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 #[IsGranted('ROLE_ADMIN')]
 class AdminController extends AbstractController
@@ -70,16 +73,19 @@ class AdminController extends AbstractController
         // Récupérer uniquement les utilisateurs avec le rôle USER
         $users = $userRepository->findByRoleLibelle('USER');
 
-        // Pareil pour les signalements
+        // Récupérer tous les signalements faits par les employés
         $reports = $em->getRepository(Report::class)->findAll();
 
         $reportsByUser = [];
         foreach ($reports as $report) {
-            $userId = $report->getReportedUser()->getId();
-            if (!isset($reportsByUser[$userId])) {
-                $reportsByUser[$userId] = [];
+            $reportedBy = $report->getReportedBy();
+            if ($reportedBy && $reportedBy->getRole()->getLibelle() === 'EMPLOYE') {
+                $userId = $report->getReportedUser()->getId();
+                if (!isset($reportsByUser[$userId])) {
+                    $reportsByUser[$userId] = [];
+                }
+                $reportsByUser[$userId][] = $report;
             }
-            $reportsByUser[$userId][] = $report;
         }
 
         return $this->render('admin/gestion_utilisateurs.html.twig', [
@@ -87,6 +93,83 @@ class AdminController extends AbstractController
             'reportsByUser' => $reportsByUser,
         ]);
     }
+
+    #[Route('/admin/utilisateur/suspendre/{id}', name: 'admin_suspendre_utilisateur', methods: ['POST'])]
+    public function suspendreUtilisateur(Request $request, User $user, EntityManagerInterface $em, MailerInterface $mailer): Response {
+        // Récupérer les données JSON envoyées par fetch
+        $data = json_decode($request->getContent(), true);
+
+        // Vérifier que les données existent
+        if (!$data || !isset($data['_token'])) {
+            return $this->json(['success' => false, 'error' => 'Données manquantes'], 400);
+        }
+
+        // Vérifier le token CSRF
+        if (!$this->isCsrfTokenValid('suspend_user_' . $user->getId(), $data['_token'])) {
+            return $this->json(['success' => false, 'error' => 'Token CSRF invalide'], 400);
+        }
+
+        // Déterminer la raison complète de la suspension
+        $reason = $data['reason'] ?? null;
+        if ($reason === 'autres') {
+            $reason = $data['otherReason'] ?? '';
+        }
+
+        // Enregistrer la suspension et la raison
+        $user->setIsSuspended(true);
+        $user->setSuspendReason($reason);
+        $em->flush();
+
+        // Envoyer le mail à l'utilisateur
+        $email = (new TemplatedEmail())
+            ->from('no-reply@ecoride.com')
+            ->to($user->getEmail())
+            ->subject('Votre compte a été suspendu')
+            ->htmlTemplate('emails/suspension.html.twig')
+            ->context([
+                'user' => $user,
+                'reason' => $reason
+            ]);
+        $mailer->send($email);
+
+        // Répondre au front-end
+        return $this->json([
+            'success' => true,
+            'userId' => $user->getId(),
+            'reason' => $reason
+        ]);
+    }
+
+    #[Route('/admin/utilisateur/{id}/unsuspendre', name: 'admin_unsuspendre_utilisateur', methods: ['POST'])]
+    public function unsuspendUser(Request $request, User $user, EntityManagerInterface $em, MailerInterface $mailer): Response
+    {
+        if (!$this->isCsrfTokenValid('unsuspend_user_' . $user->getId(), $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide');
+            return $this->redirectToRoute('admin_gestion_utilisateurs');
+        }
+
+        $user->setIsSuspended(false);
+        $em->flush();
+
+        if ($request->isXmlHttpRequest()) {
+            return $this->json(['success' => true]);
+        }
+
+         // Envoi du mail de réactivation
+        $email = (new TemplatedEmail())
+            ->from('no-reply@ecoride.com')
+            ->to($user->getEmail())
+            ->subject('Votre compte a été réactivé')
+            ->htmlTemplate('emails/reactivation_utilisateur.html.twig')
+            ->context([
+                'user' => $user,
+            ]);
+
+        $mailer->send($email);
+
+        return $this->redirectToRoute('admin_gestion_utilisateurs');
+    }
+
 
     #[Route('/admin/employes', name: 'admin_employes')]
     public function employes(UserRepository $userRepository): Response
@@ -127,40 +210,6 @@ class AdminController extends AbstractController
         return $this->render('admin/nouveau_employe.html.twig', [
             'form' => $form->createView(),
         ]);
-    }
-
-    #[Route('/admin/utilisateur/suspendre/{id}', name: 'admin_suspendre_utilisateur', methods: ['POST'])]
-    public function suspendreUtilisateur(Request $request, User $user, EntityManagerInterface $em, CsrfTokenManagerInterface $csrfTokenManager): RedirectResponse
-    {
-        $submittedToken = $request->request->get('_token');
-
-        if (!$csrfTokenManager->isTokenValid(new \Symfony\Component\Security\Csrf\CsrfToken('suspend_user_' . $user->getId(), $submittedToken))) {
-            $this->addFlash('error', 'Token CSRF invalide.');
-            return $this->redirectToRoute('admin_gestion_utilisateurs');
-        }
-
-        $user->setIsSuspended(true);
-        $em->flush();
-
-        // Envoyer un email à l'utilisateur pour informer de la suspension
-
-        $this->addFlash('success', 'Utilisateur suspendu avec succès.');
-
-        return $this->redirectToRoute('admin_gestion_utilisateurs');
-    }
-
-    #[Route('/admin/utilisateur/supprimer/{id}', name: 'admin_supprimer_utilisateur')]
-    public function supprimerUser(int $id, UserRepository $userRepository, EntityManagerInterface $em, Request $request): RedirectResponse
-    {
-        $user = $userRepository->find($id);
-        if (!$user) {
-            throw new NotFoundHttpException('Utilisateur non trouvé');
-        }
-
-        $em->remove($user);
-        $em->flush();
-
-        return $this->redirectToRoute('admin_gestion_utilisateurs', ['filtre' => 'EMPLOYE']);
     }
 
    #[Route('/admin/employe/supprimer/{id}', name: 'admin_supprimer_employe', methods: ['POST'])]
