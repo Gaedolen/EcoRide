@@ -55,6 +55,20 @@ class EmployeController extends AbstractController
         if ($action === 'approuve') {
             $avis->setStatut('approuve');
             $avis->setIsValidated(true);
+
+            // Recalculer la moyenne du chauffeur
+            $cible = $avis->getCible(); // le chauffeur
+            $qb = $em->getRepository(Avis::class)->createQueryBuilder('a')
+                ->select('AVG(a.note) as moyenne')
+                ->where('a.cible = :user')
+                ->andWhere('a.statut = :statut')
+                ->setParameter('user', $cible)
+                ->setParameter('statut', Avis::STATUT_APPROUVE);
+
+            $moyenne = $qb->getQuery()->getSingleScalarResult();
+            $cible->setNote($moyenne !== null ? (float) $moyenne : null);
+
+            $em->persist($cible);
         } elseif ($action === 'refuse') {
             $avis->setStatut('refuse');
             $avis->setStatut(false);

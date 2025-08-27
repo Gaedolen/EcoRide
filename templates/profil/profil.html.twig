@@ -36,6 +36,14 @@
                     <img src="{{ asset('images/se-connecter.png') }}" alt="Photo de profil" class="photo-profil mb-2">
                 {% endif %}
                 <div class="credits">
+                    <strong>Note :</strong>
+                    {% if user.note is not null %}
+                        {{ user.note|number_format(1, '.', ',') }}/5 ⭐
+                    {% else %}
+                        Pas de notes
+                    {% endif %}
+                </div>
+                <div class="credits">
                     <span class="label">Crédits :</span>
                     <span class="value">{{ user.credits }} <i class="bi bi-coin"></i></span>
                 </div>

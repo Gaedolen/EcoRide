@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Avis;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -25,6 +26,21 @@ class AvisRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function getMoyenneNotesPourUser(User $user): ?float
+    {
+        $qb = $this->createQueryBuilder('a')
+            ->select('AVG(a.note) as moyenne')
+            ->where('a.cible = :user')
+            ->andWhere('a.statut = :statut')
+            ->setParameter('user', $user)
+            ->setParameter('statut', Avis::STATUT_APPROUVE);
+
+        $result = $qb->getQuery()->getSingleScalarResult();
+
+        return $result !== null ? (float) $result : null;
+    }
+
 
     //    /**
     //     * @return Avis[] Returns an array of Avis objects

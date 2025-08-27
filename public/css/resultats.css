@@ -1,4 +1,4 @@
-/* Base */
+/* Base */ 
 body {
     font-family: 'Comfortaa', sans-serif;
     margin: 0;
@@ -122,7 +122,7 @@ body {
 
 /* Formulaire de modification */
 .formulaire-modification {
-    background-color: #4A90E2;
+    background: linear-gradient(#4a86e8, rgb(117, 179, 255));
     padding: 20px;
     border-radius: 12px;
     margin-bottom: 30px;
@@ -229,6 +229,7 @@ body {
 .chauffeur-nom {
     font-weight: bold;
     margin: 0;
+    margin-bottom: 10px;
 }
 
 .chauffeur-nom,
