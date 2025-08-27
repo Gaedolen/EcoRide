@@ -275,6 +275,15 @@ h1 {
     padding: 0 30px;
 }
 
+.reservation-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding-left: 20px;
+    margin-bottom: 0.25rem;
+    margin-top: 1.5rem;
+}
+
 /* Carte de réservation d'un covoiturage */
 .details-card {
     width: 100%;
@@ -462,6 +471,41 @@ h1 {
     color: white;
     cursor: pointer;
 }
+
+/* Historiques */
+.historique-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.btn-historique {
+    background: linear-gradient(#a2e76d, yellowgreen);
+    border: none;
+    color: white;
+    border-radius: 25px;
+    padding: 8px 18px;
+    font-size: 16px;
+    font-family: 'Comfortaa', sans-serif;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    min-width: 0;
+    max-width: none;
+    line-height: normal;
+}
+
+
+.btn-historique:hover {
+    background: linear-gradient(#8ed657, #317d31);
+}
+
 
 
 /* Conteneur des avis */

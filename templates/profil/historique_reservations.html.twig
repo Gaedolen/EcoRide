@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>📜 Historique de mes réservations</h1>
+
+{% if reservations is not empty %}
+    <ul>
+        {% for resa in reservations %}
+            <li>
+                {{ resa.lieu_depart }} → {{ resa.lieu_arrivee }}
+                (le {{ resa.date_depart|date('d/m/Y') }})
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Aucune réservation passée.</p>
+{% endif %}
+{% endblock %}

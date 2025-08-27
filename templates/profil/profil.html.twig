@@ -110,6 +110,7 @@
                 {% if app.user.credits < 2 %}data-tooltip="Il vous faut 2 crédits pour créer un covoiturage"{% endif %}>
                     Ajouter un covoiturage
                 </a>
+                <a href="{{ path('historique_covoiturages') }}" class="btn-historique">📜 Historique des covoiturages</a>
             </div>
 
             <div class="covoiturage-scroll-wrapper">
@@ -165,7 +166,10 @@
     {% endif %}
 
     <!-- Affichage des réservations -->
-   <h1 class="h1">Mes réservations</h1>
+    <div class='reservation-header'>
+        <h1 class="h1">Mes réservations</h1>
+        <a href="{{ path('historique_reservations') }}" class="btn-historique">📜 Historique des réservations</a>
+   </div>
     {% if reservations is not empty %}
         <div class="reservations-section">
             {% for resa in reservations %}

@@ -11,6 +11,7 @@ use App\Repository\AvisRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use DateTime;
 use PDO;
+use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -338,5 +339,49 @@ class ProfilController extends AbstractController
         ]);
 
         return $this->redirectToRoute('app_profil');
+    }
+
+    #[Route('/historique/covoiturages', name: 'historique_covoiturages')]
+    public function historiqueCovoiturages(Connection $connection): Response
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
+        // récupération des covoiturages terminés dont l'utilisateur est chauffeur
+        $sql = "SELECT * FROM covoiturage 
+                WHERE chauffeur_id = :userId 
+                AND statut = 'termine'
+                ORDER BY date_depart DESC";
+
+        $covoiturages = $connection->fetchAllAssociative($sql, [
+            'userId' => $user->getId()
+        ]);
+
+        return $this->render('profil/historique_covoiturages.html.twig', [
+            'covoiturages' => $covoiturages,
+        ]);
+    }
+
+    #[Route('/historique/reservations', name: 'historique_reservations')]
+    public function historiqueReservations(Connection $connection): Response
+    {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+
+        // récupération des réservations liées à l’utilisateur, terminées
+        $sql = "SELECT r.*, c.lieu_depart, c.lieu_arrivee, c.date_depart 
+                FROM reservation r
+                JOIN covoiturage c ON r.covoiturage_id = c.id
+                WHERE r.passager_id = :userId
+                AND r.statut = 'termine'
+                ORDER BY c.date_depart DESC";
+
+        $reservations = $connection->fetchAllAssociative($sql, [
+            'userId' => $user->getId()
+        ]);
+
+        return $this->render('profil/historique_reservations.html.twig', [
+            'reservations' => $reservations,
+        ]);
     }
 }

@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<h1>📜 Historique de mes covoiturages</h1>
+
+{% if covoiturages is not empty %}
+    <ul>
+        {% for covoiturage in covoiturages %}
+            <li>
+                {{ covoiturage.lieu_depart }} → {{ covoiturage.lieu_arrivee }}
+                (le {{ covoiturage.date_depart|date('d/m/Y') }})
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Aucun covoiturage passé.</p>
+{% endif %}
+{% endblock %}
