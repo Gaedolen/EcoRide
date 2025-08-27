@@ -97,7 +97,11 @@
         <div class="covoiturages-section">
             <div class="covoiturages-header">
                 <h1>Mes covoiturages</h1>
-                <a href="{{ path('ajouter_covoiturage') }}" class="btn-covoiturage">Ajouter un covoiturage</a>
+                <a href="{{ path('ajouter_covoiturage') }}" 
+                class="btn-covoiturage {% if app.user.credits < 2 %}disabled{% endif %}" 
+                {% if app.user.credits < 2 %}data-tooltip="Il vous faut 2 crédits pour créer un covoiturage"{% endif %}>
+                    Ajouter un covoiturage
+                </a>
             </div>
 
             <div class="covoiturage-scroll-wrapper">

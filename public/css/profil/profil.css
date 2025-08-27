@@ -95,8 +95,7 @@ h1 {
     margin: 40px 40px 10px 40px;
 }
 
-.btn-ajouter-voiture,
-.btn-covoiturage {
+.btn-ajouter-voiture{
     background: linear-gradient(#a2e76d, yellowgreen);
     color: white;
     border: none;
@@ -109,14 +108,65 @@ h1 {
     transition: background-color 0.3s ease;
 }
 
-.btn-ajouter-voiture:hover,
-.btn-covoiturage:hover {
+.btn-ajouter-voiture:hover{
     background: linear-gradient(#8ed657, #317d31);
 }
 
 .btn-ajouter-voiture.disabled {
     background-color: #ccc;
     cursor: not-allowed;
+}
+
+/* Style commun à tous les boutons */
+.btn-covoiturage {
+    display: inline-block;
+    background: linear-gradient(#a2e76d, yellowgreen);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 10px 18px;
+    font-size: 16px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+/* Hover */
+.btn-covoiturage:hover {
+    background: linear-gradient(#8ed657, #317d31);
+}
+
+/* Désactivé */
+.btn-covoiturage.disabled {
+    background: #ccc !important;
+    color: #666 !important;
+    cursor: not-allowed;
+    pointer-events: auto; /* pour autoriser le hover et afficher le tooltip */
+    position: relative;
+}
+
+/* Tooltip désactivé */
+.btn-covoiturage.disabled::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 120%; /* au-dessus du bouton */
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: #fff;
+    padding: 6px 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+}
+
+.btn-covoiturage.disabled:hover::after {
+    opacity: 1;
 }
 
 /* Cartes voiture et covoiturage */

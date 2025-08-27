@@ -66,6 +66,33 @@
     background: linear-gradient(#8ed657, #317d31);
 }
 
+/* Bouton désactivé */
+.btn-reserver.disabled-btn {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: auto; /* laisse le survol pour le tooltip */
+    position: relative;
+}
+
+/* Tooltip */
+.btn-reserver.disabled-btn:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%; /* au-dessus du bouton */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    font-size: 13px;
+    z-index: 100;
+    opacity: 1;
+}
+
+
+
 /* Carte de détails du covoiturage sélectionné */
 .carte-details {
     display: flex;
@@ -199,4 +226,104 @@
 .no-avis {
     font-style: italic;
     color: #555;
+}
+
+/* Overlay commun pour modal et pop-up */
+.modal,
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.3s ease;
+}
+
+.modal.hidden,
+.popup-overlay.hidden {
+    display: none;
+}
+
+/* Contenu des modals */
+.modal-content,
+.popup-content {
+    background: #ffffff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    font-family: 'Arial', sans-serif;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Texte du modal */
+.modal-content p,
+.popup-content p {
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Boutons du modal */
+.modal-buttons button,
+.popup-content button {
+    padding: 10px 25px;
+    margin: 0 10px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Bouton Oui */
+.modal-buttons .btn-confirm-yes {
+    background-color: #4CAF50;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+.modal-buttons .btn-confirm-yes:hover {
+    background-color: #45a049;
+    transform: translateY(-2px);
+}
+
+/* Bouton Non / Fermer */
+.modal-buttons .btn-confirm-no,
+.popup-content button {
+    background-color: #f44336;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+.modal-buttons .btn-confirm-no:hover,
+.popup-content button:hover {
+    background-color: #e53935;
+    transform: translateY(-2px);
+}
+
+/* Animation d'apparition */
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+    .modal-content,
+    .popup-content {
+        padding: 20px;
+        font-size: 14px;
+    }
+    .modal-buttons button,
+    .popup-content button {
+        padding: 8px 20px;
+        font-size: 14px;
+        margin: 5px;
+    }
 }
