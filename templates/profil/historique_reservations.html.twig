@@ -1,18 +1,124 @@
 {% extends 'base.html.twig' %}
 
-{% block body %}
-<h1>📜 Historique de mes réservations</h1>
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/profil/historique_reservations.css') }}">
+{% endblock %}
 
-{% if reservations is not empty %}
-    <ul>
+{% block title %}Historique des réservations{% endblock %}
+
+{% block body %}
+    <div class="historique-reservations-container">
+
+        <h1 class="main-title">📜 Historique de mes réservations</h1>
+
+        {% set reservationsParMois = {} %}
         {% for resa in reservations %}
-            <li>
-                {{ resa.lieu_depart }} → {{ resa.lieu_arrivee }}
-                (le {{ resa.date_depart|date('d/m/Y') }})
-            </li>
+            {% if resa.covoiturage_statut == 'ferme' %}
+                {% set mois = resa.date_depart|date('Y-m') %}
+                {% if reservationsParMois[mois] is not defined %}
+                    {% set reservationsParMois = reservationsParMois|merge({(mois): []}) %}
+                {% endif %}
+                {% set reservationsParMois = reservationsParMois|merge({(mois): reservationsParMois[mois]|merge([resa])}) %}
+            {% endif %}
         {% endfor %}
-    </ul>
-{% else %}
-    <p>Aucune réservation passée.</p>
-{% endif %}
+
+        {% for mois, resas in reservationsParMois %}
+            {% set moisTexte = resas[0].date_depart|date('F Y') %}
+            {% set moisTexteFR = {
+                'January':'Janvier','February':'Février','March':'Mars','April':'Avril','May':'Mai','June':'Juin',
+                'July':'Juillet','August':'Août','September':'Septembre','October':'Octobre','November':'Novembre','December':'Décembre'
+            }[moisTexte|split(' ')[0]] ~ ' ' ~ moisTexte|split(' ')[1] %}
+
+            <h2 class="month-title">
+                <span class="month-bullet"></span> {{ moisTexteFR }}
+            </h2>
+
+            <div class="reservations-section">
+                {% for resa in resas %}
+                    <div class="details-card past-reservation">
+                        <div class="details-card-header">
+                            <div class="details-title">
+                                <h2>Trajet du {{ resa.date_depart|date('d/m/Y') }} vers {{ resa.lieu_arrivee }}</h2>
+                            </div>
+                            <div class="boutons-container">
+                                {% set avis = resa.avis_existant %}
+                                {% set signalement = resa.signalement_existant %}
+
+                                <!-- Bouton avis -->
+                                {% if avis %}
+                                    {% if avis.is_validated %}
+                                        <span class="badge badge-success">✅ Avis déposé</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">⏳ Avis en attente</span>
+                                    {% endif %}
+                                {% else %}
+                                    <button type="button" class="btn btn-avis open-avis-popup"
+                                        data-avis-covoiturage-id="{{ resa.covoiturage_id }}"
+                                        data-cible-id="{{ resa.chauffeur_id }}">
+                                        Laisser un avis
+                                    </button>
+                                {% endif %}
+
+                                <!-- Bouton signalement -->
+                                {% if signalement %}
+                                    {% if signalement.statut == 'en_attente' %}
+                                        <span class="badge badge-warning">⏳ Signalement en attente</span>
+                                    {% elseif signalement.statut == 'traite' %}
+                                        <span class="badge badge-success">✅ Traité</span>
+                                    {% elseif signalement.statut == 'ignore' %}
+                                        <span class="badge badge-danger">❌ Ignoré</span>
+                                    {% endif %}
+                                {% else %}
+                                    <button type="button" class="btn btn-signalement open-report-popup"
+                                        data-reported-user-id="{{ resa.chauffeur_id }}"
+                                        data-covoiturage-id="{{ resa.covoiturage_id }}">
+                                        Signaler
+                                    </button>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="grayscale-wrapper">
+                            <div class="details-content">
+                                <!-- Bloc conducteur -->
+                                <div class="bloc bloc-conducteur">
+                                    <h3>Conducteur</h3>
+                                    <img src="{{ resa.chauffeur_photo ? 'data:image/jpeg;base64,' ~ resa.chauffeur_photo : asset('images/default-user.png') }}" alt="Photo" class="chauffeur-photo">
+                                    <p><strong>{{ resa.chauffeur_pseudo }}</strong></p>
+                                    <p><strong>Note : </strong>{{ resa.chauffeur_note ?? 'Non noté' }}/5</p>
+                                </div>
+
+                                <!-- Ligne verticale -->
+                                <div class="separator-vertical"></div>
+
+                                <!-- Bloc trajet -->
+                                <div class="bloc bloc-trajet">
+                                    <h3>Trajet</h3>
+                                    <p><strong>Départ :</strong> {{ resa.lieu_depart }}, {{ resa.date_depart|date('d/m/Y') }} à {{ resa.heure_depart|date('H:i') }}</p>
+                                    <p><strong>Arrivée :</strong> {{ resa.lieu_arrivee }}, {{ resa.date_arrivee|date('d/m/Y') }} à {{ resa.heure_arrivee|date('H:i') }}</p>
+                                    <p><strong>Prix :</strong> {{ resa.prix_personne|number_format(2, ',', ' ') }} €</p>
+                                    <p><strong>Places :</strong> {{ resa.nb_place }}</p>
+                                    {% if resa.voiture_energie in ['Électrique', 'Electrique'] %}
+                                        <span class="eco-badge">🌱 Écologique</span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Ligne verticale -->
+                                <div class="separator-vertical"></div>
+
+                                <!-- Bloc voiture -->
+                                <div class="bloc bloc-voiture">
+                                    <h3>Véhicule</h3>
+                                    <p><strong>Marque :</strong> {{ resa.marque }}</p>
+                                    <p><strong>Modèle :</strong> {{ resa.modele }}</p>
+                                    <p><strong>Couleur :</strong> {{ resa.couleur }}</p>
+                                    <p><strong>Énergie :</strong> {{ resa.voiture_energie }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
 {% endblock %}

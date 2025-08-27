@@ -61,13 +61,19 @@ class ProfilController extends AbstractController
             $voitureForms[] = $form->createView();
         }
 
-        // Récupération des covoiturages
+        // Récupération des covoiturages actifs pour le profil
         $covoiturages = [];
         if ($utilisateur->isChauffeur()) {
-            $stmt = $pdo->prepare("SELECT * FROM covoiturage WHERE utilisateur_id = :id");
+            $stmt = $pdo->prepare("
+                SELECT * FROM covoiturage 
+                WHERE utilisateur_id = :id 
+                AND statut IN ('ouvert', 'en_cours', 'complet')
+                ORDER BY date_depart ASC, heure_depart ASC
+            ");
             $stmt->execute(['id' => $utilisateur->getId()]);
             $covoiturages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
+
 
         // Récupération des avis
         $avisValides = $avisRepository->findBy([
@@ -127,6 +133,7 @@ class ProfilController extends AbstractController
             JOIN user u ON u.id = c.utilisateur_id
             JOIN voiture v ON v.id = c.voiture_id
             WHERE r.utilisateur_id = :user_id
+            AND c.statut != 'ferme'
         ");
 
         $stmt->execute(['user_id' => $utilisateur->getId()]);
@@ -362,23 +369,70 @@ class ProfilController extends AbstractController
         ]);
     }
 
-    #[Route('/historique/reservations', name: 'historique_reservations')]
-    public function historiqueReservations(Connection $connection): Response
+   #[Route('/historique/reservations', name: 'historique_reservations')]
+    public function historiqueReservations(EntityManagerInterface $em): Response
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        // récupération des réservations liées à l’utilisateur, terminées
-        $sql = "SELECT r.*, c.lieu_depart, c.lieu_arrivee, c.date_depart 
-                FROM reservation r
-                JOIN covoiturage c ON r.covoiturage_id = c.id
-                WHERE r.passager_id = :userId
-                AND r.statut = 'ferme'
-                ORDER BY c.date_depart DESC";
+        $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $reservations = $connection->fetchAllAssociative($sql, [
-            'userId' => $user->getId()
-        ]);
+        // Récupération des réservations dont le covoiturage est fermé
+        $stmt = $pdo->prepare("
+            SELECT r.*, 
+                c.lieu_depart, c.lieu_arrivee, c.date_depart, c.heure_depart, 
+                c.date_arrivee, c.heure_arrivee, c.nb_place, c.prix_personne, c.statut AS covoiturage_statut,
+                v.marque, v.modele, v.energie AS voiture_energie, v.couleur,
+                u.pseudo AS chauffeur_pseudo, u.note AS chauffeur_note, u.photo AS chauffeur_photo,
+                u.id AS chauffeur_id
+            FROM reservation r
+            JOIN covoiturage c ON r.covoiturage_id = c.id
+            JOIN user u ON u.id = c.utilisateur_id
+            JOIN voiture v ON v.id = c.voiture_id
+            WHERE r.utilisateur_id = :userId
+            AND c.statut = 'ferme'
+            ORDER BY c.date_depart DESC
+        ");
+        $stmt->execute(['userId' => $user->getId()]);
+        $reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Conversion photo et dates/heures + ajout avis et signalement
+        foreach ($reservations as &$resa) {
+            $resa['chauffeur_photo'] = $resa['chauffeur_photo'] ? base64_encode($resa['chauffeur_photo']) : null;
+            $resa['date_depart'] = new DateTime($resa['date_depart']);
+            $resa['heure_depart'] = new DateTime($resa['heure_depart']);
+            $resa['date_arrivee'] = new DateTime($resa['date_arrivee']);
+            $resa['heure_arrivee'] = new DateTime($resa['heure_arrivee']);
+
+            // Avis existant
+            $stmtAvis = $pdo->prepare("
+                SELECT * FROM avis 
+                WHERE auteur_id = :auteur_id 
+                AND covoiturage_id = :covoiturage_id
+                LIMIT 1
+            ");
+            $stmtAvis->execute([
+                'auteur_id' => $user->getId(),
+                'covoiturage_id' => $resa['covoiturage_id'],
+            ]);
+            $resa['avis_existant'] = $stmtAvis->fetch(PDO::FETCH_ASSOC) ?: null;
+
+            // Signalement existant
+            $stmtReport = $pdo->prepare("
+                SELECT * FROM report
+                WHERE reported_by_id = :reported_by_id
+                AND reported_user_id = :reported_user_id
+                AND covoiturage_id = :covoiturage_id
+                LIMIT 1
+            ");
+            $stmtReport->execute([
+                'reported_by_id' => $user->getId(),
+                'reported_user_id' => $resa['chauffeur_id'],
+                'covoiturage_id' => $resa['covoiturage_id'],
+            ]);
+            $resa['signalement_existant'] = $stmtReport->fetch(PDO::FETCH_ASSOC) ?: null;
+        }
 
         return $this->render('profil/historique_reservations.html.twig', [
             'reservations' => $reservations,

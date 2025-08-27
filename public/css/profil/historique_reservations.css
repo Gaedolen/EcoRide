@@ -1,0 +1,147 @@
+/* Container principal */
+.historique-reservations-container {
+    padding: 20px 40px;
+    font-family: 'Comfortaa', sans-serif;
+}
+
+/* Titre principal */
+.main-title {
+    font-size: 32px;
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+/* Titre des mois */
+.month-title {
+    font-size: 22px;
+    color: #2c3e50;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.month-bullet {
+    width: 16px;
+    height: 16px;
+    background: linear-gradient(45deg, #4a86e8, #6fa8dc);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Section des réservations */
+.reservations-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Carte réservation */
+.details-card {
+    width: 100%;
+    background-color: #f5f5f5;
+    border-radius: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Header de la carte */
+.details-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+/* Boutons avis et signalement */
+.boutons-container {
+    display: flex;
+    gap: 10px;
+}
+
+/* Détails de la carte */
+.details-content {
+    display: flex;
+    gap: 20px;
+}
+
+.bloc {
+    flex: 1;
+    padding: 0 10px;
+}
+
+.bloc h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+/* Conducteur */
+.bloc-conducteur {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.chauffeur-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+/* Ligne verticale */
+.separator-vertical {
+    width: 1px;
+    background-color: #ccc;
+}
+
+/* Badges */
+.badge {
+    padding: 0.4em 0.7em;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.badge-success { background-color: #d4edda; color: #155724; }
+.badge-warning { background-color: #fff3cd; color: #856404; }
+.badge-danger { background-color: #f8d7da; color: #721c24; }
+
+/* Boutons avis / signalement */
+.btn-avis, .btn-signalement {
+    padding: 6px 12px;
+    border-radius: 25px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-avis {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-signalement {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-avis:hover { background-color: #218838; }
+.btn-signalement:hover { background-color: #c82333; }
+
+/* Badge écologique */
+.eco-badge {
+    background-color: #a2e76d;
+    color: white;
+    font-weight: bold;
+    padding: 6px 12px;
+    border-radius: 15px;
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 14px;
+}
