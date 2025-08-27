@@ -38,15 +38,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const cancelForm = document.getElementById('cancel-reservation-form');
     const cancelNo = cancelModal.querySelector('.btn-confirm-no');
 
+    // Ouverture du modal et mise à jour de l'action du formulaire
     cancelButtons.forEach(button => {
-        button.addEventListener('click', function (e) {
+        button.addEventListener('click', function(e) {
             e.preventDefault();
             const actionUrl = this.getAttribute('data-action-url');
-            cancelForm.setAttribute('action', actionUrl);
-            cancelModal.classList.remove('hidden');
+            if(cancelForm) {
+                cancelForm.setAttribute('action', actionUrl);
+                cancelModal.classList.remove('hidden');
+            }
         });
     });
 
+    // Fermeture du modal si "Non"
     cancelNo.addEventListener('click', () => {
         cancelModal.classList.add('hidden');
     });

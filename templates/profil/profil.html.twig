@@ -168,9 +168,10 @@
                         </div>
 
                         {% if resa.statut != 'ferme' %}
-                            <form method="POST">
-                                <button type="button" class="btn-annuler open-cancel-popup" data-reservation-id="{{ resa.reservation_id }}" data-action-url="{{ path('annuler_reservation', { id: resa.reservation_id }) }}">Annuler</button>
-                            </form>
+                            <button type="button" class="btn-annuler open-cancel-popup"
+                                data-action-url="{{ path('annuler_reservation', { id: resa.reservation_id }) }}">
+                                Annuler
+                            </button>
                         {% else %}
                             {% set avis = resa.avis_existant %}
                             {% set signalement = resa.signalement_existant %}
@@ -305,7 +306,7 @@
     <div id="cancel-reservation-modal" class="modal hidden"> <!-- Fenêtre pop-up de suppression d'une réservation -->
         <div class="modal-content">
             <p>Êtes-vous sûr de vouloir annuler cette réservation ?</p>
-            <form id="cancel-reservation-form" method="POST">
+            <form id="cancel-reservation-form" method="POST" action="">
                 <div class="modal-buttons">
                     <button type="submit" class="btn-confirm-yes">Oui</button>
                     <button type="button" class="btn-confirm-no">Non</button>

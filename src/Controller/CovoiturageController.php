@@ -6,12 +6,14 @@ use DateTime;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\Mime\Email;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 use App\Form\CovoiturageType;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Covoiturage;
+use App\Entity\User;
 use App\Entity\Reservation;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -471,7 +473,7 @@ class CovoiturageController extends AbstractController
         $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // Récupérer le covoiturage et son chauffeur
+        // Vérifier que le covoiturage appartient bien au chauffeur
         $stmt = $pdo->prepare("SELECT * FROM covoiturage WHERE id = :id AND utilisateur_id = :chauffeur_id");
         $stmt->execute([
             'id' => $id,
@@ -486,7 +488,7 @@ class CovoiturageController extends AbstractController
 
         // Récupérer les passagers
         $stmt = $pdo->prepare("
-            SELECT u.id, u.email, u.credits 
+            SELECT u.id, u.email
             FROM reservation r
             JOIN user u ON r.utilisateur_id = u.id
             WHERE r.covoiturage_id = :id
@@ -494,16 +496,11 @@ class CovoiturageController extends AbstractController
         $stmt->execute(['id' => $id]);
         $passagers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Rembourser les passagers (2 crédits chacun)
+        // Rembourser les passagers et envoyer les mails
+        $updateStmt = $pdo->prepare("UPDATE user SET credits = credits + 2 WHERE id = :id");
         foreach ($passagers as $passager) {
-            $nouveauxCredits = $passager['credits'] + 2;
-            $stmt = $pdo->prepare("UPDATE user SET credits = :credits WHERE id = :id");
-            $stmt->execute([
-                'credits' => $nouveauxCredits,
-                'id' => $passager['id']
-            ]);
+            $updateStmt->execute(['id' => $passager['id']]);
 
-            // Envoyer mail au passager
             $email = (new TemplatedEmail())
                 ->from('noreply@ecoride.com')
                 ->to($passager['email'])
@@ -516,13 +513,9 @@ class CovoiturageController extends AbstractController
             $mailer->send($email);
         }
 
-        // Crédits du chauffeur : 2 crédits par passager
-        $creditsChauffeur = 2 * count($passagers);
-        $stmt = $pdo->prepare("UPDATE user SET credits = credits + :credits WHERE id = :id");
-        $stmt->execute([
-            'credits' => $creditsChauffeur,
-            'id' => $chauffeur->getId()
-        ]);
+        // Rembourser le chauffeur
+        $stmt = $pdo->prepare("UPDATE user SET credits = credits + 2 WHERE id = :id");
+        $stmt->execute(['id' => $chauffeur->getId()]);
 
         // Supprimer les réservations
         $stmt = $pdo->prepare("DELETE FROM reservation WHERE covoiturage_id = :id");
@@ -537,42 +530,59 @@ class CovoiturageController extends AbstractController
     }
 
     #[Route('/reservation/{id}/annuler', name: 'annuler_reservation', methods: ['POST'])]
-    public function annulerReservation(int $id, ManagerRegistry $doctrine): Response
+    public function annulerReservation(int $id): Response
     {
+        /** @var \App\Entity\User $user */
+        $user = $this->getUser();
+        if (!$user) {
+            $this->addFlash('error', 'Vous devez être connecté.');
+            return $this->redirectToRoute('app_login');
+        }
+
         $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // Récupérer le covoiturage et l'utilisateur lié à la réservation
+        // Récupérer la réservation
         $stmt = $pdo->prepare("SELECT covoiturage_id, utilisateur_id FROM reservation WHERE id = :id");
         $stmt->execute(['id' => $id]);
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($result) {
-            $covoiturageId = $result['covoiturage_id'];
-            $utilisateurId = $result['utilisateur_id'];
-
-            // Supprimer la réservation
-            $stmt = $pdo->prepare("DELETE FROM reservation WHERE id = :id");
-            $stmt->execute(['id' => $id]);
-
-            // Ré-incrémentation des places
-            $stmt = $pdo->prepare("UPDATE covoiturage SET nb_place = nb_place + 1 WHERE id = :id");
-            $stmt->execute(['id' => $covoiturageId]);
-
-            // Mettre à jour le statut
-            $em = $doctrine->getManager();
-            $covoiturageEntity = $em->getRepository(Covoiturage::class)->find($covoiturageId);
-
-            if ($covoiturageEntity) {
-                $covoiturageEntity->updateStatutSelonPlaces(); // repasse à "ouvert"
-                $em->flush();
-            }
-
-            // Remboursement des crédits au passager
-            $stmt = $pdo->prepare("UPDATE user SET credits = credits + 2 WHERE id = :id");
-            $stmt->execute(['id' => $utilisateurId]);
+        if (!$reservation) {
+            $this->addFlash('error', 'Réservation non trouvée.');
+            return $this->redirectToRoute('app_profil');
         }
 
+        // Vérifier que l'utilisateur connecté est bien le passager
+        if ($user->getId() != $reservation['utilisateur_id']) {
+            $this->addFlash('error', 'Vous ne pouvez pas annuler cette réservation.');
+            return $this->redirectToRoute('app_profil');
+        }
+
+        $covoiturageId = $reservation['covoiturage_id'];
+
+        // Supprimer la réservation
+        $stmt = $pdo->prepare("DELETE FROM reservation WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+
+        // Remboursement de 2 crédits au passager
+        $stmt = $pdo->prepare("UPDATE user SET credits = credits + 2 WHERE id = :id");
+        $stmt->execute(['id' => $user->getId()]);
+
+        // Ré-incrémenter les places disponibles
+        $stmt = $pdo->prepare("UPDATE covoiturage SET nb_place = nb_place + 1 WHERE id = :id");
+        $stmt->execute(['id' => $covoiturageId]);
+
+        // Vérifier le nombre de places pour passer le statut à 'ouvert'
+        $stmt = $pdo->prepare("SELECT nb_place FROM covoiturage WHERE id = :id");
+        $stmt->execute(['id' => $covoiturageId]);
+        $covoiturage = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($covoiturage['nb_place'] > 0) {
+            $stmt = $pdo->prepare("UPDATE covoiturage SET statut = 'ouvert' WHERE id = :id");
+            $stmt->execute(['id' => $covoiturageId]);
+        }
+
+        $this->addFlash('success', 'Votre réservation a été annulée, 2 crédits vous ont été remboursés.');
         return $this->redirectToRoute('app_profil');
     }
 

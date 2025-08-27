@@ -293,42 +293,6 @@ class ProfilController extends AbstractController
         ]);
     }
 
-    #[Route('/reservation/{id}/annuler', name: 'annuler_reservation', methods: ['POST'])]
-    public function annulerReservation(int $id): RedirectResponse
-    {
-        /** @var \App\Entity\User $utilisateur */
-        $utilisateur = $this->getUser();
-
-        if (!$utilisateur) {
-            throw $this->createAccessDeniedException("Vous devez être connecté.");
-        }
-
-        $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-        // Récupérer la réservation
-        $stmt = $pdo->prepare("SELECT * FROM reservation WHERE id = :id AND utilisateur_id = :user_id");
-        $stmt->execute(['id' => $id, 'user_id' => $utilisateur->getId()]);
-        $reservation = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        if (!$reservation) {
-            throw $this->createNotFoundException('Réservation non trouvée.');
-        }
-
-        $covoiturageId = $reservation['covoiturage_id'];
-
-        // Supprimer la réservation
-        $stmt = $pdo->prepare("DELETE FROM reservation WHERE id = :id");
-        $stmt->execute(['id' => $id]);
-
-        // Réaugmenter le nombre de places disponibles du covoiturage
-        $stmt = $pdo->prepare("UPDATE covoiturage SET nb_place = nb_place + 1 WHERE id = :id");
-        $stmt->execute(['id' => $covoiturageId]);
-
-        return $this->redirectToRoute('app_profil');
-    }
-
-
     #[Route('/laisser-avis', name: 'laisser_avis', methods: ['POST'])]
     public function laisserAvis(Request $request): Response
     {

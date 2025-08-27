@@ -106,6 +106,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $suspendReason = null;
 
+    #[ORM\Column(type: "date", nullable: true)]
+    private ?\DateTimeInterface $dernierCreditJour = null;
+
     // Setter et Getter
 
     public function getRole(): ?Role
@@ -483,6 +486,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setSuspendReason(?string $reason): self
     {
         $this->suspendReason = $reason;
+        return $this;
+    }
+
+    public function getDernierCreditJour(): ?\DateTimeInterface
+    {
+        return $this->dernierCreditJour;
+    }
+
+    public function setDernierCreditJour(?\DateTimeInterface $date): self
+    {
+        $this->dernierCreditJour = $date;
         return $this;
     }
 }
