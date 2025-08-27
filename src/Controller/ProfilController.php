@@ -347,11 +347,11 @@ class ProfilController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        // récupération des covoiturages terminés dont l'utilisateur est chauffeur
+        // Récupération des covoiturages terminés dont l'utilisateur est chauffeur
         $sql = "SELECT * FROM covoiturage 
-                WHERE chauffeur_id = :userId 
-                AND statut = 'termine'
-                ORDER BY date_depart DESC";
+        WHERE utilisateur_id = :userId 
+          AND statut = 'ferme'
+        ORDER BY date_depart ASC, heure_depart ASC";
 
         $covoiturages = $connection->fetchAllAssociative($sql, [
             'userId' => $user->getId()
@@ -373,7 +373,7 @@ class ProfilController extends AbstractController
                 FROM reservation r
                 JOIN covoiturage c ON r.covoiturage_id = c.id
                 WHERE r.passager_id = :userId
-                AND r.statut = 'termine'
+                AND r.statut = 'ferme'
                 ORDER BY c.date_depart DESC";
 
         $reservations = $connection->fetchAllAssociative($sql, [

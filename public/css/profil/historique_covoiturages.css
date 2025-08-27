@@ -1,0 +1,56 @@
+.covoiturage-container-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 0 40px 20px 40px;
+}
+
+.covoiturage-card {
+    background-color: #f5f5f5;
+    border-radius: 20px;
+    padding: 20px;
+    font-family: 'Comfortaa', sans-serif;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.covoiturage-content {
+    display: flex;
+    gap: 20px;
+}
+
+.covoiturage-left,
+.covoiturage-right {
+    flex: 1;
+}
+
+.separator-vertical {
+    width: 1px;
+    background-color: #ccc;
+}
+
+.titre-covoiturage {
+    color: #4a86e8;
+    margin-bottom: 10px;
+}
+
+.covoiturage-card p {
+    font-size: 16px;
+    margin: 6px 0;
+}
+
+.month-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 30px 40px 10px 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.month-dot {
+    width: 10px;
+    height: 10px;
+    background-color: black;
+    border-radius: 50%;
+    display: inline-block;
+}

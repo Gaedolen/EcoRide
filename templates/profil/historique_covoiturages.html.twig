@@ -1,18 +1,65 @@
 {% extends 'base.html.twig' %}
 
-{% block body %}
-<h1>📜 Historique de mes covoiturages</h1>
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/profil/historique_covoiturages.css') }}">
+{% endblock %}
 
-{% if covoiturages is not empty %}
-    <ul>
-        {% for covoiturage in covoiturages %}
-            <li>
-                {{ covoiturage.lieu_depart }} → {{ covoiturage.lieu_arrivee }}
-                (le {{ covoiturage.date_depart|date('d/m/Y') }})
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Aucun covoiturage passé.</p>
-{% endif %}
+{% block body %}
+    <h1>📜 Historique de mes covoiturages</h1>
+
+    {% if covoiturages is not empty %}
+        <div class="covoiturage-container-vertical">
+            {% set previousMonth = null %}
+
+            {% set moisFR = {
+                '01': 'Janvier',
+                '02': 'Février',
+                '03': 'Mars',
+                '04': 'Avril',
+                '05': 'Mai',
+                '06': 'Juin',
+                '07': 'Juillet',
+                '08': 'Août',
+                '09': 'Septembre',
+                '10': 'Octobre',
+                '11': 'Novembre',
+                '12': 'Décembre'
+            } %}
+
+            {% for covoiturage in covoiturages %}
+                {% set monthNumber = covoiturage.date_depart|date('m') %}
+                {% set year = covoiturage.date_depart|date('Y') %}
+                {% set currentMonth = monthNumber ~ '-' ~ year %}
+
+                {% if currentMonth != previousMonth %}
+                    <h2 class="month-title">
+                        <span class="month-dot"></span>
+                        {{ moisFR[monthNumber] }} {{ year }}
+                    </h2>
+                    {% set previousMonth = currentMonth %}
+                {% endif %}
+
+                <div class="covoiturage-card">
+                    <div class="covoiturage-content">
+                        <div class="covoiturage-left">
+                            <h3 class="titre-covoiturage">Trajet vers {{ covoiturage.lieu_arrivee }}</h3>
+                            <p><strong>Départ :</strong> {{ covoiturage.lieu_depart }}, {{ covoiturage.date_depart|date('d/m/Y') }} à {{ covoiturage.heure_depart|date('H:i') }}</p>
+                            <p><strong>Arrivée :</strong> {{ covoiturage.lieu_arrivee }}, {{ covoiturage.date_arrivee|date('d/m/Y') }} à {{ covoiturage.heure_arrivee|date('H:i') }}</p>
+                        </div>
+
+                        <div class="separator-vertical"></div>
+
+                        <div class="covoiturage-right">
+                            <p><strong>Nombre de places :</strong> {{ covoiturage.nb_place }}</p>
+                            <p><strong>Prix par personne :</strong> {{ covoiturage.prix_personne }} €</p>
+                            <p><strong>Statut :</strong> {{ covoiturage.statut }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>Vous n'avez aucun covoiturage passé.</p>
+    {% endif %}
+
 {% endblock %}
