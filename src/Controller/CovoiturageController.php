@@ -31,6 +31,16 @@ class CovoiturageController extends AbstractController
         $date = $request->query->get('date_depart');
         $heure = $request->query->get('heure_depart');
 
+        // Vérification côté serveur : date >= aujourd'hui
+        if ($date) {
+            $dateDepart = DateTime::createFromFormat('Y-m-d', $date);
+            $aujourdhui = new DateTime('today');
+            if ($dateDepart < $aujourdhui) {
+                $this->addFlash('error', 'Vous ne pouvez pas rechercher un covoiturage pour une date passée.');
+                return $this->redirectToRoute('app_covoiturage'); // redirection vers le formulaire
+            }
+        }
+
         // Paramètres de filtre
         $noteMin = $request->query->get('note_min');
         $ecologique = $request->query->get('ecologique');
@@ -112,7 +122,6 @@ class CovoiturageController extends AbstractController
             'trajets' => $trajets
         ]);
     }
-
 
     #[Route('/covoiturage/{id}', name: 'details_trajet', requirements: ['id' => '\d+'])]
     public function details(int $id): Response
@@ -366,22 +375,24 @@ class CovoiturageController extends AbstractController
     }
 
     #[Route('/covoiturage/{id}/modifier', name: 'modifier_covoiturage', methods: ['GET', 'POST'])]
-    public function modifierCovoiturage(Request $request, int $id, EntityManagerInterface $em): Response
+    public function modifierCovoiturage(Request $request, int $id): Response
     {
         /** @var \App\Entity\User $utilisateur */
         $utilisateur = $this->getUser();
+
         if (!$utilisateur || !$utilisateur->isChauffeur()) {
             throw $this->createAccessDeniedException('Accès refusé.');
         }
 
-        // Connexion PDO pour récupérer le covoiturage
-        $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
+        // Connexion PDO
+        $pdo = new PDO('mysql:host=127.0.0.1;dbname=ecoride;charset=utf8', 'root', '');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $stmt = $pdo->prepare("SELECT * FROM covoiturage WHERE id = :id AND utilisateur_id = :utilisateur_id");
+        // Récupérer le covoiturage
+        $stmt = $pdo->prepare("SELECT * FROM covoiturage WHERE id = :id AND utilisateur_id = :userId");
         $stmt->execute([
             'id' => $id,
-            'utilisateur_id' => $utilisateur->getId(),
+            'userId' => $utilisateur->getId(),
         ]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -389,7 +400,7 @@ class CovoiturageController extends AbstractController
             throw $this->createNotFoundException('Covoiturage non trouvé.');
         }
 
-        // Reconstituer l'entité Covoiturage
+        // Reconstituer l'entité pour le formulaire
         $covoiturage = new Covoiturage();
         $covoiturage
             ->setDateDepart(new DateTime($row['date_depart']))
@@ -398,31 +409,29 @@ class CovoiturageController extends AbstractController
             ->setDateArrivee(new DateTime($row['date_arrivee']))
             ->setHeureArrivee(new DateTime($row['heure_arrivee']))
             ->setLieuArrivee($row['lieu_arrivee'])
-            ->setNbPlace((int) $row['nb_place'])
-            ->setPrixPersonne((float) $row['prix_personne']);
+            ->setNbPlace((int)$row['nb_place'])
+            ->setPrixPersonne((float)$row['prix_personne']);
 
-        // Récupérer la voiture via Doctrine (obligatoire pour EntityType)
-        if (!empty($row['voiture_id'])) {
-            $voitureEntity = $em->getRepository(\App\Entity\Voiture::class)->find($row['voiture_id']);
-            if ($voitureEntity) {
-                $covoiturage->setVoiture($voitureEntity);
-            }
-        }
-
-        // Création du formulaire
+        // Créer le formulaire
         $form = $this->createForm(CovoiturageType::class, $covoiturage, [
             'user' => $utilisateur,
         ]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Recalculer le statut
+            // Vérifier si le covoiturage est passé
             $now = new DateTime();
-            $isPast = ($covoiturage->getDateDepart() < $now) || ($covoiturage->getDateDepart() == $now && $covoiturage->getHeureDepart() < $now);
+            $dateHeureDepart = DateTime::createFromFormat(
+                'Y-m-d H:i:s',
+                $covoiturage->getDateDepart()->format('Y-m-d') . ' ' . $covoiturage->getHeureDepart()->format('H:i:s')
+            );
+            $isPast = $dateHeureDepart < $now;
+
+            // Calcul du statut
             $statut = $isPast ? 'ferme' : (($covoiturage->getNbPlace() <= 0) ? 'complet' : 'ouvert');
 
-            // Mise à jour BDD
-            $stmt = $pdo->prepare("
+            // Mise à jour en PDO
+            $stmtUpdate = $pdo->prepare("
                 UPDATE covoiturage SET
                     date_depart = :date_depart,
                     heure_depart = :heure_depart,
@@ -436,19 +445,18 @@ class CovoiturageController extends AbstractController
                     statut = :statut
                 WHERE id = :id
             ");
-
-            $stmt->execute([
-                'date_depart'   => $covoiturage->getDateDepart()->format('Y-m-d'),
-                'heure_depart'  => $covoiturage->getHeureDepart()->format('H:i:s'),
-                'lieu_depart'   => $covoiturage->getLieuDepart(),
-                'date_arrivee'  => $covoiturage->getDateArrivee()->format('Y-m-d'),
+            $stmtUpdate->execute([
+                'date_depart' => $covoiturage->getDateDepart()->format('Y-m-d'),
+                'heure_depart' => $covoiturage->getHeureDepart()->format('H:i:s'),
+                'lieu_depart' => $covoiturage->getLieuDepart(),
+                'date_arrivee' => $covoiturage->getDateArrivee()->format('Y-m-d'),
                 'heure_arrivee' => $covoiturage->getHeureArrivee()->format('H:i:s'),
-                'lieu_arrivee'  => $covoiturage->getLieuArrivee(),
-                'nb_place'      => $covoiturage->getNbPlace(),
+                'lieu_arrivee' => $covoiturage->getLieuArrivee(),
+                'nb_place' => $covoiturage->getNbPlace(),
                 'prix_personne' => $covoiturage->getPrixPersonne(),
-                'voiture_id'    => $covoiturage->getVoiture()?->getId(),
-                'statut'        => $statut,
-                'id'            => $id,
+                'voiture_id' => $covoiturage->getVoiture()?->getId(),
+                'statut' => $statut,
+                'id' => $id,
             ]);
 
             $this->addFlash('success', 'Covoiturage modifié avec succès.');
@@ -457,6 +465,7 @@ class CovoiturageController extends AbstractController
 
         return $this->render('covoiturage/modifier.html.twig', [
             'form' => $form->createView(),
+            'covoiturage' => $covoiturage,
         ]);
     }
 

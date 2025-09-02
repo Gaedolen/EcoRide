@@ -24,7 +24,9 @@ class CovoiturageType extends AbstractType
             ->add('date_depart', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date de départ',
+                'html5' => true,
                 'attr' => [
+                    'min' => (new \DateTime())->format('Y-m-d'),
                     'class' => 'form-input',
                 ]
             ])
@@ -44,7 +46,12 @@ class CovoiturageType extends AbstractType
             ])
             ->add('date_arrivee', DateType::class, [
                 'widget' => 'single_text',
-                'label' => 'Date d’arrivée'
+                'label' => 'Date d’arrivée',
+                'html5' => true,
+                'attr' => [
+                    'min' => (new \DateTime())->format('Y-m-d'),
+                    'class' => 'form-input'
+                ],
             ])
             ->add('heureArrivee', TimeType::class, [
                 'label' => 'Heure d\'arrivée',

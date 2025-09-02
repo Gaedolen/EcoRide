@@ -88,7 +88,7 @@
                         placeholder="Ville d'arrivée"
                         value="{{ app.request.get('lieu_arrivee') }}" required>
 
-                    <input type="date" class="form-control" id="date_depart" name="date_depart"
+                    <input type="date" class="form-control" id="date_depart" name="date_depart" min="{{ "now"|date('Y-m-d') }}"
                         value="{{ app.request.get('date_depart') ?: 'now'|date('Y-m-d') }}" required>
 
                     <input type="time" class="form-control" id="heure_depart" name="heure_depart"

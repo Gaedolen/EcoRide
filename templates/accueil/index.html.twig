@@ -29,7 +29,7 @@
             <div class='champs-saisie'>
                 <input type="text" class="form-control" id="lieu_depart" name="lieu_depart" placeholder="Ville de départ" required>
                 <input type="text" class="form-control" id="lieu_arrivee" name="lieu_arrivee" placeholder="Ville d'arrivée" required>
-                <input type="date" class="form-control" id="date_depart" name="date_depart" value="{{ "tomorrow"|date('Y-m-d') }}" required>
+                <input type="date" class="form-control" id="date_depart" name="date_depart"  value="{{ app.request.get('date_depart') ?: "now"|date('Y-m-d') }}" min="{{ "now"|date('Y-m-d') }}"  required>
                 <input type="time" class="form-control" id="heure_depart" name="heure_depart" value="06:00" required>
             </div>
             <input type="submit" value="Rechercher" class='rechercher'>

@@ -9,16 +9,21 @@
 {% block body %}
     <div class="details-header">
         <h2>Détails du covoiturage</h2>
-        <form method="POST" action="{{ path('reserver_trajet', { id: trajet.id }) }}">
-            <button 
-                type="submit" 
-                class="btn-reserver {% if app.user.credits < 2 %}disabled-btn{% endif %}"
-                data-tooltip="{% if app.user.credits < 2 %}Il vous faut 2 crédits pour covoiturer{% endif %}"
-                {% if app.user.credits < 2 %}onclick="return false;"{% endif %}
-            >
-                Covoiturer !
+        {% if app.user.id != trajet.utilisateur_id %}
+            <form method="POST" action="{{ path('reserver_trajet', { id: trajet.id }) }}">
+                <button 
+                    type="submit" 
+                    class="btn-reserver {% if app.user.credits < 2 %}disabled-btn{% endif %}"
+                    {% if app.user.credits < 2 %}onclick="return false;"{% endif %}
+                >
+                    Covoiturer !
+                </button>
+            </form>
+        {% else %}
+            <button class="btn-reserver disabled-btn" onclick="return false;">
+                Vous êtes le conducteur
             </button>
-        </form>
+        {% endif %}
     </div>
 
     <div class="carte-details">

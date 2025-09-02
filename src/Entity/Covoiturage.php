@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use App\Repository\CovoiturageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -39,6 +41,8 @@ class Covoiturage
     private Collection $avis;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotNull(message: "La date de départ est obligatoire.")]
+    #[Assert\GreaterThanOrEqual("today", message: "La date de départ doit être aujourd'hui ou plus tard.")]
     private ?\DateTimeInterface $date_depart = null;
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
@@ -48,7 +52,19 @@ class Covoiturage
     private ?string $lieu_depart = null;
 
     #[ORM\Column(type: Types::DATE_MUTABLE)]
+    #[Assert\NotNull(message: "La date d’arrivée est obligatoire.")]
+    #[Assert\GreaterThanOrEqual("today", message: "La date d’arrivée doit être aujourd'hui ou plus tard.")]
     private ?\DateTimeInterface $date_arrivee = null;
+
+    #[Assert\Callback]
+    public function validate(ExecutionContextInterface $context): void
+    {
+        if ($this->date_depart && $this->date_arrivee && $this->date_arrivee < $this->date_depart) {
+            $context->buildViolation('La date d’arrivée doit être après la date de départ.')
+                ->atPath('date_arrivee')
+                ->addViolation();
+        }
+    }
 
     #[ORM\Column(type: Types::TIME_MUTABLE)]
     private ?\DateTimeInterface $heureArrivee = null;

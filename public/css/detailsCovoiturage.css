@@ -70,7 +70,7 @@
 .btn-reserver.disabled-btn {
     opacity: 0.5;
     cursor: not-allowed;
-    pointer-events: auto; /* laisse le survol pour le tooltip */
+    pointer-events: auto;
     position: relative;
 }
 
@@ -78,7 +78,7 @@
 .btn-reserver.disabled-btn:hover::after {
     content: attr(data-tooltip);
     position: absolute;
-    bottom: 125%; /* au-dessus du bouton */
+    bottom: 125%;
     left: 50%;
     transform: translateX(-50%);
     background-color: #333;
@@ -90,8 +90,6 @@
     z-index: 100;
     opacity: 1;
 }
-
-
 
 /* Carte de détails du covoiturage sélectionné */
 .carte-details {
