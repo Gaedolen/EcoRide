@@ -62,7 +62,7 @@
             {% if voituresData is not empty %}
                 <div class="car-scroll-wrapper">
                     <div class="car-container">
-                        {% for form in voitureForms %}
+                        {% for voiture in voituresData %}
                             {% set voiture = voituresData[loop.index0] %}
                             <div class="car-card">
                                 <ul style="list-style-type:none;">
@@ -74,6 +74,18 @@
                                     <li><span class="label">Places disponibles :</span> <span class="value">{{ voiture.nb_places }}</span></li>
                                     <li><span class="label">Fumeur :</span> <span class="value">{{ voiture.fumeur ? 'Oui' : 'Non' }}</span></li>
                                     <li><span class="label">Animaux :</span> <span class="value">{{ voiture.animaux ? 'Oui' : 'Non' }}</span></li>
+                                    <div class="preferences-container">
+                                        <li><span class="label">Préférences personnalisées :</span></li>
+                                        {% if voiture.preferences is not empty %}
+                                            <ul id="preferences-list">
+                                                {% for pref in voiture.preferences %}
+                                                    <li><span class="pastille"></span>{{ pref }}</li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            <p>Aucune préférence.</p>
+                                        {% endif %}
+                                    </div>
                                 </ul>
                                 
                                 <div class="card-actions">

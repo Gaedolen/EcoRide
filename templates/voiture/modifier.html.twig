@@ -99,6 +99,21 @@
                 </label>
             </div>
 
+            <div class="preferences-container">
+                <label>Préférences personnalisées</label>
+                
+                <ul id="preferences-list" data-prototype="{{ form_widget(form.preferences.vars.prototype)|e('html_attr') }}">
+                    {% for pref in form.preferences %}
+                        <li>
+                            {{ form_widget(pref, { attr: { class: 'preference-input', placeholder: 'Ex : musique forte' } }) }}
+                            <button type="button" class="remove-pref">❌</button>
+                        </li>
+                    {% endfor %}
+                </ul>
+                
+                <button type="button" id="add-pref">Ajouter une préférence</button>
+            </div>
+
             <button type="submit" class="ajouter">Modifier</button>
         {{ form_end(form) }}
     </div>

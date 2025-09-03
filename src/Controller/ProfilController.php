@@ -42,23 +42,24 @@ class ProfilController extends AbstractController
         $stmt->execute(['id' => $utilisateur->getId()]);
         $voituresData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $voitureForms = [];
-        foreach ($voituresData as $index => $row) {
-            $voiture = new Voiture();
-            $voiture
-                ->setId((int) $row['id'])
-                ->setMarque($row['marque'])
-                ->setModele($row['modele'])
-                ->setImmatriculation($row['immatriculation'])
-                ->setDatePremiereImmatriculation(new DateTime($row['date_premiere_immatriculation']))
-                ->setNbPlaces((int)$row['nb_places'])
-                ->setEnergie($row['energie'])
-                ->setCouleur($row['couleur'])
-                ->setFumeur((bool) $row['fumeur'])
-                ->setAnimaux((bool) $row['animaux']);
+        // Décodage des préférences JSON pour chaque voiture
+        foreach ($voituresData as &$row) {
+            $preferences = [];
+            if (!empty($row['preferences'])) {
+                // Premier décodage JSON
+                $decoded = json_decode($row['preferences'], true);
 
-            $form = $formFactory->createNamed("voiture_{$index}", VoitureType::class, $voiture);
-            $voitureForms[] = $form->createView();
+                // Si c’est encore une string JSON (double encodage), on décode une deuxième fois
+                if (is_string($decoded)) {
+                    $decoded = json_decode($decoded, true);
+                }
+
+                if (is_array($decoded)) {
+                    $preferences = $decoded;
+                }
+            }
+
+            $row['preferences'] = $preferences;
         }
 
         // Récupération des covoiturages actifs pour le profil
@@ -127,7 +128,8 @@ class ProfilController extends AbstractController
                 v.couleur,
                 v.nb_places,
                 v.fumeur,
-                v.animaux
+                v.animaux,
+                v.preferences
             FROM reservation r
             JOIN covoiturage c ON r.covoiturage_id = c.id
             JOIN user u ON u.id = c.utilisateur_id
@@ -203,8 +205,7 @@ class ProfilController extends AbstractController
         $avisDonnes = $utilisateur->getAvisDonnes();
 
         return $this->render('profil/profil.html.twig', [
-            'user' => $utilisateur, 
-            'voitureForms' => $voitureForms,
+            'user' => $utilisateur,
             'voituresData' => $voituresData,
             'photoBase64' => $photoBase64, 
             'covoiturages' => $covoiturages,
@@ -213,7 +214,6 @@ class ProfilController extends AbstractController
             'avisValides' => $avisValides,
         ]);
     }
-
 
     #[Route('/profil/modifier', name: 'modifier_profil')]
     public function modifierProfil(Request $request): Response

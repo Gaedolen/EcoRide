@@ -42,7 +42,6 @@ class Voiture
     #[Assert\LessThan('today', message: 'La date d\'immatriculation doit être antérieure à aujourd\'hui.')]
     private ?\DateTimeInterface $datePremiereImmatriculation = null;
 
-
     #[ORM\Column(length: 50)]
     private ?string $marque = null;
 
@@ -55,6 +54,8 @@ class Voiture
     #[ORM\Column(type: 'boolean')]
     private ?bool $animaux = null;
 
+    #[ORM\Column(type: Types::JSON, nullable: true)]
+    private array $preferences = [];
 
     public function getId(): ?int
     {
@@ -184,4 +185,14 @@ class Voiture
         return $this;
     }
 
+    public function getPreferences(): array
+    {
+        return $this->preferences;
+    }
+
+    public function setPreferences(array $preferences): self
+    {
+        $this->preferences = $preferences;
+        return $this;
+    }
 }

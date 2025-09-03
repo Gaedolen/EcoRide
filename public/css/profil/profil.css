@@ -224,6 +224,26 @@ h1 {
     font-size: 18px;
 }
 
+.pref-badge {
+    display: inline-block;
+    background-color: #4a86e8;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 14px;
+    margin-right: 5px;
+    margin-bottom: 3px;
+}
+
+.pastille {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #9BE365;
+    display: inline-block;
+    margin-right: 8px;
+}
+
 /* Boutons de modification et de suppression, et d'avis */
 .card-actions,
 .btns {

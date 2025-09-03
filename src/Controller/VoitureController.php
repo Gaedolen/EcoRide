@@ -7,40 +7,41 @@ use App\Form\VoitureType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
 class VoitureController extends AbstractController
 {
     #[Route('/ajouter-voiture', name: 'ajouter_voiture', methods: ['GET', 'POST'])]
     public function ajouterVoiture(Request $request): Response
     {
-        // Création d'une nouvelle voiture
         $voiture = new Voiture();
-
-        // Création du formulaire associé à l'entité Voiture
         $form = $this->createForm(VoitureType::class, $voiture);
-
-        // Traitement de la requête HTTP
         $form->handleRequest($request);
 
-        // Si l'utilisateur a soumis le formulaire
-        if ($form->isSubmitted()) {
+        if ($form->isSubmitted() && $form->isValid()) {
 
-            // Si les données sont valides
-            if ($form->isValid()) {
+            /** @var \App\Entity\User $utilisateur */
+            $utilisateur = $this->getUser();
+            if (!$utilisateur) {
+                $this->addFlash('error', 'Vous devez être connecté pour ajouter une voiture.');
+                return $this->redirectToRoute('app_login');
+            }
 
-                // Récupération de l'utilisateur connecté
-                $utilisateur = $this->getUser();
-                /** @var \App\Entity\User $utilisateur */
+            $preferences = $voiture->getPreferences(); // tableau JSON
+            $preferencesJson = !empty($preferences) ? json_encode($preferences, JSON_UNESCAPED_UNICODE) : null;
 
-                // Si aucun utilisateur n'est pas connecté, on redirige vers la connexion
-                if (!$utilisateur) {
-                    $this->addFlash('error', 'Vous devez être connecté pour ajouter une voiture.');
-                    return $this->redirectToRoute('app_login');
-                }
+            try {
+                $pdo = new \PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
+                $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-                // Préparation des données pour l'insertion dans la base
-                $data = [
+                $stmt = $pdo->prepare("
+                    INSERT INTO voiture 
+                        (immatriculation, date_premiere_immatriculation, marque, modele, nb_places, fumeur, animaux, couleur, energie, utilisateur_id, preferences)
+                    VALUES 
+                        (:immatriculation, :date_premiere_immatriculation, :marque, :modele, :nb_places, :fumeur, :animaux, :couleur, :energie, :utilisateur_id, :preferences)
+                ");
+
+                $stmt->execute([
                     'immatriculation' => $voiture->getImmatriculation(),
                     'date_premiere_immatriculation' => $voiture->getDatePremiereImmatriculation()?->format('Y-m-d'),
                     'marque' => $voiture->getMarque(),
@@ -51,51 +52,30 @@ class VoitureController extends AbstractController
                     'couleur' => $voiture->getCouleur(),
                     'energie' => $voiture->getEnergie(),
                     'utilisateur_id' => $utilisateur->getId(),
-                ];
+                    'preferences' => $preferencesJson,
+                ]);
 
-                // Insertion en base via PDO
-                try {
-                    $pdo = new \PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
-                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                $this->addFlash('success', 'Voiture ajoutée avec succès !');
+                return $this->redirectToRoute('app_profil');
 
-                    $stmt = $pdo->prepare("
-                        INSERT INTO voiture 
-                        (immatriculation, date_premiere_immatriculation, marque, modele, nb_places, fumeur, animaux, couleur, energie, utilisateur_id)
-                        VALUES 
-                        (:immatriculation, :date_premiere_immatriculation, :marque, :modele, :nb_places, :fumeur, :animaux, :couleur, :energie, :utilisateur_id)
-                    ");
-
-                    $stmt->execute($data);
-
-                    $this->addFlash('success', 'Voiture ajoutée avec succès !');
-                    return $this->redirectToRoute('app_profil');
-
-                } catch (\PDOException $e) {
-                    $this->addFlash('error', 'Erreur lors de l\'insertion : ' . $e->getMessage());
-                    return $this->redirectToRoute('ajouter_voiture');
-                }
-            }
-
-            // Si le formulaire est invalide, on affiche les erreurs
-            foreach ($form->getErrors(true, false) as $error) {
-                $this->addFlash('error', $error->getMessage());
+            } catch (\PDOException $e) {
+                $this->addFlash('error', 'Erreur lors de l\'insertion : ' . $e->getMessage());
+                return $this->redirectToRoute('ajouter_voiture');
             }
         }
 
-        // Affichage de la page
         return $this->render('voiture/ajouter.html.twig', [
             'form' => $form->createView(),
-            'voiture' => $voiture,
         ]);
     }
 
-    #[Route('/voiture/modifier/{id}', name: 'modifier_voiture')]
-    public function modifier(Request $request, int $id): Response
+    #[Route('/voiture/modifier/{id}', name: 'modifier_voiture', methods: ['GET', 'POST'])]
+    public function modifierVoiture(Request $request, int $id): Response
     {
         $pdo = new \PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        // Récupération des données de la voiture
+        // Récupérer la voiture
         $stmt = $pdo->prepare("SELECT * FROM voiture WHERE id = :id");
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -104,27 +84,44 @@ class VoitureController extends AbstractController
             throw $this->createNotFoundException('Voiture introuvable');
         }
 
-        // Crée une entité Voiture
         $voiture = new Voiture();
         $voiture
-            ->setId($row['id'])
             ->setMarque($row['marque'])
             ->setModele($row['modele'])
             ->setImmatriculation($row['immatriculation'])
             ->setDatePremiereImmatriculation(new \DateTime($row['date_premiere_immatriculation']))
             ->setNbPlaces($row['nb_places'])
-            ->setEnergie($row['energie'])
-            ->setCouleur($row['couleur'])
             ->setFumeur((bool) $row['fumeur'])
-            ->setAnimaux((bool) $row['animaux']);
+            ->setAnimaux((bool) $row['animaux'])
+            ->setCouleur($row['couleur'])
+            ->setEnergie($row['energie'])
+            ->setPreferences($row['preferences'] ? json_decode($row['preferences'], true) : []);
 
-        // Crée le formulaire
         $form = $this->createForm(VoitureType::class, $voiture);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Met à jour la BDD
-            $data = [
+
+            $preferences = $voiture->getPreferences();
+            $preferencesJson = !empty($preferences) ? json_encode($preferences, JSON_UNESCAPED_UNICODE) : null;
+
+            $sql = "
+                UPDATE voiture SET
+                    immatriculation = :immatriculation,
+                    date_premiere_immatriculation = :date,
+                    marque = :marque,
+                    modele = :modele,
+                    nb_places = :nb_places,
+                    fumeur = :fumeur,
+                    animaux = :animaux,
+                    couleur = :couleur,
+                    energie = :energie,
+                    preferences = :preferences
+                WHERE id = :id
+            ";
+
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute([
                 'id' => $id,
                 'immatriculation' => $voiture->getImmatriculation(),
                 'date' => $voiture->getDatePremiereImmatriculation()->format('Y-m-d'),
@@ -135,24 +132,8 @@ class VoitureController extends AbstractController
                 'animaux' => $voiture->isAnimaux() ? 1 : 0,
                 'couleur' => $voiture->getCouleur(),
                 'energie' => $voiture->getEnergie(),
-            ];
-
-            $sql = "
-                UPDATE voiture SET
-                immatriculation = :immatriculation,
-                date_premiere_immatriculation = :date,
-                marque = :marque,
-                modele = :modele,
-                nb_places = :nb_places,
-                fumeur = :fumeur,
-                animaux = :animaux,
-                couleur = :couleur,
-                energie = :energie
-                WHERE id = :id
-            ";
-
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($data);
+                'preferences' => $preferencesJson,
+            ]);
 
             $this->addFlash('success', 'Voiture modifiée avec succès !');
             return $this->redirectToRoute('app_profil');
@@ -164,7 +145,7 @@ class VoitureController extends AbstractController
     }
 
     #[Route('/voiture/supprimer/{id}', name: 'supprimer_voiture', methods: ['POST'])]
-public function supprimer(int $id): Response
+    public function supprimerVoiture(int $id): Response
     {
         /** @var \App\Entity\User $utilisateur */
         $utilisateur = $this->getUser();
@@ -184,6 +165,4 @@ public function supprimer(int $id): Response
         $this->addFlash('success', 'Voiture supprimée avec succès.');
         return $this->redirectToRoute('app_profil');
     }
-
-
 }
