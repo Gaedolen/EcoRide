@@ -163,6 +163,31 @@
     padding-left: 20px;
 }
 
+.preferences-section {
+    margin-top: 10px;
+}
+
+.preferences-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 5px 0 0 0;
+}
+
+.preferences-list li {
+    position: relative;
+    padding-left: 20px;
+    margin-bottom: 5px;
+}
+
+.pastille {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #9BE365;
+    display: inline-block;
+    margin-right: 8px;
+}
+
 /* Bouton de retour en arrière */
 .btn-retour-wrapper {
     margin-top: 25px;

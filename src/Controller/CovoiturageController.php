@@ -135,7 +135,7 @@ class CovoiturageController extends AbstractController
                 u.pseudo AS chauffeur_pseudo,
                 u.note AS chauffeur_note,
                 u.photo AS chauffeur_photo,
-                v.marque, v.modele, v.energie, v.nb_places, v.couleur, v.animaux, v.fumeur
+                v.marque, v.modele, v.energie, v.nb_places, v.couleur, v.animaux, v.fumeur, v.preferences
             FROM covoiturage c
             JOIN user u ON u.id = c.utilisateur_id
             JOIN voiture v ON v.id = c.voiture_id
@@ -144,6 +144,26 @@ class CovoiturageController extends AbstractController
 
         $stmt->execute(['id' => $id]);
         $trajet = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$trajet) {
+            throw $this->createNotFoundException("Ce covoiturage n'existe pas.");
+        }
+
+        if (!empty($trajet['preferences'])) {
+            $decoded = json_decode($trajet['preferences'], true);
+
+            if (is_string($decoded)) {
+                $decoded = json_decode($decoded, true);
+            }
+
+            if (is_array($decoded)) {
+                $trajet['preferences'] = $decoded;
+            } else {
+                $trajet['preferences'] = [];
+            }
+        } else {
+            $trajet['preferences'] = [];
+        }
 
         if (!$trajet) {
             throw $this->createNotFoundException("Ce covoiturage n'existe pas.");

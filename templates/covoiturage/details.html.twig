@@ -63,7 +63,14 @@
             <p><strong>Animaux :</strong> {{ trajet.animaux ? 'Oui' : 'Non' }}</p>
             <p><strong>Fumeur :</strong> {{ trajet.fumeur ? 'Oui' : 'Non' }}</p>
             {% if trajet.preferences is not empty %}
-                <p><strong>Préférences :</strong> {{ trajet.preferences|join(', ') }}</p>
+                <div class="preferences-section">
+                    <p><strong>Préférences personnalisées :</strong></p>
+                    <ul class="preferences-list">
+                        {% for pref in trajet.preferences %}
+                            <li><span class="pastille"></span>{{ pref }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
             {% endif %}
         </div>
     </div>
