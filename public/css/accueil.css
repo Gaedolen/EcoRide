@@ -1,36 +1,72 @@
-/* Block de présentation */
-.presentation {
-    padding: 20px;
+/* --- GLOBAL --- */
+body {
     font-family: 'Comfortaa', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f9f9f9;
+    color: #333;
 }
 
-.bienvenue {
-    color: #4A90E2;
-    font-size: 50px;
-    margin-bottom: 20px;
-    margin-top: 10px;
-}
-
-.presentation-contenu {
+/* --- HERO --- */
+.hero {
+    background: linear-gradient(#d6f3d9, #f9f9f9);
+    padding: 50px 15px 30px 15px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
+    justify-content: center;
+}
+
+.hero-content {
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    gap: 2rem;
+    flex-wrap: wrap;
+    max-width: 1600px;
+    width: 100%;
+}
+
+/* --- IMAGE CONVIVIALE --- */
+.hero-img-container {
+    flex: 1;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
     align-items: center;
+    max-height: 700px;
 }
 
-.img-conviviale {
-    width: 820px;
+.hero-img-container img {
+    width: 100%;
     height: auto;
+    object-fit: contain;
     border-radius: 20px;
 }
 
-.texte-presentation {
+/* --- TEXTE DE PRÉSENTATION --- */
+.hero-text {
+    flex: 1;
     background-color: #a2e76d;
-    padding: 30px;
     border-radius: 20px;
-    max-width:800px;
-    font-size: 1.75em;
-    line-height: 1.3;
+    padding: 70px 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+}
+
+.hero-text h1 {
+    margin: 0 0 20px 0;
+    font-size: 3rem;
+    line-height: 1.2;
+}
+
+.hero-text p {
+    font-size: 1.35rem;
+    line-height: 1.5;
+    margin-bottom: 20px;
 }
 
 .eco-color {
@@ -38,63 +74,194 @@
     font-weight: bold;
 }
 
-/* Image bas de page*/
-.paysage {
-    width: 1500px;
-    height: auto;
-    display: block;
-    margin: 0 auto;
-    align-items: center;
-    justify-content: center;  
-}
-
-/* Formulaire */
-.formulaire {
+.btn-cta {
     background-color: #4A90E2;
-    padding: 10px;
+    color: white;
+    text-decoration: none;
+    padding: 16px 32px;
     border-radius: 20px;
-    margin: 20px;
-    margin-top: 5px;
+    font-weight: bold;
+    font-size: 1.25rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.titre-formulaire { /* Titre formulaire */
+.btn-cta:hover {
+    background-color: #357ab8;
+    transform: scale(1.05);
+}
+
+/* --- FORMULAIRE DE RECHERCHE --- */
+.search {
+    background-color: #4A90E2;
     color: white;
-    margin-left: 10px;
-    margin-top: 5px;
+    padding: 60px 30px; /* réduit légèrement padding vertical */
+    border-radius: 25px;
+    margin: 30px auto; /* réduit espace vertical au-dessus et en-dessous */
+    max-width: 1100px;
+    text-align: center;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+.search h2 {
+    font-size: 2.4rem;
+    margin-bottom: 30px; /* réduit espace avec champs */
+}
+
+.form-fields {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 25px; /* réduit espace entre les champs */
+    max-width: 1000px;
+    margin: auto;
 }
 
 input {
-    background-color: white;
-    text-decoration: none;
+    padding: 18px;
     border-radius: 20px;
-    border-style: none;
-    font-family: 'Comfortaa', sans-serif;
-    padding: 12px;
-    width: 400px;
-    font-size: 15px;
-    margin-bottom: 10px;
+    border: none;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 1.25rem;
 }
 
-.champs-saisie {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
-    
-}
-
-.rechercher { /* Bouton de recherche */
+.btn-submit {
     background-color: #a2e76d;
     color: white;
-    padding: 12px;
-    font-size: 25px;
-    width: 300px;
+    padding: 22px;
+    font-size: 1.5rem;
     font-weight: bold;
-    display: block;
-    margin: 0 auto;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
+    margin-top: 30px; /* réduit l'espace au-dessus */
+    border-radius: 20px;
+    border: none;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-submit:hover {
+    background-color: #8ccf5a;
+    transform: scale(1.05);
+}
+
+/* --- AVANTAGES --- */
+.advantages {
+    display: flex;
+    justify-content: center;
+    gap: 2rem; /* réduit espace horizontal entre petites cartes */
+    padding: 50px 15px; /* réduit espace vertical au-dessus et en-dessous */
+    flex-wrap: wrap;
+    max-width: 1400px;
+    margin: auto;
+}
+
+.advantage {
+    background-color: white;
+    flex: 1;
+    min-width: 320px;
+    max-width: 420px;
+    padding: 40px 30px;
+    border-radius: 25px;
+    text-align: center;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease;
+}
+
+.advantage i {
+    font-size: 3.5rem;
+    color: #4A90E2;
+    margin-bottom: 25px;
+}
+
+.advantage h3 {
+    margin-bottom: 18px;
+    color: #2e7d32;
+}
+
+.advantage p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+.advantage:hover {
+    transform: translateY(-5px);
+}
+
+/* --- IMAGE BAS --- */
+.bottom-img {
+    width: calc(100% - 60px); /* laisse un petit padding horizontal */
+    max-width: 2200px;
+    height: auto;
+    display: block;
+    margin: 40px auto 50px auto; /* réduit espace vertical au-dessus */
+    border-radius: 20px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .hero-content {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hero-text, .hero-img-container {
+        width: 100%;
+        max-width: none;
+        height: auto;
+    }
+
+    .hero-text {
+        padding: 50px 40px;
+    }
+
+    .btn-cta {
+        font-size: 1.1rem;
+        padding: 14px 28px;
+    }
+
+    .form-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-cta, .btn-submit {
+        width: 100%;
+    }
+
+    .advantages {
+        flex-direction: column;
+        align-items: center;
+        gap: 25px;
+        padding: 40px 15px;
+    }
+
+    .bottom-img {
+        width: calc(100% - 30px);
+    }
+}
+
+@media (max-width: 600px) {
+    .hero-text h1 {
+        font-size: 2.5rem;
+    }
+
+    .hero-text p {
+        font-size: 1.1rem;
+    }
+
+    .search h2 {
+        font-size: 1.6rem;
+    }
+
+    input {
+        font-size: 1rem;
+        padding: 14px;
+    }
+
+    .btn-cta {
+        font-size: 1rem;
+        padding: 12px 25px;
+    }
+
+    .bottom-img {
+        width: calc(100% - 20px);
+    }
 }

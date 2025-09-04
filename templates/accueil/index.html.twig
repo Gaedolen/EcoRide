@@ -8,33 +8,61 @@
 
 {% block body %}
 
-<!-- Présentation d'EcoRide  -->
-    <div class='presentation'>
-        <h1 class='bienvenue'>Bienvenue sur EcoRide !</h1>
-        <div class='presentation-contenu'>
-            <img src="{{ asset('images/img-conviviale.jpeg') }}" class='img-conviviale' alt="Covoiturage Convivial">
-            <div class="texte-presentation">
-                <p>Voyagez l’esprit tranquille avec <span class="eco-color">EcoRide</span> !</p>
+    <!-- SECTION HERO -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-img-container">
+                <img src="{{ asset('images/img-conviviale.jpeg') }}" alt="Covoiturage convivial">
+            </div>
+            <div class="hero-text">
+                <h1>Bienvenue sur <span class="eco-color">EcoRide</span> !</h1>
                 <p>
-                    On vous propose des trajets <strong>en voiture à bas prix</strong>,
-                    <strong>respectueux de l’environnement</strong> et en toute <strong>convivialité</strong> !
+                    Voyagez l’esprit tranquille avec EcoRide !<br>
+                    Des trajets <strong>économiques</strong>, <strong>conviviaux</strong> et <strong>écologiques</strong>.
                 </p>
+                <a href="{{ path('app_covoiturage') }}" class="btn-cta">Trouver un trajet</a>
             </div>
         </div>
-    </div>
-<!-- Formulaire de recherche covoiturage -->
-    <div class='formulaire'>
-        <h2 class='titre-formulaire'>Choisissez votre itinéraire :</h2>
-        <form action="{{ path('app_covoiturage') }}" method="GET">
-            <div class='champs-saisie'>
-                <input type="text" class="form-control" id="lieu_depart" name="lieu_depart" placeholder="Ville de départ" required>
-                <input type="text" class="form-control" id="lieu_arrivee" name="lieu_arrivee" placeholder="Ville d'arrivée" required>
-                <input type="date" class="form-control" id="date_depart" name="date_depart"  value="{{ app.request.get('date_depart') ?: "now"|date('Y-m-d') }}" min="{{ "now"|date('Y-m-d') }}"  required>
-                <input type="time" class="form-control" id="heure_depart" name="heure_depart" value="06:00" required>
-            </div>
-            <input type="submit" value="Rechercher" class='rechercher'>
-        </form>
-    </div>
+    </section>
 
-<img src="{{ asset('images/paysage_voiture.png') }}" alt="Paysage" class='paysage' width="1200" height="200">
+    <!-- FORMULAIRE DE RECHERCHE -->
+    <section class="search">
+        <h2>Choisissez votre itinéraire :</h2>
+        <form action="{{ path('app_covoiturage') }}" method="GET">
+            <div class="form-fields">
+                <input type="text" name="lieu_depart" placeholder="Ville de départ" required>
+                <input type="text" name="lieu_arrivee" placeholder="Ville d'arrivée" required>
+                <input type="date" name="date_depart" value="{{ app.request.get('date_depart') ?: "now"|date('Y-m-d') }}" min="{{ "now"|date('Y-m-d') }}" required>
+                <input type="time" name="heure_depart" value="06:00" required>
+            </div>
+            <button type="submit" class="btn-submit">Rechercher</button>
+        </form>
+    </section>
+
+    <!-- AVANTAGES -->
+    <section class="advantages">
+        <div class="advantage">
+            <i class="bi bi-car-front-fill"></i>
+            <h3>Covoiturage simplifié</h3>
+            <p>Trouvez ou proposez vos trajets facilement en quelques clics.</p>
+        </div>
+        <div class="advantage">
+            <i class="bi bi-leaf-fill"></i>
+            <h3>Écologique</h3>
+            <p>Réduisez votre empreinte carbone en partageant vos trajets.</p>
+        </div>
+        <div class="advantage">
+            <i class="bi bi-shield-lock-fill"></i>
+            <h3>Sécurité</h3>
+            <p>Vos trajets et informations sont sécurisés et fiables.</p>
+        </div>
+    </section>
+
+    <!-- IMAGE BAS -->
+    <img src="{{ asset('images/voiture_foret.jpg') }}" alt="Paysage" class="bottom-img">
+
+    {% block javascripts %}
+        <script src="{{ asset('/js/image.js') }}"></script>
+    {% endblock %}
+
 {% endblock %}
