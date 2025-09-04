@@ -9,20 +9,20 @@ body {
 
 /* --- HERO --- */
 .hero {
-    background: linear-gradient(#d6f3d9, #f9f9f9);
-    padding: 50px 15px 30px 15px;
+    background: #e8f5e9;
     display: flex;
     justify-content: center;
+    align-items: center;
+    min-height: auto; /* laisse la hauteur s’adapter à contenu */
+    padding: 30px 15px 20px 15px; /* réduit l’espace vertical */
 }
 
 .hero-content {
     display: flex;
-    justify-content: center;
-    align-items: stretch;
-    gap: 2rem;
-    flex-wrap: wrap;
-    max-width: 1600px;
+    gap: 1.5rem;
     width: 100%;
+    max-width: 1600px;
+    align-items: stretch;
 }
 
 /* --- IMAGE CONVIVIALE --- */
@@ -33,13 +33,12 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    max-height: 700px;
 }
 
 .hero-img-container img {
     width: 100%;
-    height: auto;
-    object-fit: contain;
+    height: 100%;
+    object-fit: cover; 
     border-radius: 20px;
 }
 
@@ -48,40 +47,36 @@ body {
     flex: 1;
     background-color: #a2e76d;
     border-radius: 20px;
-    padding: 70px 60px;
+    max-width: 785px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
+    padding: 3%;
     box-shadow: 0 6px 15px rgba(0,0,0,0.15);
 }
 
 .hero-text h1 {
-    margin: 0 0 20px 0;
-    font-size: 3rem;
+    font-size: clamp(2rem, 3vw, 2.8rem);
     line-height: 1.2;
+    margin: 0 0 1rem 0;
 }
 
 .hero-text p {
-    font-size: 1.35rem;
-    line-height: 1.5;
-    margin-bottom: 20px;
-}
-
-.eco-color {
-    color: #4A90E2;
-    font-weight: bold;
+    font-size: clamp(1rem, 1.8vw, 1.2rem);
+    line-height: 1.4;
+    margin-bottom: 1rem;
 }
 
 .btn-cta {
     background-color: #4A90E2;
     color: white;
     text-decoration: none;
-    padding: 16px 32px;
+    padding: 0.8rem 1.6rem;
     border-radius: 20px;
     font-weight: bold;
-    font-size: 1.25rem;
+    font-size: 1rem;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
@@ -94,43 +89,43 @@ body {
 .search {
     background-color: #4A90E2;
     color: white;
-    padding: 60px 30px; /* réduit légèrement padding vertical */
+    padding: 50px 20px;
     border-radius: 25px;
-    margin: 30px auto; /* réduit espace vertical au-dessus et en-dessous */
+    margin: 20px auto 30px auto; /* réduit un peu l’espace vertical */
     max-width: 1100px;
     text-align: center;
     box-shadow: 0 6px 15px rgba(0,0,0,0.1);
 }
 
 .search h2 {
-    font-size: 2.4rem;
-    margin-bottom: 30px; /* réduit espace avec champs */
+    font-size: 2rem;
+    margin-bottom: 25px;
 }
 
 .form-fields {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px 25px; /* réduit espace entre les champs */
+    gap: 15px 20px;
     max-width: 1000px;
     margin: auto;
 }
 
 input {
-    padding: 18px;
+    padding: 16px;
     border-radius: 20px;
     border: none;
     width: 100%;
     box-sizing: border-box;
-    font-size: 1.25rem;
+    font-size: 1.1rem;
 }
 
 .btn-submit {
     background-color: #a2e76d;
     color: white;
-    padding: 22px;
-    font-size: 1.5rem;
+    padding: 20px;
+    font-size: 1.3rem;
     font-weight: bold;
-    margin-top: 30px; /* réduit l'espace au-dessus */
+    margin-top: 20px;
     border-radius: 20px;
     border: none;
     cursor: pointer;
@@ -146,8 +141,8 @@ input {
 .advantages {
     display: flex;
     justify-content: center;
-    gap: 2rem; /* réduit espace horizontal entre petites cartes */
-    padding: 50px 15px; /* réduit espace vertical au-dessus et en-dessous */
+    gap: 1.5rem;
+    padding: 40px 15px;
     flex-wrap: wrap;
     max-width: 1400px;
     margin: auto;
@@ -156,9 +151,9 @@ input {
 .advantage {
     background-color: white;
     flex: 1;
-    min-width: 320px;
-    max-width: 420px;
-    padding: 40px 30px;
+    min-width: 300px;
+    max-width: 400px;
+    padding: 35px 25px;
     border-radius: 25px;
     text-align: center;
     box-shadow: 0 6px 15px rgba(0,0,0,0.1);
@@ -166,19 +161,19 @@ input {
 }
 
 .advantage i {
-    font-size: 3.5rem;
+    font-size: 3rem;
     color: #4A90E2;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
 }
 
 .advantage h3 {
-    margin-bottom: 18px;
+    margin-bottom: 15px;
     color: #2e7d32;
 }
 
 .advantage p {
-    font-size: 1.2rem;
-    line-height: 1.6;
+    font-size: 1.1rem;
+    line-height: 1.5;
 }
 
 .advantage:hover {
@@ -187,35 +182,25 @@ input {
 
 /* --- IMAGE BAS --- */
 .bottom-img {
-    width: calc(100% - 60px); /* laisse un petit padding horizontal */
+    width: calc(100% - 40px);
     max-width: 2200px;
     height: auto;
     display: block;
-    margin: 40px auto 50px auto; /* réduit espace vertical au-dessus */
+    margin: 30px auto 40px auto;
     border-radius: 20px;
     box-shadow: 0 6px 15px rgba(0,0,0,0.2);
 }
 
-/* Responsive */
+/* --- RESPONSIVE --- */
 @media (max-width: 900px) {
     .hero-content {
         flex-direction: column;
         align-items: center;
     }
 
-    .hero-text, .hero-img-container {
+    .hero-img-container, .hero-text {
         width: 100%;
-        max-width: none;
         height: auto;
-    }
-
-    .hero-text {
-        padding: 50px 40px;
-    }
-
-    .btn-cta {
-        font-size: 1.1rem;
-        padding: 14px 28px;
     }
 
     .form-fields {
@@ -229,8 +214,8 @@ input {
     .advantages {
         flex-direction: column;
         align-items: center;
-        gap: 25px;
-        padding: 40px 15px;
+        gap: 20px;
+        padding: 30px 15px;
     }
 
     .bottom-img {
@@ -240,25 +225,25 @@ input {
 
 @media (max-width: 600px) {
     .hero-text h1 {
-        font-size: 2.5rem;
+        font-size: clamp(1.5rem, 4vw, 2rem);
     }
 
     .hero-text p {
-        font-size: 1.1rem;
+        font-size: clamp(0.9rem, 3vw, 1rem);
     }
 
     .search h2 {
-        font-size: 1.6rem;
+        font-size: 1.4rem;
     }
 
     input {
         font-size: 1rem;
-        padding: 14px;
+        padding: 12px;
     }
 
     .btn-cta {
-        font-size: 1rem;
-        padding: 12px 25px;
+        font-size: 0.9rem;
+        padding: 0.6rem 1.2rem;
     }
 
     .bottom-img {
