@@ -2,9 +2,39 @@
 
 {% block title %}À propos - EcoRide{% endblock %}
 
-{% block body %}
-<div class="page">
-    <h1>À propos</h1>
-    <p>Présentation d’EcoRide, son histoire, son objectif écologique, etc.</p>
-</div>
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/pages.css') }}">
 {% endblock %}
+
+{% block body %}
+<section class="page-content">
+    <h1>À propos de EcoRide</h1>
+
+    <h2>Notre mission</h2>
+    <p>
+        La startup <strong>EcoRide</strong>, fraîchement créée en France, a pour objectif de réduire l'impact environnemental
+        des déplacements en encourageant le covoiturage. <strong>EcoRide</strong> prône une approche écologique et souhaite se faire connaître 
+        au travers d’un projet porté par une application web dédiée.
+    </p>
+
+    <h2>Notre ambition</h2>
+    <p>
+        L’ambition de <strong>EcoRide</strong> est de devenir la principale plateforme de covoiturage pour les voyageurs 
+        soucieux de l'environnement et ceux qui recherchent une solution économique pour leurs déplacements. 
+        Il est important de souligner que la plateforme de covoiturage gère uniquement les déplacements en voitures.
+    </p>
+
+    <h2>Notre équipe</h2>
+    <p>
+        <strong>EcoRide</strong> est soutenue par une équipe passionnée de développeurs et de spécialistes du transport durable,
+        qui travaillent ensemble pour proposer une expérience utilisateur simple, fiable et respectueuse de l'environnement.
+    </p>
+
+    <h2>Charte graphique et thème</h2>
+    <p>
+        L’application web a été conçue pour refléter les valeurs écologiques de la plateforme : les couleurs et le thème évoquent 
+        la nature et la durabilité, tout en restant modernes, claires et accessibles aux utilisateurs.
+    </p>
+</section>
+{% endblock %}
+

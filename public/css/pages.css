@@ -1,0 +1,75 @@
+/* Base */
+body {
+    font-family: 'Comfortaa', sans-serif;
+    background-color: #f9f9f9;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    flex: 1;
+}
+
+/* Conteneur des pages */
+.page-content {
+    max-width: 1000px;
+    margin: 50px auto;
+    padding: 25px;
+    background-color: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+}
+
+/* Titres */
+.page-content h1 {
+    font-size: 2.5rem;
+    color: #2e7d32;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.page-content h2 {
+    font-size: 1.8rem;
+    color: #4A90E2;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+/* Paragraphe */
+.page-content p {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.page-content strong {
+    color: #4A90E2;
+}
+
+/* Liens */
+.page-content a {
+    color: #4A90E2;
+    text-decoration: none;
+}
+
+.page-content a:hover {
+    text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .page-content h1 { font-size: 2rem; }
+    .page-content h2 { font-size: 1.5rem; }
+    .page-content p { font-size: 1rem; }
+}
+
+@media (max-width: 600px) {
+    .page-content {
+        margin: 30px 15px;
+        padding: 15px;
+    }
+    .page-content h1 { font-size: 1.8rem; }
+    .page-content h2 { font-size: 1.3rem; }
+    .page-content p { font-size: 0.95rem; }
+}

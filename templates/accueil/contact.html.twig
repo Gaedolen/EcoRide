@@ -2,9 +2,25 @@
 
 {% block title %}Contact - EcoRide{% endblock %}
 
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/pages.css') }}">
+{% endblock %}
+
 {% block body %}
-<div class="page">
-    <h1>Contact</h1>
-    <p>Ici, tu peux mettre un formulaire de contact ou les coordonnées de ton service.</p>
-</div>
+<section class="contact page-content">
+    <h1>Contactez-nous</h1>
+
+    <p>
+        Pour toute question ou retour concernant la plateforme <strong>EcoRide</strong>, 
+        vous pouvez nous contacter aux coordonnées suivantes :
+    </p>
+
+    <p>
+        Email : <a href="mailto:contact@ecoride.fr">contact@ecoride.fr</a>
+    </p>
+
+    <p>
+        Téléphone : <a href="tel:+330123456789">+33 0 12 34 56 78 9</a>
+    </p>
+</section>
 {% endblock %}

@@ -8,7 +8,7 @@
 
 {% block body %}
 
-    <!-- SECTION HERO -->
+    <!-- Section d'introduction -->
     <section class="hero">
         <div class="hero-content">
             <div class="hero-text">
@@ -25,7 +25,7 @@
         </div>
     </section>
 
-    <!-- FORMULAIRE DE RECHERCHE -->
+    <!-- Formulaire de recherche -->
     <section class="search">
         <h2>Choisissez votre itinéraire :</h2>
         <form action="{{ path('app_covoiturage') }}" method="GET">
@@ -39,7 +39,7 @@
         </form>
     </section>
 
-    <!-- AVANTAGES -->
+    <!-- Avantages -->
     <section class="advantages">
         <div class="advantage">
             <i class="bi bi-car-front-fill"></i>
@@ -58,7 +58,7 @@
         </div>
     </section>
 
-    <!-- IMAGE BAS -->
+    <!-- Image bas de page -->
     <img src="{{ asset('images/voiture_foret.jpg') }}" alt="Paysage" class="bottom-img">
 
     {% block javascripts %}

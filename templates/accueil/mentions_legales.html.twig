@@ -1,10 +1,48 @@
+{# templates/mentions_legales.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Mentions légales - EcoRide{% endblock %}
+{% block title %}Mentions légales{% endblock %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/pages.css') }}">
+{% endblock %}
 
 {% block body %}
-<div class="page">
+<section class="page-content">
     <h1>Mentions légales</h1>
-    <p>Ton texte obligatoire concernant la responsabilité, l’hébergement, etc.</p>
-</div>
+
+    <h2>Éditeur du site</h2>
+    <p>
+        Le site <strong>EcoRide</strong> est un projet pédagogique réalisé dans le cadre d’une évaluation de formation.
+        <br>
+        Éditeur : Étudiante : Clélia Panini
+        <br>
+        Email : mail@exemple.com
+    </p>
+
+    <h2>Hébergement</h2>
+    <p>
+        Le site est hébergé sur un serveur local ou une plateforme d’apprentissage (XAMPP, Symfony local, etc.).
+    </p>
+
+    <h2>Propriété intellectuelle</h2>
+    <p>
+        Tous les contenus présents sur ce site (textes, images, logos, icônes) sont la propriété de l’auteur du projet ou utilisés à titre pédagogique. Toute reproduction est interdite sans autorisation.
+    </p>
+
+    <h2>Protection des données personnelles</h2>
+    <p>
+        Ce projet ne collecte aucune donnée réelle. Les informations saisies sont uniquement utilisées dans le cadre du test et de l’exercice.
+    </p>
+
+    <h2>Responsabilité</h2>
+    <p>
+        Le projet est à but pédagogique et ne saurait engager la responsabilité de l’auteur en cas de problème.
+    </p>
+
+    <h2>Loi applicable</h2>
+    <p>
+        Le projet est soumis au droit français.
+    </p>
+</section>
 {% endblock %}
