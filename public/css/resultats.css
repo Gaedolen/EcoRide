@@ -310,24 +310,160 @@ body {
     background: linear-gradient(#8ed657, #317d31);
 }
 
+/* Bouton burger */
+.burger-btn {
+    display: none;
+    background: #4a86e8;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 18px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-bottom: 15px;
+}
+
 /* Responsive */
-@media screen and (max-width: 1000px) {
-    .resultats-layout {
+@media screen and (max-width: 900px) {
+    .trajet-card {
         flex-direction: column;
         padding: 20px;
+        gap: 20px;
+        align-items: flex-start;
+    }
+
+    .trajet-card-content {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .chauffeur-info {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 10px;
+    }
+
+    .chauffeur-photo {
+        width: 100px;
+        height: 100px;
+    }
+
+    .infos-trajet {
+        width: 100%;
+    }
+
+    .prix-et-details {
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .separator-vertical {
+        display: none;
+    }
+
+    .chauffeur-nom,
+    .infos-trajet p,
+    .prix,
+    .details-link {
+        font-size: 18px;
+    }
+
+    .details-link {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+
+    .eco-badge {
+        font-size: 12px;
+        padding: 3px 6px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .resultats-layout {
+        padding: 10px;
     }
 
     .sidebar-filtres {
         width: 100%;
-        position: static;
+        margin-bottom: 20px;
+    }
+
+    .formulaire-modification .champs-saisie {
+        flex-direction: column;
+    }
+
+    .champs-saisie input {
+        width: 100%;
+        min-width: unset;
     }
 
     .trajet-card {
-        flex-direction: column;
-        align-items: flex-start;
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .chauffeur-photo {
+        width: 80px;
+        height: 80px;
+    }
+
+    .prix {
+        font-size: 22px;
+    }
+
+    .infos-trajet p,
+    .chauffeur-nom,
+    .details-link {
+        font-size: 16px;
     }
 
     .prix-et-details {
-        align-self: flex-end;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 8px;
+    }
+}
+
+/* Sidebar responsive pour mobile/tablette */
+@media screen and (max-width: 900px) {
+    .burger-btn {
+        display: inline-block;
+    }
+
+    .sidebar-filtres {
+        position: fixed;
+        top: 0;
+        left: -300px;
+        width: 280px;
+        height: 100%;
+        background: #f7f7f7;
+        padding: 20px;
+        box-shadow: 2px 0 6px rgba(0,0,0,0.2);
+        transition: left 0.3s ease;
+        z-index: 1000;
+        overflow-y: auto;
+    }
+
+    .sidebar-filtres.open {
+        left: 0;
+    }
+
+    /* Overlay derrière la sidebar */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.4);
+        z-index: 900;
+    }
+
+    .sidebar-overlay.active {
+        display: block;
     }
 }

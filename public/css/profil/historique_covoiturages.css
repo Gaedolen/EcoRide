@@ -5,6 +5,10 @@
     padding: 0 40px 20px 40px;
 }
 
+.titre {
+    color: #4a86e8;
+}
+
 .covoiturage-card {
     background-color: #f5f5f5;
     border-radius: 20px;
@@ -40,6 +44,7 @@
 
 .month-title {
     font-size: 24px;
+    color: #4a86e8;
     font-weight: bold;
     margin: 30px 40px 10px 40px;
     display: flex;
@@ -50,7 +55,64 @@
 .month-dot {
     width: 10px;
     height: 10px;
-    background-color: black;
+    background-color: #4a86e8;
     border-radius: 50%;
     display: inline-block;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .covoiturage-container-vertical {
+        padding: 0 20px 20px 20px;
+    }
+
+    .covoiturage-card {
+        padding: 15px;
+    }
+
+    .covoiturage-content {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .separator-vertical {
+        display: none;
+    }
+
+    .month-title {
+        font-size: 20px;
+        margin: 25px 20px 10px 20px;
+    }
+
+    .titre-covoiturage {
+        font-size: 20px;
+    }
+
+    .covoiturage-card p {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 600px) {
+    .covoiturage-container-vertical {
+        padding: 0 10px 15px 10px;
+    }
+
+    .covoiturage-card {
+        padding: 10px;
+    }
+
+    .month-title {
+        font-size: 18px;
+        margin: 20px 10px 8px 10px;
+    }
+
+    .titre-covoiturage {
+        font-size: 18px;
+    }
+
+    .covoiturage-card p {
+        font-size: 13px;
+        margin: 4px 0;
+    }
 }

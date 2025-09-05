@@ -116,3 +116,107 @@ label {
 .bouton:hover {
     background: linear-gradient(#8ed657, #317d31);
 }
+
+/* ===================== Responsive ===================== */
+/* Tablette (max-width: 900px) */
+@media (max-width: 900px) {
+    .form-container {
+        width: 90%;
+        padding: 20px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    label {
+        font-size: 18px;
+    }
+
+    .form-input {
+        font-size: 16px;
+        padding: 10px;
+    }
+
+    .form-row {
+        flex-wrap: wrap; /* permet aux champs de passer à la ligne si nécessaire */
+        gap: 15px;
+    }
+
+    .form-group,
+    .form-group.double {
+        flex: 1 1 48%; /* conserve l'alignement mais réduit légèrement la largeur */
+        min-width: 45%;
+    }
+
+    .input-with-symbol .form-input {
+        padding-right: 25px;
+    }
+
+    .currency-symbol {
+        font-size: 16px;
+    }
+
+    .bouton {
+        width: 100%;
+        font-size: 22px;
+        padding: 12px;
+    }
+}
+
+/* Mobile (max-width: 600px) */
+@media (max-width: 600px) {
+    .form-container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 22px;
+        text-align: center;
+    }
+
+    label {
+        font-size: 16px;
+    }
+
+    .form-input {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .form-row {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .form-group,
+    .form-group.double {
+        flex: 1 1 48%; /* garde deux colonnes si possible */
+        min-width: 48%;
+    }
+
+    /* si la largeur disponible est trop petite, les champs passent automatiquement en full width */
+    @supports (width: 100%) {
+        .form-group, .form-group.double {
+            flex-basis: 100%;
+            min-width: 100%;
+        }
+    }
+
+    .input-with-symbol .form-input {
+        padding-right: 20px;
+    }
+
+    .currency-symbol {
+        font-size: 14px;
+    }
+
+    .bouton {
+        font-size: 18px;
+        padding: 10px;
+        width: 100%;
+    }
+}

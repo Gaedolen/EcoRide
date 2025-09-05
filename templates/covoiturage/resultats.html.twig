@@ -8,155 +8,162 @@
 
 {% block body %}
 
-{% set mois_fr = {
-    'January': 'janvier',
-    'February': 'février',
-    'March': 'mars',
-    'April': 'avril',
-    'May': 'mai',
-    'June': 'juin',
-    'July': 'juillet',
-    'August': 'août',
-    'September': 'septembre',
-    'October': 'octobre',
-    'November': 'novembre',
-    'December': 'décembre'
-} %}
+    {% set mois_fr = {
+        'January': 'janvier',
+        'February': 'février',
+        'March': 'mars',
+        'April': 'avril',
+        'May': 'mai',
+        'June': 'juin',
+        'July': 'juillet',
+        'August': 'août',
+        'September': 'septembre',
+        'October': 'octobre',
+        'November': 'novembre',
+        'December': 'décembre'
+    } %}
 
-<div class="resultats-layout">
-    <!-- Filtres sur la gauche -->
-    <aside class="sidebar-filtres">
-        <h2>Filtres</h2>
+    <div class="resultats-layout">
 
-        <form method="get" action="{{ path('app_covoiturage') }}">
-            {# Champs cachés pour conserver les données de recherche #}
-            <input type="hidden" name="lieu_depart" value="{{ app.request.get('lieu_depart') }}">
-            <input type="hidden" name="lieu_arrivee" value="{{ app.request.get('lieu_arrivee') }}">
-            <input type="hidden" name="date_depart" value="{{ app.request.get('date_depart') }}">
-            <input type="hidden" name="heure_depart" value="{{ app.request.get('heure_depart') }}">
+        <!-- Bouton burger pour mobile/tablette -->
+        <button id="burger-btn" class="burger-btn">☰ Filtres</button>
 
-            <div class="filtre-group">
-                <label for="note_min">Note minimale :</label>
-                <select name="note_min" id="note_min">
-                    <option value="">Toutes</option>
-                    {% for i in 1..5 %}
-                        <option value="{{ i }}" {% if app.request.get('note_min') == i %}selected{% endif %}>{{ i }}/5</option>
-                    {% endfor %}
-                </select>
-            </div>
+        <!-- Filtres sur la gauche -->
+        <aside class="sidebar-filtres">
+            <h2>Filtres</h2>
 
-            <div class="filtre-group">
-                <label for="ecologique" class="label-inline">
-                    <input type="checkbox" id="ecologique" name="ecologique" value="1"
-                        {% if app.request.get('ecologique') == '1' %}checked{% endif %}>
-                    🌱 Écologique
-                </label>
-            </div>
+            <form method="get" action="{{ path('app_covoiturage') }}">
+                {# Champs cachés pour conserver les données de recherche #}
+                <input type="hidden" name="lieu_depart" value="{{ app.request.get('lieu_depart') }}">
+                <input type="hidden" name="lieu_arrivee" value="{{ app.request.get('lieu_arrivee') }}">
+                <input type="hidden" name="date_depart" value="{{ app.request.get('date_depart') }}">
+                <input type="hidden" name="heure_depart" value="{{ app.request.get('heure_depart') }}">
 
-            <div class="filtre-group">
-                <label for="prix_min">Prix min :</label>
-                <input type="number" name="prix_min" min="0" step="0.5" value="{{ app.request.get('prix_min') }}">
-                <label for="prix_max">Prix max :</label>
-                <input type="number" name="prix_max" min="0" step="0.5" value="{{ app.request.get('prix_max') }}">
-            </div>
-
-            <div class="filtre-group">
-                <label>Temps de trajet max :</label>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="number" name="temps_max_heures" min="0" step="1" placeholder="Heures"
-                        value="{{ app.request.get('temps_max_heures') }}" style="width: 80px;">
-                    <input type="number" name="temps_max_minutes" min="0" max="59" step="1" placeholder="Minutes"
-                        value="{{ app.request.get('temps_max_minutes') }}" style="width: 80px;">
-                </div>
-            </div>
-
-            <button type="submit" class="btn-filtres">Filtrer</button>
-        </form>
-    </aside>
-
-    <!-- Formulaire et cartes trajets sur la droite -->
-    <main class="zone-resultats">
-        <div class='formulaire-modification'>
-            <h2 class='titre-formulaire-modification'>Modifiez votre itinéraire :</h2>
-            <form action="{{ path('app_covoiturage') }}" method="GET">
-                <div class='champs-saisie'>
-                    <input type="text" class="form-control" id="lieu_depart" name="lieu_depart"
-                        placeholder="Ville de départ"
-                        value="{{ app.request.get('lieu_depart') }}" required>
-
-                    <input type="text" class="form-control" id="lieu_arrivee" name="lieu_arrivee"
-                        placeholder="Ville d'arrivée"
-                        value="{{ app.request.get('lieu_arrivee') }}" required>
-
-                    <input type="date" class="form-control" id="date_depart" name="date_depart" min="{{ "now"|date('Y-m-d') }}"
-                        value="{{ app.request.get('date_depart') ?: 'now'|date('Y-m-d') }}" required>
-
-                    <input type="time" class="form-control" id="heure_depart" name="heure_depart"
-                        value="{{ app.request.get('heure_depart') ?: '06:00' }}" required>
+                <div class="filtre-group">
+                    <label for="note_min">Note minimale :</label>
+                    <select name="note_min" id="note_min">
+                        <option value="">Toutes</option>
+                        {% for i in 1..5 %}
+                            <option value="{{ i }}" {% if app.request.get('note_min') == i %}selected{% endif %}>{{ i }}/5</option>
+                        {% endfor %}
+                    </select>
                 </div>
 
-                <div class="recherche-center">
-                    <input type="submit" value="Rechercher" class='rechercher'>
+                <div class="filtre-group">
+                    <label for="ecologique" class="label-inline">
+                        <input type="checkbox" id="ecologique" name="ecologique" value="1"
+                            {% if app.request.get('ecologique') == '1' %}checked{% endif %}>
+                        🌱 Écologique
+                    </label>
                 </div>
+
+                <div class="filtre-group">
+                    <label for="prix_min">Prix min :</label>
+                    <input type="number" name="prix_min" min="0" step="0.5" value="{{ app.request.get('prix_min') }}">
+                    <label for="prix_max">Prix max :</label>
+                    <input type="number" name="prix_max" min="0" step="0.5" value="{{ app.request.get('prix_max') }}">
+                </div>
+
+                <div class="filtre-group">
+                    <label>Temps de trajet max :</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="number" name="temps_max_heures" min="0" step="1" placeholder="Heures"
+                            value="{{ app.request.get('temps_max_heures') }}" style="width: 80px;">
+                        <input type="number" name="temps_max_minutes" min="0" max="59" step="1" placeholder="Minutes"
+                            value="{{ app.request.get('temps_max_minutes') }}" style="width: 80px;">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-filtres">Filtrer</button>
             </form>
-        </div>
+        </aside>
 
-        <div class="liste-trajets">
-            {% if trajets is empty %}
-                <p>Aucun trajet trouvé.</p>
-            {% else %}
-                {% for trajet in trajets %}
-                    <div class="trajet-card">
-                        <div class="trajet-card-content">
-                            <div class="chauffeur-info">
-                                <img src="{{ trajet.user_photo ? 'data:image/jpeg;base64,' ~ trajet.user_photo : asset('images/default-user.png') }}" alt="photo" class="chauffeur-photo">
-                                <div>
-                                    <p class="chauffeur-nom">{{ trajet.user_pseudo }}</p>
-                                    <p>Note : {{ trajet.user_note ?? 'Non noté' }}/5</p>
+        <!-- Formulaire et cartes trajets sur la droite -->
+        <main class="zone-resultats">
+            <div class='formulaire-modification'>
+                <h2 class='titre-formulaire-modification'>Modifiez votre itinéraire :</h2>
+                <form action="{{ path('app_covoiturage') }}" method="GET">
+                    <div class='champs-saisie'>
+                        <input type="text" class="form-control" id="lieu_depart" name="lieu_depart"
+                            placeholder="Ville de départ"
+                            value="{{ app.request.get('lieu_depart') }}" required>
+
+                        <input type="text" class="form-control" id="lieu_arrivee" name="lieu_arrivee"
+                            placeholder="Ville d'arrivée"
+                            value="{{ app.request.get('lieu_arrivee') }}" required>
+
+                        <input type="date" class="form-control" id="date_depart" name="date_depart" min="{{ "now"|date('Y-m-d') }}"
+                            value="{{ app.request.get('date_depart') ?: 'now'|date('Y-m-d') }}" required>
+
+                        <input type="time" class="form-control" id="heure_depart" name="heure_depart"
+                            value="{{ app.request.get('heure_depart') ?: '06:00' }}" required>
+                    </div>
+
+                    <div class="recherche-center">
+                        <input type="submit" value="Rechercher" class='rechercher'>
+                    </div>
+                </form>
+            </div>
+
+            <div class="liste-trajets">
+                {% if trajets is empty %}
+                    <p>Aucun trajet trouvé.</p>
+                {% else %}
+                    {% for trajet in trajets %}
+                        <div class="trajet-card">
+                            <div class="trajet-card-content">
+                                <div class="chauffeur-info">
+                                    <img src="{{ trajet.user_photo ? 'data:image/jpeg;base64,' ~ trajet.user_photo : asset('images/default-user.png') }}" alt="photo" class="chauffeur-photo">
+                                    <div>
+                                        <p class="chauffeur-nom">{{ trajet.user_pseudo }}</p>
+                                        <p>Note : {{ trajet.user_note ?? 'Non noté' }}/5</p>
+                                    </div>
+                                </div>
+
+                                <div class="separator-vertical"></div>
+
+                                <div class="infos-trajet">
+                                    {% set moisAnglais = trajet.date_depart|date('F') %}
+                                    {% set mois = mois_fr[moisAnglais] %}
+                                    <p><strong>Départ : </strong>{{ trajet.date_depart|date('d') }} {{ mois }} à {{ trajet.heure_depart|date('H:i') }}</p>
+                                    {% set moisArrivee = mois_fr[trajet.date_arrivee|date('F')] %}
+                                    <p><strong>Arrivée : </strong>{{ trajet.date_arrivee|date('d') }} {{ moisArrivee }} à {{ trajet.heure_arrivee|date('H:i') }}</p>
+
+                                    {% set duree = trajet.heure_arrivee.timestamp - trajet.heure_depart.timestamp %}
+                                    {% set h = duree // 3600 %}
+                                    {% set m = (duree % 3600) // 60 %}
+                                    <p><strong>Durée :</strong> {{ h }}h{% if m > 0 %}{{ m }}min{% endif %}</p>
+
+                                    <p>👥 {{ trajet.nb_place }} place{{ trajet.nb_place > 1 ? 's' : '' }}</p>
+
+                                    {% if trajet.voiture_energie in ['Électrique', 'Electrique'] %}
+                                        <span class="eco-badge">🌱 Écologique</span>
+                                    {% endif %}
+                                </div>
+
+                                <div class="prix-et-details">
+                                    <p class="prix">{{ trajet.prix_personne|number_format(2, ',', ' ') }} €</p>
+                                    <a href="{{ path('details_trajet', { 
+                                        id: trajet.id,
+                                        lieu_depart: app.request.get('lieu_depart'),
+                                        lieu_arrivee: app.request.get('lieu_arrivee'),
+                                        date_depart: app.request.get('date_depart'),
+                                        heure_depart: app.request.get('heure_depart'),
+                                        note_min: app.request.get('note_min'),
+                                        ecologique: app.request.get('ecologique'),
+                                        prix_min: app.request.get('prix_min'),
+                                        prix_max: app.request.get('prix_max'),
+                                        temps_max: app.request.get('temps_max')
+                                    }) }}" class="details-link">Détails</a>
                                 </div>
                             </div>
-
-                            <div class="separator-vertical"></div>
-
-                            <div class="infos-trajet">
-                                {% set moisAnglais = trajet.date_depart|date('F') %}
-                                {% set mois = mois_fr[moisAnglais] %}
-                                <p><strong>Départ : </strong>{{ trajet.date_depart|date('d') }} {{ mois }} à {{ trajet.heure_depart|date('H:i') }}</p>
-                                {% set moisArrivee = mois_fr[trajet.date_arrivee|date('F')] %}
-                                <p><strong>Arrivée : </strong>{{ trajet.date_arrivee|date('d') }} {{ moisArrivee }} à {{ trajet.heure_arrivee|date('H:i') }}</p>
-
-                                {% set duree = trajet.heure_arrivee.timestamp - trajet.heure_depart.timestamp %}
-                                {% set h = duree // 3600 %}
-                                {% set m = (duree % 3600) // 60 %}
-                                <p><strong>Durée :</strong> {{ h }}h{% if m > 0 %}{{ m }}min{% endif %}</p>
-
-                                <p>👥 {{ trajet.nb_place }} place{{ trajet.nb_place > 1 ? 's' : '' }}</p>
-
-                                {% if trajet.voiture_energie in ['Électrique', 'Electrique'] %}
-                                    <span class="eco-badge">🌱 Écologique</span>
-                                {% endif %}
-                            </div>
-
-                            <div class="prix-et-details">
-                                <p class="prix">{{ trajet.prix_personne|number_format(2, ',', ' ') }} €</p>
-                                <a href="{{ path('details_trajet', { 
-                                    id: trajet.id,
-                                    lieu_depart: app.request.get('lieu_depart'),
-                                    lieu_arrivee: app.request.get('lieu_arrivee'),
-                                    date_depart: app.request.get('date_depart'),
-                                    heure_depart: app.request.get('heure_depart'),
-                                    note_min: app.request.get('note_min'),
-                                    ecologique: app.request.get('ecologique'),
-                                    prix_min: app.request.get('prix_min'),
-                                    prix_max: app.request.get('prix_max'),
-                                    temps_max: app.request.get('temps_max')
-                                }) }}" class="details-link">Détails</a>
-                            </div>
                         </div>
-                    </div>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </main>
-</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ asset('js/resultats.js') }}"></script>
+
 {% endblock %}

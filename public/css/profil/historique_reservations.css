@@ -7,6 +7,7 @@
 /* Titre principal */
 .main-title {
     font-size: 32px;
+    color: #4a86e8;
     text-align: left;
     margin-bottom: 30px;
 }
@@ -14,7 +15,7 @@
 /* Titre des mois */
 .month-title {
     font-size: 22px;
-    color: #2c3e50;
+    color: #4a86e8;
     margin-top: 25px;
     margin-bottom: 15px;
     display: flex;
@@ -144,4 +145,97 @@
     display: inline-block;
     margin-top: 10px;
     font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .historique-reservations-container {
+        padding: 20px;
+    }
+
+    .main-title {
+        font-size: 28px;
+    }
+
+    .month-title {
+        font-size: 20px;
+        margin: 20px 0 12px 0;
+    }
+
+    .details-card {
+        padding: 15px;
+    }
+
+    .details-card-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .boutons-container {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .details-content {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .separator-vertical {
+        display: none;
+    }
+
+    .bloc h3 {
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    .chauffeur-photo {
+        width: 80px;
+        height: 80px;
+    }
+
+    .badge, .btn-avis, .btn-signalement, .eco-badge {
+        font-size: 0.85em;
+        padding: 5px 10px;
+    }
+}
+
+@media (max-width: 600px) {
+    .main-title {
+        font-size: 24px;
+        text-align: center;
+    }
+
+    .month-title {
+        font-size: 18px;
+        gap: 8px;
+    }
+
+    .details-card {
+        padding: 10px;
+    }
+
+    .bloc h3 {
+        font-size: 14px;
+    }
+
+    .chauffeur-photo {
+        width: 60px;
+        height: 60px;
+    }
+
+    .badge, .btn-avis, .btn-signalement, .eco-badge {
+        font-size: 0.75em;
+        padding: 4px 8px;
+    }
+
+    .details-card-header {
+        align-items: center;
+        text-align: center;
+    }
+
+    .boutons-container {
+        justify-content: center;
+    }
 }
