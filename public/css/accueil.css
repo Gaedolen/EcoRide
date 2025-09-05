@@ -1,4 +1,4 @@
-/* --- GLOBAL --- */
+/* Global */
 body {
     font-family: 'Comfortaa', sans-serif;
     margin: 0;
@@ -7,14 +7,14 @@ body {
     color: #333;
 }
 
-/* --- HERO --- */
+/* Bloc d'itroduction */
 .hero {
-    background: #e8f5e9;
+    background: linear-gradient(#d5fcd9, #f9f9f9);
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: auto; /* laisse la hauteur s’adapter à contenu */
-    padding: 30px 15px 20px 15px; /* réduit l’espace vertical */
+    min-height: auto;
+    padding: 30px 15px 20px 15px;
 }
 
 .hero-content {
@@ -25,7 +25,7 @@ body {
     align-items: stretch;
 }
 
-/* --- IMAGE CONVIVIALE --- */
+/* Image d'introduction */
 .hero-img-container {
     flex: 1;
     border-radius: 20px;
@@ -42,7 +42,7 @@ body {
     border-radius: 20px;
 }
 
-/* --- TEXTE DE PRÉSENTATION --- */
+/* Texte de présentation */
 .hero-text {
     flex: 1;
     background-color: #a2e76d;
@@ -85,13 +85,13 @@ body {
     transform: scale(1.05);
 }
 
-/* --- FORMULAIRE DE RECHERCHE --- */
+/* Formulaire de recherche */
 .search {
     background-color: #4A90E2;
     color: white;
     padding: 50px 20px;
     border-radius: 25px;
-    margin: 20px auto 30px auto; /* réduit un peu l’espace vertical */
+    margin: 20px auto 30px auto;
     max-width: 1100px;
     text-align: center;
     box-shadow: 0 6px 15px rgba(0,0,0,0.1);
@@ -137,7 +137,7 @@ input {
     transform: scale(1.05);
 }
 
-/* --- AVANTAGES --- */
+/* Présentation des avantages */
 .advantages {
     display: flex;
     justify-content: center;
@@ -180,7 +180,7 @@ input {
     transform: translateY(-5px);
 }
 
-/* --- IMAGE BAS --- */
+/* Image de bas de page */
 .bottom-img {
     width: calc(100% - 40px);
     max-width: 2200px;
@@ -191,7 +191,7 @@ input {
     box-shadow: 0 6px 15px rgba(0,0,0,0.2);
 }
 
-/* --- RESPONSIVE --- */
+/* Responsive */
 @media (max-width: 900px) {
     .hero-content {
         flex-direction: column;

@@ -14,6 +14,9 @@
         <!-- Lien Bootstrap -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
+        <!-- Lien Font Awesome -->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
         {% block head %}{% endblock %}
 
         {% block stylesheets %}{% endblock %}
@@ -25,15 +28,21 @@
                     <div class="container-header">
                         <div class="gauche">
                             <img src="{{ asset('images/logo.png') }}" alt="EcoRide" class="logo">
-                            <span class="site-name">EcoRide</span>
+                            <span class="site-name"> <a href="{{ path('app_accueil') }}" class='nom-site'>EcoRide</a></span>
                         </div>
+                            <!-- Menu burger -->
+                            <div class="burger">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
 
                             <nav class="nav-menu">
                                 <a href="{{ path('app_accueil') }}">Accueil</a>
                                 <span class="separator">|</span>
                                 <a href="{{ path('app_covoiturage') }}">Covoiturages</a>
                                 <span class="separator">|</span>
-                                <a href="/contact">Contact</a>
+                                <a href="{{ path('app_contact')}}">Contact</a>
                                 <span class="separator">|</span>
                                 {% if app.user %}
                                     <a href="{{ path('app_profil') }}">Mon Compte</a>
@@ -52,26 +61,28 @@
                     {% block body %}{% endblock %}
                 </main>
 
-                <footer class='nav-footer'>
-                    <div class='container-footer'>
-                        <div class='navbar-footer'>
-                            <a href='/a-propos'>A propos</a>
-                            <a href='/contact'>Nous contacter</a>
-                            <a href='mentions-legales'>Mentions légales</a>
+                <footer class="nav-footer">
+                    <div class="container-footer">
+
+                        <div class="navbar-footer">
+                            <a href="{{ path('app_a_propos')}}">À propos</a>
+                            <a href="{{ path('app_contact')}}">Nous contacter</a>
+                            <a href="{{ path('app_mentions_legales')}}">Mentions légales</a>
                         </div>
 
-                        <p class='copyrigth'>© 2025 Copyright</p>
+                        <p class="copyrigth">© EcoRide 2025</p>
 
-                        <div class='reseaux-sociaux'>
-                            <p class='retrouvez-nous'>Retrouvez nous sur :</p>
-                            <img src="{{ asset('images/X-icon.svg') }}" alt="X" class='X-icon'>
-                            <img src="{{ asset('images/instagram-icon.svg') }}" alt="Instagram" class='instagram-icon'>
-                            <img src="{{ asset('images/snapchat-icon.svg') }}" alt="Snapchat" class='snapchat-icon'>
+                        <div class="reseaux-sociaux">
+                            <p class="retrouvez-nous">Retrouvez-nous :</p>
+                            <a href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+                            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                            <a href="#" aria-label="Snapchat"><i class="fab fa-snapchat"></i></a>
                         </div>
+
                     </div>
                 </footer>
             </div>
     </body>
 
-    {% block javascripts %}{% endblock %}
+        <script src="{{ asset('/js/menu-burger.js') }}" defer></script>
 </html>
