@@ -11,11 +11,13 @@ h1.titre {
     color: #4a86e8;
     margin: 30px 20px 20px 20px;
     font-size: 1.8rem;
+    text-align: center;
 }
 
 /* Conteneur du tableau */
 .table-container {
     padding: 0 20px;
+    overflow-x: auto; /* Scroll horizontal sur mobile */
 }
 
 /* Table stylée */
@@ -55,7 +57,7 @@ table tbody tr:hover {
     background-color: #e9f0fb;
 }
 
-/* Supprimer le style des formulaires dans le tableau */
+/* Formulaires dans le tableau */
 td form {
     background: none;
     padding: 0;
@@ -68,7 +70,7 @@ td form + form {
     margin-left: 5px;
 }
 
-/* Bouton Valider */
+/* Boutons */
 .approve {
     background-color: #4a86e8;
     color: white;
@@ -84,7 +86,6 @@ td form + form {
     background-color: #155ab6;
 }
 
-/* Bouton Refuser */
 .refuse {
     background-color: #FF4136;
     color: white;
@@ -98,4 +99,72 @@ td form + form {
 
 .refuse:hover {
     background-color: #E03B2E;
+}
+
+/* ----- PARTIE RESPONSIVE ----- */
+
+/* Tablette (moins de 900px) */
+@media (max-width: 900px) {
+    h1.titre {
+        font-size: 1.6rem;
+    }
+
+    table th, table td {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .approve, .refuse {
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+}
+
+/* Mobile (moins de 600px) */
+@media (max-width: 600px) {
+    h1.titre {
+        font-size: 1.4rem;
+    }
+
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    table th, table td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .approve, .refuse {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    /* Les boutons en colonne sur mobile */
+    .moderation-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        align-items: center;
+    }
+}
+
+/* Très petit mobile (moins de 480px) */
+@media (max-width: 480px) {
+    h1.titre {
+        font-size: 1.2rem;
+        margin: 20px 10px;
+    }
+
+    table th, table td {
+        padding: 6px 8px;
+        font-size: 11px;
+    }
+
+    .approve, .refuse {
+        padding: 3px 6px;
+        font-size: 11px;
+    }
 }

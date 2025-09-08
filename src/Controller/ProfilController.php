@@ -345,7 +345,7 @@ class ProfilController extends AbstractController
             ':is_validated' => 0,
         ]);
 
-        return $this->redirectToRoute('app_profil');
+        return $this->redirectToRoute('historique_reservations');
     }
 
     #[Route('/historique/covoiturages', name: 'historique_covoiturages')]

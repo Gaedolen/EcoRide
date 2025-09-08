@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Voiture;
 use App\Form\VoitureType;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -145,7 +147,7 @@ class VoitureController extends AbstractController
     }
 
     #[Route('/voiture/supprimer/{id}', name: 'supprimer_voiture', methods: ['POST'])]
-    public function supprimerVoiture(int $id): Response
+    public function supprimerVoiture(int $id, MailerInterface $mailer): Response
     {
         /** @var \App\Entity\User $utilisateur */
         $utilisateur = $this->getUser();
@@ -156,13 +158,56 @@ class VoitureController extends AbstractController
         $pdo = new \PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-        $stmt = $pdo->prepare("DELETE FROM voiture WHERE id = :id AND utilisateur_id = :utilisateur_id");
-        $stmt->execute([
+        // Récupérer les covoiturages liés à la voiture
+        $stmt = $pdo->prepare("SELECT id, lieu_depart, lieu_arrivee, date_depart FROM covoiturage WHERE voiture_id = :id");
+        $stmt->execute(['id' => $id]);
+        $covoiturages = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($covoiturages as $covoiturage) {
+            $covoiturageId = $covoiturage['id'];
+
+            // Récupérer les passagers de ce covoiturage
+            $stmtPassagers = $pdo->prepare("
+                SELECT u.email, u.pseudo 
+                FROM reservation r
+                JOIN user u ON r.utilisateur_id = u.id
+                WHERE r.covoiturage_id = :covoiturage_id
+            ");
+            $stmtPassagers->execute(['covoiturage_id' => $covoiturageId]);
+            $passagers = $stmtPassagers->fetchAll(\PDO::FETCH_ASSOC);
+
+            // Envoyer un mail à chaque passager
+            foreach ($passagers as $passager) {
+                $email = (new TemplatedEmail())
+                    ->from('contact@ecoride.com')
+                    ->to($passager['email'])
+                    ->subject('Annulation de votre covoiturage')
+                    ->htmlTemplate('emails/annulation_covoiturage.html.twig')
+                    ->context([
+                        'pseudo' => $passager['pseudo'],
+                        'trajet' => $covoiturage
+                    ]);
+
+                $mailer->send($email);
+            }
+
+            // Supprimer les réservations liées
+            $stmtDeleteReservations = $pdo->prepare("DELETE FROM reservation WHERE covoiturage_id = :covoiturage_id");
+            $stmtDeleteReservations->execute(['covoiturage_id' => $covoiturageId]);
+
+            // Supprimer le covoiturage
+            $stmtDeleteCovoiturage = $pdo->prepare("DELETE FROM covoiturage WHERE id = :id");
+            $stmtDeleteCovoiturage->execute(['id' => $covoiturageId]);
+        }
+
+        // Supprimer la voiture
+        $stmtDeleteVoiture = $pdo->prepare("DELETE FROM voiture WHERE id = :id AND utilisateur_id = :utilisateur_id");
+        $stmtDeleteVoiture->execute([
             'id' => $id,
             'utilisateur_id' => $utilisateur->getId(),
         ]);
 
-        $this->addFlash('success', 'Voiture supprimée avec succès.');
+        $this->addFlash('success', 'La voiture et ses covoiturages ont été supprimés. Les passagers ont été prévenus.');
         return $this->redirectToRoute('app_profil');
     }
 }

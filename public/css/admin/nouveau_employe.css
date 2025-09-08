@@ -1,8 +1,8 @@
-/* nouveau_employe.css */
-
 body {
     background-color: #f9f9f9;
     font-family: "Comfortaa", sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
 .form-container {
@@ -19,6 +19,7 @@ body {
     text-align: center;
     margin-bottom: 25px;
     color: #4a86e8;
+    font-size: 1.8rem;
 }
 
 form label {
@@ -26,6 +27,7 @@ form label {
     margin-bottom: 5px;
     color: #333;
     font-weight: 500;
+    font-size: 14px;
 }
 
 form input,
@@ -35,10 +37,12 @@ form select {
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    font-size: 15px;
+    font-size: 14px;
+    box-sizing: border-box;
 }
 
-form input:focus {
+form input:focus,
+form select:focus {
     outline: none;
     border-color: #39b385;
     box-shadow: 0 0 0 2px rgba(57, 179, 133, 0.2);
@@ -59,8 +63,6 @@ form input:focus {
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    text-align: center;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -68,14 +70,12 @@ form input:focus {
     max-width: 120px;
     height: 38px;
     line-height: 1;
-    white-space: nowrap;
     margin: 20px auto 0 auto;
 }
 
 .btn-submit:hover {
     background: linear-gradient(#8ed657, #317d31);
 }
-
 
 .error {
     color: #c0392b;
@@ -92,6 +92,28 @@ form input:focus {
     border-radius: 6px;
     margin-top: 6px;
     font-size: 14px;
-    font-family: 'Comfortaa', sans-serif;
 }
 
+/* Responsive */
+@media screen and (max-width: 650px) {
+    .form-container {
+        margin: 30px 10px;
+        padding: 20px;
+    }
+
+    .btn-submit {
+        width: 100%;
+        max-width: none;
+        padding: 10px 0;
+    }
+
+    form input,
+    form select {
+        font-size: 13px;
+        padding: 8px 10px;
+    }
+
+    .form-container h1 {
+        font-size: 1.5rem;
+    }
+}

@@ -287,4 +287,76 @@ button[type="submit"]:hover {
     color: red;
 }
 
+/* Responsive */
+@media screen and (max-width: 900px) {
+    h1 {
+        font-size: 1.6rem;
+    }
 
+    h2 {
+        font-size: 1.2rem;
+    }
+
+    .container-signalement {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    table th, table td {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+    .modal-content {
+        width: 350px;
+    }
+
+    button[type="submit"],
+    .btn-traiter,
+    .btn-ignorer,
+    .btn-contact {
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    h1 {
+        font-size: 1.4rem;
+        margin: 15px;
+    }
+
+    h2 {
+        font-size: 1rem;
+        margin: 15px 15px 10px 15px;
+    }
+
+    table th, table td {
+        padding: 8px;
+        font-size: 12px;
+    }
+
+    .modal-content {
+        width: 90%;
+        padding: 15px;
+    }
+
+    .container-signalement {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    button[type="submit"],
+    .btn-traiter,
+    .btn-ignorer,
+    .btn-contact {
+        padding: 4px 8px;
+        font-size: 12px;
+        width: 100%;
+        margin-bottom: 5px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+}

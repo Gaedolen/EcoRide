@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\VoitureRepository;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\ORM\Mapping as ORM;
 use App\Entity\User;
@@ -56,6 +58,14 @@ class Voiture
 
     #[ORM\Column(type: Types::JSON, nullable: true)]
     private array $preferences = [];
+
+    #[ORM\OneToMany(mappedBy: 'voiture', targetEntity: Covoiturage::class)]
+    private Collection $covoiturages;
+
+    public function __construct()
+    {
+        $this->covoiturages = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -193,6 +203,33 @@ class Voiture
     public function setPreferences(array $preferences): self
     {
         $this->preferences = $preferences;
+        return $this;
+    }
+
+    public function getCovoiturages(): Collection
+    {
+        return $this->covoiturages;
+    }
+
+    // Optionnel : ajouter et supprimer
+    public function addCovoiturage(Covoiturage $covoiturage): self
+    {
+        if (!$this->covoiturages->contains($covoiturage)) {
+            $this->covoiturages[] = $covoiturage;
+            $covoiturage->setVoiture($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCovoiturage(Covoiturage $covoiturage): self
+    {
+        if ($this->covoiturages->removeElement($covoiturage)) {
+            if ($covoiturage->getVoiture() === $this) {
+                $covoiturage->setVoiture(null);
+            }
+        }
+
         return $this;
     }
 }

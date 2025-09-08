@@ -10,17 +10,17 @@
     <div class="container-form">
         <h1>M'inscrire</h1>
 
-        {{ form_errors(registrationForm) }}
-
         {{ form_start(registrationForm) }}
             <div class='input'>
+                <label for="{{ registrationForm.email.vars.id }}">Email</label>
                 {{ form_widget(registrationForm.email, {
                     attr: {
                         class: 'email',
                         placeholder: 'Email'
                         }
                     }) }}
-
+                
+                <label for="{{ registrationForm.plainPassword.vars.id }}">Mot de passe</label>
                 {{ form_widget(registrationForm.plainPassword, {
                     attr: {
                         class: 'mot-de-passe',
@@ -34,13 +34,15 @@
                     <p id="password-strength-text"></p>
                 </div>
 
+                <label for="{{ registrationForm.pseudo.vars.id }}">Pseudo</label>
                 {{ form_widget(registrationForm.pseudo, {
                     attr: {
                         class: 'pseudo',
                         placeholder: 'Pseudo'
                         }
                 }) }}
-
+                
+                <label for="{{ registrationForm.nom.vars.id }}">Nom</label>
                 {{ form_widget(registrationForm.nom, {
                     attr: {
                         class: 'nom',
@@ -48,6 +50,7 @@
                         }
                 }) }}
 
+                <label for="{{ registrationForm.prenom.vars.id }}">Prénom</label>
                 {{ form_widget(registrationForm.prenom, {
                     attr: {
                         class: 'prenom',
@@ -55,6 +58,7 @@
                         }
                 }) }}
 
+                <label for="{{ registrationForm.telephone.vars.id }}">Numéro de téléphone</label>
                 {{ form_widget(registrationForm.telephone, {
                     attr: {
                         class: 'telephone',
@@ -62,6 +66,7 @@
                         }
                 }) }}
 
+                <label for="{{ registrationForm.adresse.vars.id }}">Adresse</label>
                 {{ form_widget(registrationForm.adresse, {
                     attr: {
                         class: 'adresse',
@@ -69,6 +74,7 @@
                         }
                 }) }}
 
+                <label for="{{ registrationForm.date_naissance.vars.id }}">Date de naissance</label>
                 {{ form_widget(registrationForm.date_naissance, {
                     attr: {
                         class: 'date-naissance',

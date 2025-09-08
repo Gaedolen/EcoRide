@@ -81,9 +81,10 @@ class Covoiturage
     #[ORM\Column]
     private ?float $prix_personne = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?\App\Entity\Voiture $voiture = null;
+    #[ORM\ManyToOne(targetEntity: Voiture::class, inversedBy: 'covoiturages')]
+    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
+    private ?Voiture $voiture = null;
+
 
     #[ORM\OneToMany(mappedBy: 'covoiturage', targetEntity: Reservation::class)]
     private Collection $reservations;

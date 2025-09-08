@@ -9,10 +9,10 @@ h1 {
     margin-bottom: 10px;
 }
 
-/* Conteneur pour bouton + tableau seulement */
+/* Conteneur pour bouton + tableau */
 .content-container {
-    margin: 20px auto; /* centre horizontalement et ajoute un top/bottom spacing */
-    padding: 0 20px; /* espace à l'intérieur */
+    margin: 20px auto;
+    padding: 0 20px;
 }
 
 /* Table stylée */

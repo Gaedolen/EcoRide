@@ -121,4 +121,35 @@
             </div>
         {% endfor %}
     </div>
+
+    <div id="avis-popup" class="popup-overlay" style="display:none;"> <!-- Fenêtre pop-up pour laisser un avis -->
+        <div class="popup-content">
+            <button class="close-popup" aria-label="Fermer">&times;</button>
+
+            <form method="POST" action="{{ path('laisser_avis') }}">
+                <input type="hidden" name="cible_id" id="cible_id" value="">
+                <input type="hidden" name="covoiturage_id" id="covoiturage_id" value="">
+
+                <label for="note">Note (1 à 5) :</label>
+                <select name="note" id="note" required>
+                    <option value="">-- Choisir --</option>
+                    {% for i in 1..5 %}
+                        <option value="{{ i }}">{{ i }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="commentaire">Commentaire :</label>
+                <textarea name="commentaire" id="commentaire" rows="4" required></textarea>
+
+                <button type="submit" class="btn btn-primary">Envoyer</button>
+            </form>
+        </div>
+    </div>
+
+    {% include 'report/_form_popup.html.twig' %} <!-- Fenêtre pop-up pour signaler un utilisateur -->
+
+    {% block javascripts %}
+        <script src="{{ asset('js/historique_reservations.js') }}"></script>
+    {% endblock %}
+
 {% endblock %}

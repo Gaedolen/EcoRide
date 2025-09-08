@@ -157,10 +157,21 @@
                             </ul>
 
                             <div class="card-actions">
-                                <a href="{{ path('modifier_covoiturage', { id: covoiturage.id }) }}" class="btn-card-action">Modifier</a>
-                                <form method="POST" action="{{ path('supprimer_covoiturage', { id: covoiturage.id }) }}" class="delete-form">
-                                    <button type="button" class="btn-card-action" data-covoiturage-id="{{ covoiturage.id }}">Supprimer</button>
-                                </form>
+                                {# Bouton Modifier #}
+                                {% if covoiturage.statut == 'en_cours' %}
+                                    <span class="btn-card-action disabled">Modifier</span>
+                                {% else %}
+                                    <a href="{{ path('modifier_covoiturage', { id: covoiturage.id }) }}" class="btn-card-action">Modifier</a>
+                                {% endif %}
+
+                                {# Bouton Supprimer #}
+                                {% if covoiturage.statut == 'en_cours' %}
+                                    <button type="button" class="btn-card-action disabled" disabled>Supprimer</button>
+                                {% else %}
+                                    <form method="POST" action="{{ path('supprimer_covoiturage', { id: covoiturage.id }) }}" class="delete-form">
+                                        <button type="submit" class="btn-card-action">Supprimer</button>
+                                    </form>
+                                {% endif %}
                             </div>
                         </div>
                     {% endfor %}
@@ -313,7 +324,9 @@
 
     <div id="confirmation-modal" class="modal hidden"> <!-- Fenêtre pop-up de suppression d'une voiture -->
         <div class="modal-content">
-            <p>Êtes-vous sûr de vouloir supprimer cette voiture ?</p>
+            <p>Êtes-vous sûr de vouloir supprimer cette voiture ?<br>
+    <strong>Tous les covoiturages associés à cette voiture seront également supprimés.</strong><br>
+    Les passagers concernés recevront un mail d’annulation.</p>
             <div class="modal-buttons">
                 <button id="confirm-yes" class="btn-confirm-yes">Oui</button>
                 <button id="confirm-no" class="btn-confirm-no">Non</button>
@@ -342,32 +355,6 @@
             </form>
         </div>
     </div>
-
-    <div id="avis-popup" class="popup-overlay" style="display:none;"> <!-- Fenêtre pop-up pour laisser un avis -->
-        <div class="popup-content">
-            <button class="close-popup" aria-label="Fermer">&times;</button>
-
-            <form method="POST" action="{{ path('laisser_avis') }}">
-                <input type="hidden" name="cible_id" id="cible_id" value="">
-                <input type="hidden" name="covoiturage_id" id="covoiturage_id" value="">
-
-                <label for="note">Note (1 à 5) :</label>
-                <select name="note" id="note" required>
-                    <option value="">-- Choisir --</option>
-                    {% for i in 1..5 %}
-                        <option value="{{ i }}">{{ i }}</option>
-                    {% endfor %}
-                </select>
-
-                <label for="commentaire">Commentaire :</label>
-                <textarea name="commentaire" id="commentaire" rows="4" required></textarea>
-
-                <button type="submit" class="btn btn-primary">Envoyer</button>
-            </form>
-        </div>
-    </div>
-
-    {% include 'report/_form_popup.html.twig' %} <!-- Fenêtre pop-up pour signaler un utilisateur -->
 
     <script src="{{ asset('js/delete-voiture.js') }}"></script>
 {% endblock %}

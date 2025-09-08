@@ -1,4 +1,16 @@
-/* Container principal */
+/* ---------- RESET ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Comfortaa', sans-serif;
+    background-color: #f9f9f9;
+}
+
+/* ---------- CONTAINER ---------- */
 .container-form {
     background-color: #EFEFEF;
     border-radius: 20px;
@@ -6,10 +18,9 @@
     max-width: 400px;
     margin: 40px auto;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    font-family: 'Comfortaa', sans-serif;
 }
 
-/* Titre "M'inscrire" */
+/* ---------- TITRE ---------- */
 .container-form h1 {
     color: #4a86e8;
     font-size: 32px;
@@ -18,28 +29,40 @@
     margin-bottom: 25px;
 }
 
-/* Champs de saisie */
-.input {
+/* ---------- GROUPES LABEL + INPUT ---------- */
+.form-column {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 15px;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 15px;
+    width: 100%;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-/* Champs de saisie spécifiques */
+/* Labels */
+label {
+   font-weight: bold; 
+   color: #333;
+}
+
+/* Inputs */
 input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="date"],
 input[type="tel"] {
     width: 100%;
-    max-width: 300px;
     background-color: white;
     border-radius: 20px;
     border: none;
     padding: 12px 16px;
     font-size: 16px;
     box-sizing: border-box;
+    margin-bottom: 20px;
+    margin-top: 10px;
 }
 
 /* Placeholder */
@@ -49,12 +72,12 @@ input[type="tel"] {
     color: #6c757d;
 }
 
-/* input de la date */
+/* Input date */
 .date-naissance {
     color: #6c757d;
 }
 
-/* Bouton de télécharchement d'une photo */
+/* ---------- UPLOAD PHOTO ---------- */
 .photo-upload-wrapper {
     margin-top: 10px;
     text-align: center;
@@ -80,7 +103,7 @@ input[type="tel"] {
     background: linear-gradient(#8ed657, #317d31);
 }
 
-/* Checkbox des conditions */
+/* ---------- CONDITIONS ---------- */
 .conditions {
     display: flex;
     align-items: center;
@@ -90,7 +113,7 @@ input[type="tel"] {
     font-size: 14px;
 }
 
-/* Bouton d'inscription */
+/* ---------- BOUTON INSCRIPTION ---------- */
 .bouton {
     background: linear-gradient(#a2e76d, yellowgreen);
     border: none;
@@ -111,7 +134,7 @@ input[type="tel"] {
     background: linear-gradient(#8ed657, #317d31);
 }
 
-/* Lien "déjà incrit ?" */
+/* ---------- LIEN DEJA INSCRIT ---------- */
 .deja-inscrit {
     display: block;
     text-align: center;
@@ -121,7 +144,7 @@ input[type="tel"] {
     margin-top: 10px;
 }
 
-/* Barre de force Mot de passe */
+/* ---------- BARRE DE FORCE MDP ---------- */
 .password-strength-container {
     width: 100%;
     max-width: 300px;
@@ -143,10 +166,62 @@ input[type="tel"] {
     font-weight: bold;
 }
 
-/* Message d'erreur moins de 18 ans */
+/* ---------- MESSAGE ERREUR ---------- */
 .error-message {
     font-size: 14px;
     color: red;
     text-align: center;
     margin-top: 5px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+/* Tablette */
+@media (max-width: 768px) {
+    .container-form {
+        max-width: 90%;
+        padding: 20px;
+    }
+
+    .form-column {
+        max-width: 100%;
+    }
+
+    .bouton {
+        max-width: 100%;
+    }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .container-form {
+        margin: 20px;
+        padding: 15px;
+    }
+
+    .container-form h1 {
+        font-size: 26px;
+    }
+
+    .form-column label {
+        font-size: 13px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="date"],
+    input[type="tel"] {
+        font-size: 14px;
+        padding: 10px 14px;
+    }
+
+    .bouton {
+        font-size: 18px;
+        padding: 10px;
+    }
+
+    .deja-inscrit {
+        font-size: 13px;
+    }
 }
