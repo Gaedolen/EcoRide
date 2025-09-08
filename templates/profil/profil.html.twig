@@ -190,7 +190,7 @@
 
     <!-- Affichage des réservations -->
     <div class='reservation-header'>
-        <h1 class="h1">Mes réservations</h1>
+        <h1>Mes réservations</h1>
         <a href="{{ path('historique_reservations') }}" class="btn-historique">📜 Historique des réservations</a>
    </div>
     {% if reservations is not empty %}
@@ -294,7 +294,7 @@
         <p class="no-car-message">Vous n'avez pas encore réservé de covoiturage.</p>
     {% endif %}
 
-    <h1 class="h1">Mes avis</h1>
+    <h1 class='avis-title'>Mes avis</h1>
     {% if avisValides is not empty %}
         {% for avis in avisValides %}
             <div class="avis-item">
