@@ -7,14 +7,13 @@ use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\MoneyType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use App\Entity\Voiture;
+use Symfony\Component\Validator\Constraints as Assert;
 
 class CovoiturageType extends AbstractType
 {
@@ -28,21 +27,32 @@ class CovoiturageType extends AbstractType
                 'attr' => [
                     'min' => (new \DateTime())->format('Y-m-d'),
                     'class' => 'form-input',
-                ]
+                ],
+                'constraints' => [
+                    new Assert\NotBlank(),
+                    new Assert\GreaterThanOrEqual('today', message: 'La date de départ doit être aujourd’hui ou plus tard.'),
+                ],
             ])
             ->add('heure_depart', TimeType::class, [
                 'widget' => 'single_text',
                 'label' => 'Heure de départ',
                 'attr' => [
                     'class' => 'form-input',
-                ]
+                ],
+                'constraints' => [
+                    new Assert\NotBlank(),
+                ],
             ])
             ->add('lieu_depart', TextType::class, [
                 'label' => 'Lieu de départ',
                 'attr' => [
                     'class' => 'form-input',
                     'placeholder' => 'Entrez la ville de départ',
-                ]
+                ],
+                'constraints' => [
+                    new Assert\NotBlank(),
+                    new Assert\Length(['max' => 255]),
+                ],
             ])
             ->add('date_arrivee', DateType::class, [
                 'widget' => 'single_text',
@@ -50,7 +60,11 @@ class CovoiturageType extends AbstractType
                 'html5' => true,
                 'attr' => [
                     'min' => (new \DateTime())->format('Y-m-d'),
-                    'class' => 'form-input'
+                    'class' => 'form-input',
+                ],
+                'constraints' => [
+                    new Assert\NotBlank(),
+                    new Assert\GreaterThanOrEqual('today', message: 'La date d’arrivée doit être aujourd’hui ou plus tard.'),
                 ],
             ])
             ->add('heureArrivee', TimeType::class, [
@@ -58,13 +72,20 @@ class CovoiturageType extends AbstractType
                 'widget' => 'single_text',
                 'input' => 'datetime',
                 'html5' => true,
+                'constraints' => [
+                    new Assert\NotBlank(),
+                ],
             ])
             ->add('lieu_arrivee', TextType::class, [
                 'label' => 'Lieu d’arrivée',
                 'attr' => [
                     'class' => 'form-input',
                     'placeholder' => 'Entrez la ville d\'arrivée',
-                ]
+                ],
+                'constraints' => [
+                    new Assert\NotBlank(),
+                    new Assert\Length(['max' => 255]),
+                ],
             ])
             ->add('nb_place', IntegerType::class, [
                 'label' => 'Nombre de places',
@@ -73,12 +94,22 @@ class CovoiturageType extends AbstractType
                     'step' => 1,
                 ],
                 'data' => 1,
+                'constraints' => [
+                    new Assert\NotBlank(),
+                    new Assert\Positive(),
+                    new Assert\LessThanOrEqual(10, message: 'Le nombre de places ne peut pas dépasser 10.'),
+                ],
             ])
             ->add('prixPersonne', NumberType::class, [
                 'label' => 'Prix par personne',
                 'scale' => 2,
                 'html5' => true,
                 'attr' => ['class' => 'form-input prix-input'],
+                'constraints' => [
+                    new Assert\NotBlank(),
+                    new Assert\PositiveOrZero(),
+                    new Assert\LessThanOrEqual(1000, message: 'Le prix est trop élevé.'),
+                ],
             ])
             ->add('voiture', EntityType::class, [
                 'class' => Voiture::class,
@@ -95,6 +126,9 @@ class CovoiturageType extends AbstractType
                         ->where('v.utilisateur = :user')
                         ->setParameter('user', $options['user']);
                 },
+                'constraints' => [
+                    new Assert\NotNull(message: 'Veuillez choisir une voiture.'),
+                ],
             ]);
     }
 
