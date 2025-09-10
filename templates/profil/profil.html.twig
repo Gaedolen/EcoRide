@@ -169,6 +169,7 @@
                                     <button type="button" class="btn-card-action disabled" disabled>Supprimer</button>
                                 {% else %}
                                     <form method="POST" action="{{ path('supprimer_covoiturage', { id: covoiturage.id }) }}" class="delete-form">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('supprimer_covoiturage_' ~ covoiturage.id) }}">
                                         <button type="submit" class="btn-card-action">Supprimer</button>
                                     </form>
                                 {% endif %}
@@ -208,7 +209,8 @@
 
                         {% if resa.statut != 'ferme' %}
                             <button type="button" class="btn-annuler open-cancel-popup"
-                                data-action-url="{{ path('annuler_reservation', { id: resa.reservation_id }) }}">
+                                data-action-url="{{ path('annuler_reservation', { id: resa.reservation_id }) }}"
+                                data-token="{{ csrf_token('annuler_reservation_' ~ resa.reservation_id) }}">
                                 Annuler
                             </button>
                         {% else %}
@@ -249,7 +251,7 @@
                             <!-- Bloc conducteur -->
                             <div class="bloc bloc-conducteur">
                                 <h3>Conducteur</h3>
-                                <img src="{{ resa.chauffeur_photo ? 'data:image/jpeg;base64,' ~ resa.chauffeur_photo : asset('images/default-user.png') }}" alt="Photo" class="chauffeur-photo">
+                                <img src="{{ resa.chauffeur_photo ? 'data:image/jpeg;base64,' ~ resa.chauffeur_photo : asset('images/se-connecter.png') }}" alt="Photo" class="chauffeur-photo">
                                 <p><strong>{{ resa.chauffeur_pseudo }}</strong></p>
                                 <p><strong>Note : </strong>{{ resa.chauffeur_note ?? 'Non noté' }}/5</p>
                             </div>
@@ -301,7 +303,7 @@
                 {% if avis.auteur and avis.auteur.auteurPhotoBase64 %}
                     <img src="data:image/jpeg;base64,{{ avis.auteur.auteurPhotoBase64 }}" alt="Photo de {{ avis.auteur.pseudo }}" class='avis-photo'>
                 {% else %}
-                    <img src="/images/default-avatar.png" alt="Photo par défaut" class='avis-photo'>
+                    <img src="/images/se-connecter.png" alt="Photo par défaut" class='avis-photo'>
                 {% endif %}
 
                 <span class="separator-vertical"></span>
@@ -348,6 +350,7 @@
         <div class="modal-content">
             <p>Êtes-vous sûr de vouloir annuler cette réservation ?</p>
             <form id="cancel-reservation-form" method="POST" action="">
+            <input type="hidden" name="_token" id="cancel-token">
                 <div class="modal-buttons">
                     <button type="submit" class="btn-confirm-yes">Oui</button>
                     <button type="button" class="btn-confirm-no">Non</button>

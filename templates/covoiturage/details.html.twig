@@ -11,11 +11,12 @@
         <h2>Détails du covoiturage</h2>
         {% if app.user.id != trajet.utilisateur_id %}
             <form method="POST" action="{{ path('reserver_trajet', { id: trajet.id }) }}">
-                <button 
-                    type="submit" 
-                    class="btn-reserver {% if app.user.credits < 2 %}disabled-btn{% endif %}"
-                    {% if app.user.credits < 2 %}onclick="return false;"{% endif %}
-                >
+                <input type="hidden" name="_token" value="{{ csrf_token('reserver_covoiturage_' ~ trajet.id) }}">
+                
+                <button type="button" 
+                        class="btn-reserver {% if app.user.credits < 2 %}disabled-btn{% endif %}" 
+                        data-credits="{{ app.user.credits }}"
+                        {% if app.user.credits < 2 %}disabled{% endif %}>
                     Covoiturer !
                 </button>
             </form>
@@ -28,7 +29,7 @@
 
     <div class="carte-details">
         <div class="details-col conducteur">
-            <img src="{{ trajet.chauffeur_photo ? 'data:image/jpeg;base64,' ~ trajet.chauffeur_photo : asset('images/default-user.png') }}" class="chauffeur-photo" alt="Photo">
+            <img src="{{ trajet.chauffeur_photo ? 'data:image/jpeg;base64,' ~ trajet.chauffeur_photo : asset('images/se-connecter.png') }}" class="chauffeur-photo" alt="Photo">
             <p class="chauffeur-name">{{ trajet.chauffeur_pseudo }}</p>
             <p><strong>Note : </strong>{{ trajet.chauffeur_note ?? 'Non noté' }}/5</p>
         </div>
@@ -43,7 +44,7 @@
             {% set duree = trajet.heure_arrivee.timestamp - trajet.heure_depart.timestamp %}
             {% set h = duree // 3600 %}
             {% set m = (duree % 3600) // 60 %}
-            <p><strong>Durée :</strong> {{ h }}h{% if m > 0 %}{{ m }}min{% endif %}</p>
+            <p><strong>Durée :</strong> {{ trajet.duree_heures }}h{% if trajet.duree_minutes > 0 %} {{ trajet.duree_minutes }}min{% endif %}</p>
 
             <p><strong>Places disponibles :</strong> {{ trajet.nb_place }}</p>
             <p><strong>Prix :</strong> {{ trajet.prix_personne }} €</p>
@@ -116,17 +117,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Fenêtre pop-up de confirmation après réservation -->
-    {% if app.request.query.get('reserved') %}
-        <div id="popup-confirmation" class="popup-overlay">
-            <div class="popup-content">
-                <p>Vous avez réservé ce covoiturage !</p>
-                <p>Vous pouvez gérer votre réservation sur votre <a href="{{ path('app_profil') }}">page de profil</a>.</p>
-                <button onclick="document.getElementById('popup-confirmation').style.display='none'">Fermer</button>
-            </div>
-        </div>
-    {% endif %}
 
     {% block javascripts %}
         <script src="{{ asset('/js/detailsCovoiturage.js') }}"></script>

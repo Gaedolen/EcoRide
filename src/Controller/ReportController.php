@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Security\Csrf\CsrfTokenManagerInterface;
 
 use App\Entity\Report;
 use App\Entity\User;
@@ -58,6 +59,12 @@ class ReportController extends AbstractController
     #[Route('/report', name: 'report_submit', methods: ['POST'])]
     public function submit(Request $request, EntityManagerInterface $em): JsonResponse
     {
+        $token = $request->request->get('_token');
+
+        if (!$this->isCsrfTokenValid('report_user', $token)) {
+            return new JsonResponse(['error' => 'Token CSRF invalide.'], 400);
+        }
+
         $user = $this->getUser(); // utilisateur qui signale
         if (!$user) {
             return new JsonResponse(['success' => false, 'message' => 'Utilisateur non connecté'], 403);

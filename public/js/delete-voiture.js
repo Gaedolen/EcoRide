@@ -30,29 +30,34 @@ document.addEventListener('DOMContentLoaded', () => {
     setupModal('button[data-voiture-id]', 'confirmation-modal', 'confirm-yes', 'confirm-no');
 
     // Supprimer un covoiturage
-    setupModal('.delete-form button[data-covoiturage-id]', 'confirmation-modal-covoiturage', 'confirm-yes-covoiturage', 'confirm-no-covoiturage');
+    setupModal('.delete-form button', 'confirmation-modal-covoiturage', 'confirm-yes-covoiturage', 'confirm-no-covoiturage');
 
     // Annulation d'une réservation
-    const cancelButtons = document.querySelectorAll('.open-cancel-popup');
-    const cancelModal = document.getElementById('cancel-reservation-modal');
-    const cancelForm = document.getElementById('cancel-reservation-form');
-    const cancelNo = cancelModal.querySelector('.btn-confirm-no');
+    const modal = document.getElementById('cancel-reservation-modal');
+    const form = document.getElementById('cancel-reservation-form');
+    const tokenInput = document.getElementById('cancel-token');
 
-    // Ouverture du modal et mise à jour de l'action du formulaire
-    cancelButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.preventDefault();
-            const actionUrl = this.getAttribute('data-action-url');
-            if(cancelForm) {
-                cancelForm.setAttribute('action', actionUrl);
-                cancelModal.classList.remove('hidden');
-            }
+    // Ouvre le modal et remplit le formulaire
+    document.querySelectorAll('.open-cancel-popup').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const actionUrl = btn.dataset.actionUrl;
+            const csrfToken = btn.dataset.token;
+
+            form.action = actionUrl;
+            tokenInput.value = csrfToken;
+
+            modal.classList.remove('hidden');
         });
     });
 
-    // Fermeture du modal si "Non"
-    cancelNo.addEventListener('click', () => {
-        cancelModal.classList.add('hidden');
+    // Fermeture du modal sans annuler
+    modal.querySelector('.btn-confirm-no').addEventListener('click', () => {
+        modal.classList.add('hidden');
+    });
+
+    // Bouton "Non" pour fermer le modal
+    document.querySelector('.btn-confirm-no').addEventListener('click', () => {
+        modal.classList.add('hidden');
     });
 
     // Laisser un avis
@@ -108,6 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({
+                _token: document.getElementById('report-token').value,
                 reported_user_id: document.getElementById('reportedUserId').value,
                 covoiturage_id: document.getElementById('covoiturageId').value,
                 message: document.getElementById('message').value

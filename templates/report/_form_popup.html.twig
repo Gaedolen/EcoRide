@@ -6,6 +6,7 @@
         <form id="report-form" method="POST" action="{{ path('report_submit') }}">
             <input type="hidden" name="reported_user_id" id="reportedUserId">
             <input type="hidden" name="covoiturage_id" id="covoiturageId">
+            <input type="hidden" name="_token" id="report-token" value="{{ csrf_token('report_user') }}">
 
             <div class="form-group">
                 <label for="reason">Raison du signalement</label>
