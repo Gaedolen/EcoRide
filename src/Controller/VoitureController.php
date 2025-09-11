@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\Voiture;
 use App\Form\VoitureType;
+use App\Service\PdoService;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,37 +15,39 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class VoitureController extends AbstractController
 {
+    private PdoService $pdoService;
+
+    public function __construct(PdoService $pdoService)
+    {
+        $this->pdoService = $pdoService;
+    }
+
     #[Route('/ajouter-voiture', name: 'ajouter_voiture', methods: ['GET', 'POST'])]
     public function ajouterVoiture(Request $request): Response
     {
+        /** @var User $utilisateur */
+        $utilisateur = $this->getUser();
+        if (!$utilisateur) {
+            $this->addFlash('error', 'Vous devez être connecté pour ajouter une voiture.');
+            return $this->redirectToRoute('app_login');
+        }
+
         $voiture = new Voiture();
         $form = $this->createForm(VoitureType::class, $voiture);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            /** @var \App\Entity\User $utilisateur */
-            $utilisateur = $this->getUser();
-            if (!$utilisateur) {
-                $this->addFlash('error', 'Vous devez être connecté pour ajouter une voiture.');
-                return $this->redirectToRoute('app_login');
-            }
-
-            $preferences = $voiture->getPreferences(); // tableau JSON
-            $preferencesJson = !empty($preferences) ? json_encode($preferences, JSON_UNESCAPED_UNICODE) : null;
+            $preferencesJson = $voiture->getPreferences() ? json_encode($voiture->getPreferences(), JSON_UNESCAPED_UNICODE) : null;
 
             try {
-                $pdo = new \PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
-                $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-
-                $stmt = $pdo->prepare("
-                    INSERT INTO voiture 
+                $sql = "
+                    INSERT INTO voiture
                         (immatriculation, date_premiere_immatriculation, marque, modele, nb_places, fumeur, animaux, couleur, energie, utilisateur_id, preferences)
-                    VALUES 
+                    VALUES
                         (:immatriculation, :date_premiere_immatriculation, :marque, :modele, :nb_places, :fumeur, :animaux, :couleur, :energie, :utilisateur_id, :preferences)
-                ");
+                ";
 
-                $stmt->execute([
+                $this->pdoService->execute($sql, [
                     'immatriculation' => $voiture->getImmatriculation(),
                     'date_premiere_immatriculation' => $voiture->getDatePremiereImmatriculation()?->format('Y-m-d'),
                     'marque' => $voiture->getMarque(),
@@ -60,9 +64,8 @@ class VoitureController extends AbstractController
                 $this->addFlash('success', 'Voiture ajoutée avec succès !');
                 return $this->redirectToRoute('app_profil');
 
-            } catch (\PDOException $e) {
+            } catch (\Exception $e) {
                 $this->addFlash('error', 'Erreur lors de l\'insertion : ' . $e->getMessage());
-                return $this->redirectToRoute('ajouter_voiture');
             }
         }
 
@@ -74,16 +77,20 @@ class VoitureController extends AbstractController
     #[Route('/voiture/modifier/{id}', name: 'modifier_voiture', methods: ['GET', 'POST'])]
     public function modifierVoiture(Request $request, int $id): Response
     {
-        $pdo = new \PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        /** @var User $utilisateur */
+        $utilisateur = $this->getUser();
+        if (!$utilisateur) {
+            throw $this->createAccessDeniedException('Vous devez être connecté.');
+        }
 
-        // Récupérer la voiture
-        $stmt = $pdo->prepare("SELECT * FROM voiture WHERE id = :id");
-        $stmt->execute(['id' => $id]);
-        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-
+        $row = $this->pdoService->fetchOne("SELECT * FROM voiture WHERE id = :id", ['id' => $id]);
         if (!$row) {
-            throw $this->createNotFoundException('Voiture introuvable');
+            throw $this->createNotFoundException('Voiture introuvable.');
+        }
+
+        // Vérification que l'utilisateur est le propriétaire
+        if ($row['utilisateur_id'] != $utilisateur->getId()) {
+            throw $this->createAccessDeniedException('Vous ne pouvez pas modifier cette voiture.');
         }
 
         $voiture = new Voiture();
@@ -93,8 +100,8 @@ class VoitureController extends AbstractController
             ->setImmatriculation($row['immatriculation'])
             ->setDatePremiereImmatriculation(new \DateTime($row['date_premiere_immatriculation']))
             ->setNbPlaces($row['nb_places'])
-            ->setFumeur((bool) $row['fumeur'])
-            ->setAnimaux((bool) $row['animaux'])
+            ->setFumeur((bool)$row['fumeur'])
+            ->setAnimaux((bool)$row['animaux'])
             ->setCouleur($row['couleur'])
             ->setEnergie($row['energie'])
             ->setPreferences($row['preferences'] ? json_decode($row['preferences'], true) : []);
@@ -103,9 +110,7 @@ class VoitureController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
-            $preferences = $voiture->getPreferences();
-            $preferencesJson = !empty($preferences) ? json_encode($preferences, JSON_UNESCAPED_UNICODE) : null;
+            $preferencesJson = $voiture->getPreferences() ? json_encode($voiture->getPreferences(), JSON_UNESCAPED_UNICODE) : null;
 
             $sql = "
                 UPDATE voiture SET
@@ -122,8 +127,7 @@ class VoitureController extends AbstractController
                 WHERE id = :id
             ";
 
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([
+            $this->pdoService->execute($sql, [
                 'id' => $id,
                 'immatriculation' => $voiture->getImmatriculation(),
                 'date' => $voiture->getDatePremiereImmatriculation()->format('Y-m-d'),
@@ -147,67 +151,88 @@ class VoitureController extends AbstractController
     }
 
     #[Route('/voiture/supprimer/{id}', name: 'supprimer_voiture', methods: ['POST'])]
-    public function supprimerVoiture(int $id, MailerInterface $mailer): Response
+    public function supprimerVoiture(Request $request, int $id, MailerInterface $mailer): Response
     {
-        /** @var \App\Entity\User $utilisateur */
+        /** @var User $utilisateur */
         $utilisateur = $this->getUser();
         if (!$utilisateur) {
-            throw $this->createAccessDeniedException('Accès refusé');
+            throw $this->createAccessDeniedException('Accès refusé.');
         }
 
-        $pdo = new \PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
-        $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $token = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('supprimer_voiture_'.$id, $token)) {
+            throw $this->createAccessDeniedException('Token CSRF invalide.');
+        }
 
-        // Récupérer les covoiturages liés à la voiture
-        $stmt = $pdo->prepare("SELECT id, lieu_depart, lieu_arrivee, date_depart FROM covoiturage WHERE voiture_id = :id");
-        $stmt->execute(['id' => $id]);
-        $covoiturages = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        try {
+            $this->pdoService->beginTransaction();
 
-        foreach ($covoiturages as $covoiturage) {
-            $covoiturageId = $covoiturage['id'];
+            // Récupération des covoiturages liés à la voiture
+            $covoiturages = $this->pdoService->fetchAll(
+                "SELECT id, lieu_depart, lieu_arrivee, date_depart 
+                FROM covoiturage 
+                WHERE voiture_id = :id AND utilisateur_id = :user_id",
+                ['id' => $id, 'user_id' => $utilisateur->getId()]
+            );
 
-            // Récupérer les passagers de ce covoiturage
-            $stmtPassagers = $pdo->prepare("
-                SELECT u.email, u.pseudo 
-                FROM reservation r
-                JOIN user u ON r.utilisateur_id = u.id
-                WHERE r.covoiturage_id = :covoiturage_id
-            ");
-            $stmtPassagers->execute(['covoiturage_id' => $covoiturageId]);
-            $passagers = $stmtPassagers->fetchAll(\PDO::FETCH_ASSOC);
+            foreach ($covoiturages as $covoiturage) {
+                $covoiturageId = $covoiturage['id'];
 
-            // Envoyer un mail à chaque passager
-            foreach ($passagers as $passager) {
-                $email = (new TemplatedEmail())
-                    ->from('contact@ecoride.com')
-                    ->to($passager['email'])
-                    ->subject('Annulation de votre covoiturage')
-                    ->htmlTemplate('emails/annulation_covoiturage.html.twig')
-                    ->context([
-                        'pseudo' => $passager['pseudo'],
-                        'trajet' => $covoiturage
-                    ]);
+                // Récupérer les passagers
+                $passagers = $this->pdoService->fetchAll("
+                    SELECT u.email, u.pseudo 
+                    FROM reservation r
+                    JOIN user u ON r.utilisateur_id = u.id
+                    WHERE r.covoiturage_id = :covoiturage_id
+                ", ['covoiturage_id' => $covoiturageId]);
 
-                $mailer->send($email);
+                // Envoyer un mail à chaque passager
+                foreach ($passagers as $passager) {
+                    $email = (new TemplatedEmail())
+                        ->from('contact@ecoride.com')
+                        ->to($passager['email'])
+                        ->subject('Annulation de votre covoiturage')
+                        ->htmlTemplate('emails/annulation_covoiturage.html.twig')
+                        ->context([
+                            'pseudo' => $passager['pseudo'],
+                            'trajet' => $covoiturage
+                        ]);
+                    $mailer->send($email);
+                }
+
+                // ⚠️ Supprimer les reports liés à ce covoiturage
+                $this->pdoService->execute(
+                    "DELETE FROM report WHERE covoiturage_id = :covoiturage_id",
+                    ['covoiturage_id' => $covoiturageId]
+                );
+
+                // Supprimer les réservations liées
+                $this->pdoService->execute(
+                    "DELETE FROM reservation WHERE covoiturage_id = :covoiturage_id",
+                    ['covoiturage_id' => $covoiturageId]
+                );
+
+                // Supprimer le covoiturage
+                $this->pdoService->execute(
+                    "DELETE FROM covoiturage WHERE id = :id",
+                    ['id' => $covoiturageId]
+                );
             }
 
-            // Supprimer les réservations liées
-            $stmtDeleteReservations = $pdo->prepare("DELETE FROM reservation WHERE covoiturage_id = :covoiturage_id");
-            $stmtDeleteReservations->execute(['covoiturage_id' => $covoiturageId]);
+            // Enfin, supprimer la voiture
+            $this->pdoService->execute(
+                "DELETE FROM voiture WHERE id = :id AND utilisateur_id = :user_id",
+                ['id' => $id, 'user_id' => $utilisateur->getId()]
+            );
 
-            // Supprimer le covoiturage
-            $stmtDeleteCovoiturage = $pdo->prepare("DELETE FROM covoiturage WHERE id = :id");
-            $stmtDeleteCovoiturage->execute(['id' => $covoiturageId]);
+            $this->pdoService->commit();
+            $this->addFlash('success', 'La voiture et ses covoiturages ont été supprimés. Les passagers ont été prévenus.');
+
+        } catch (\Exception $e) {
+            $this->pdoService->rollBack();
+            $this->addFlash('error', 'Erreur lors de la suppression : ' . $e->getMessage());
         }
 
-        // Supprimer la voiture
-        $stmtDeleteVoiture = $pdo->prepare("DELETE FROM voiture WHERE id = :id AND utilisateur_id = :utilisateur_id");
-        $stmtDeleteVoiture->execute([
-            'id' => $id,
-            'utilisateur_id' => $utilisateur->getId(),
-        ]);
-
-        $this->addFlash('success', 'La voiture et ses covoiturages ont été supprimés. Les passagers ont été prévenus.');
         return $this->redirectToRoute('app_profil');
     }
 }

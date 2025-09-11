@@ -1,14 +1,46 @@
 document.addEventListener('DOMContentLoaded', () => {
-    function setupModal(buttonSelector, modalId, yesId, noId) {
-        const buttons = document.querySelectorAll(buttonSelector);
-        const modal = document.getElementById(modalId);
-        const confirmYes = document.getElementById(yesId);
-        const confirmNo = document.getElementById(noId);
+
+    /* Supprimer une voiture */
+    const deleteButtons = document.querySelectorAll('.btn-supprimer-voiture');
+    const modal = document.getElementById('confirmation-modal');
+    const confirmYes = document.getElementById('confirm-yes');
+    const confirmNo = document.getElementById('confirm-no');
+    let currentForm = null;
+
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentForm = button.closest('form');
+            modal.classList.remove('hidden');
+        });
+    });
+
+    confirmYes.addEventListener('click', () => {
+        if (currentForm) {
+            currentForm.submit();
+        }
+        modal.classList.add('hidden');
+        currentForm = null;
+    });
+
+    confirmNo.addEventListener('click', () => {
+        modal.classList.add('hidden');
+        currentForm = null;
+    });
+
+    /* Supprimer un covoiturage */
+    (function() {
+        const buttons = document.querySelectorAll('button.btn-supprimer-covoiturage');
+        const modal = document.getElementById('confirmation-modal-covoiturage');
+        const confirmYes = document.getElementById('confirm-yes-covoiturage');
+        const confirmNo = document.getElementById('confirm-no-covoiturage');
         let currentForm = null;
 
+        if (!modal || !confirmYes || !confirmNo) return;
+
         buttons.forEach(button => {
-            button.addEventListener('click', (event) => {
-                event.preventDefault();
+            button.addEventListener('click', e => {
+                e.preventDefault();
                 currentForm = button.closest('form');
                 modal.classList.remove('hidden');
             });
@@ -24,106 +56,99 @@ document.addEventListener('DOMContentLoaded', () => {
             modal.classList.add('hidden');
             currentForm = null;
         });
-    }
+    })();
 
-    // Supprimer une voiture
-    setupModal('button[data-voiture-id]', 'confirmation-modal', 'confirm-yes', 'confirm-no');
 
-    // Supprimer un covoiturage
-    setupModal('.delete-form button', 'confirmation-modal-covoiturage', 'confirm-yes-covoiturage', 'confirm-no-covoiturage');
+    /* Annulation d'une réservation */
+    (function() {
+        const modal = document.getElementById('cancel-reservation-modal');
+        const form = document.getElementById('cancel-reservation-form');
+        const tokenInput = document.getElementById('cancel-token');
 
-    // Annulation d'une réservation
-    const modal = document.getElementById('cancel-reservation-modal');
-    const form = document.getElementById('cancel-reservation-form');
-    const tokenInput = document.getElementById('cancel-token');
+        if (!modal || !form || !tokenInput) return;
 
-    // Ouvre le modal et remplit le formulaire
-    document.querySelectorAll('.open-cancel-popup').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const actionUrl = btn.dataset.actionUrl;
-            const csrfToken = btn.dataset.token;
-
-            form.action = actionUrl;
-            tokenInput.value = csrfToken;
-
-            modal.classList.remove('hidden');
+        document.querySelectorAll('.open-cancel-popup').forEach(btn => {
+            btn.addEventListener('click', () => {
+                form.action = btn.dataset.actionUrl;
+                tokenInput.value = btn.dataset.token;
+                modal.classList.remove('hidden');
+            });
         });
-    });
 
-    // Fermeture du modal sans annuler
-    modal.querySelector('.btn-confirm-no').addEventListener('click', () => {
-        modal.classList.add('hidden');
-    });
+        modal.querySelectorAll('.btn-confirm-no').forEach(btn => {
+            btn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+        });
+    })();
 
-    // Bouton "Non" pour fermer le modal
-    document.querySelector('.btn-confirm-no').addEventListener('click', () => {
-        modal.classList.add('hidden');
-    });
 
-    // Laisser un avis
-    const avisButtons = document.querySelectorAll('.open-avis-popup');
-    const avisPopup = document.getElementById('avis-popup');
-    const avisClose = avisPopup.querySelector('.close-popup');
-    const cibleIdInput = document.getElementById('cible_id');
-    const covoiturageIdInput = document.getElementById('covoiturage_id');
+    /* Laisser un avis */
+    (function() {
+        const avisButtons = document.querySelectorAll('.open-avis-popup');
+        const popup = document.getElementById('avis-popup');
+        if (!popup) return;
+        const close = popup.querySelector('.close-popup');
+        const cibleInput = document.getElementById('cible_id');
+        const covoiturageInput = document.getElementById('covoiturage_id');
 
-    avisButtons.forEach(button => {
-        button.addEventListener('click', (e) => {
+        avisButtons.forEach(button => {
+            button.addEventListener('click', e => {
+                e.preventDefault();
+                cibleInput.value = button.dataset.cibleId;
+                covoiturageInput.value = button.dataset.avisCovoiturageId;
+                popup.style.display = 'flex';
+            });
+        });
+
+        if (close) close.addEventListener('click', () => popup.style.display = 'none');
+
+        window.addEventListener('click', e => {
+            if (e.target === popup) popup.style.display = 'none';
+        });
+    })();
+
+
+    /* Signalement */
+    (function() {
+        const popup = document.getElementById('report-popup');
+        const close = document.getElementById('close-report-popup');
+        const form = document.getElementById('report-form');
+        if (!popup || !form) return;
+
+        const reportedUserInput = document.getElementById('reportedUserId');
+        const covoiturageInput = document.getElementById('covoiturageId');
+        const tokenInput = document.getElementById('report-token');
+
+        document.querySelectorAll('.open-report-popup').forEach(btn => {
+            btn.addEventListener('click', () => {
+                reportedUserInput.value = btn.dataset.reportedUserId;
+                covoiturageInput.value = btn.dataset.covoiturageId;
+                popup.style.display = 'flex';
+            });
+        });
+
+        if (close) close.addEventListener('click', () => popup.style.display = 'none');
+        popup.addEventListener('click', e => { if (e.target === popup) popup.style.display = 'none'; });
+
+        form.addEventListener('submit', e => {
             e.preventDefault();
-            cibleIdInput.value = button.dataset.cibleId;
-            covoiturageIdInput.value = button.dataset.avisCovoiturageId;
-            avisPopup.style.display = 'flex';
-        });
-    });
-
-    avisClose.addEventListener('click', () => {
-        avisPopup.style.display = 'none';
-    });
-
-    window.addEventListener('click', (e) => {
-        if (e.target === avisPopup) {
-            avisPopup.style.display = 'none';
-        }
-    });
-
-    // Faire un signalement
-    const reportPopup = document.getElementById('report-popup');
-    const reportClose = document.getElementById('close-report-popup');
-    const reportForm = document.getElementById('report-form');
-    const reportButtons = document.querySelectorAll('.open-report-popup');
-
-    // Ouvre le popup et remplit les hidden fields
-    reportButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.getElementById('reportedUserId').value = btn.dataset.reportedUserId;
-            document.getElementById('covoiturageId').value = btn.dataset.covoiturageId;
-            reportPopup.style.display = 'flex';
-        });
-    });
-
-    // Ferme le popup
-    reportClose.addEventListener('click', () => reportPopup.style.display = 'none');
-    reportPopup.addEventListener('click', e => { if (e.target === reportPopup) reportPopup.style.display = 'none'; });
-
-    // Submit via fetch
-    reportForm.addEventListener('submit', e => {
-        e.preventDefault();
-
-        fetch(reportForm.action, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                _token: document.getElementById('report-token').value,
-                reported_user_id: document.getElementById('reportedUserId').value,
-                covoiturage_id: document.getElementById('covoiturageId').value,
-                message: document.getElementById('message').value
+            fetch(form.action, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    _token: tokenInput.value,
+                    reported_user_id: reportedUserInput.value,
+                    covoiturage_id: covoiturageInput.value,
+                    message: document.getElementById('message').value
+                })
             })
-        })
-        .then(res => res.json())
-        .then(data => {
-            // On ferme juste la popup
-            reportPopup.style.display = 'none';
-            reportForm.reset();
+            .then(res => res.json())
+            .then(() => {
+                popup.style.display = 'none';
+                form.reset();
+            });
         });
-    });
+    })();
+
 });

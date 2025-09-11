@@ -107,7 +107,7 @@
                 <ul id="preferences-list" data-prototype="{{ form_widget(form.preferences.vars.prototype)|e('html_attr') }}">
                     {% for pref in form.preferences %}
                         <li>
-                            {{ form_widget(pref, { attr: { class: 'preference-input', placeholder: 'Ex : musique forte' } }) }}
+                            {{ form_widget(pref, { attr: { class: 'preference-input', placeholder: 'Ex : musique forte', label: false } }) }}
                             <button type="button" class="remove-pref">❌</button>
                         </li>
                     {% endfor %}
@@ -120,14 +120,6 @@
 
         {{ form_end(form) }}
     </div>
-
-    {% for label, messages in app.flashes %}
-        {% for message in messages %}
-            <div class="flash flash-{{ label }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endfor %}
 
     <script src="{{ asset('js/color-select.js') }}"></script>
 {% endblock %}

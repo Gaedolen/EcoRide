@@ -30,4 +30,39 @@ class PdoService
     {
         return $this->pdo;
     }
+
+    public function execute(string $sql, array $params = []): bool
+    {
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute($params);
+    }
+
+    public function fetchOne(string $sql, array $params = []): array|false
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetch();
+    }
+
+    public function fetchAll(string $sql, array $params = []): array
+    {
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    public function beginTransaction(): void
+    {
+        $this->pdo->beginTransaction();
+    }
+
+    public function commit(): void
+    {
+        $this->pdo->commit();
+    }
+
+    public function rollBack(): void
+    {
+        $this->pdo->rollBack();
+    }
 }

@@ -2,37 +2,26 @@
 
 namespace App\Form;
 
-use App\Entity\User;
 use App\Entity\Voiture;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\Form\Extension\Core\Type\CollectionType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Config\Framework\Workflows\WorkflowsConfig\PlaceConfig;
 
 class VoitureType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('modele', TextType::class, [
+            ->add('modele', \Symfony\Component\Form\Extension\Core\Type\TextType::class, [
                 'attr' => [
                     'class' => 'form-input',
                     'placeholder' => 'Ex : 207'
                 ]
             ])
-            ->add('couleur', HiddenType::class, [
-                'constraints' => [new NotBlank(message: 'Veuillez choisir une couleur.')]
+            ->add('couleur', \Symfony\Component\Form\Extension\Core\Type\HiddenType::class, [
+                'constraints' => [new \Symfony\Component\Validator\Constraints\NotBlank(message: 'Veuillez choisir une couleur.')]
             ])
-            ->add('immatriculation', TextType::class, [
+            ->add('immatriculation', \Symfony\Component\Form\Extension\Core\Type\TextType::class, [
                 'attr' => [
                     'class' => 'form-input',
                     'placeholder' => 'AA-123-AA',
@@ -40,7 +29,7 @@ class VoitureType extends AbstractType
                     'title' => 'Format attendu : AA-123-AA'
                 ]
             ])
-            ->add('energie', ChoiceType::class, [
+            ->add('energie', \Symfony\Component\Form\Extension\Core\Type\ChoiceType::class, [
                 'choices' => [
                     'Essence' => 'Essence',
                     'Diesel' => 'Diesel',
@@ -57,16 +46,15 @@ class VoitureType extends AbstractType
                     'class' => 'select-custom'
                 ]
             ])
-            ->add('datePremiereImmatriculation', DateType::class, [
+            ->add('datePremiereImmatriculation', \Symfony\Component\Form\Extension\Core\Type\DateType::class, [
                 'widget' => 'single_text',
                 'attr' => [
                     'class' => 'form-input',
                     'max' => (new \DateTime())->format('Y-m-d'),
-                    'placeholder' => 'jj/mm/aaaa',
                     'autocomplete' => 'off'
                 ]
             ])
-            ->add('marque', TextType::class, [
+            ->add('marque', \Symfony\Component\Form\Extension\Core\Type\TextType::class, [
                 'required' => true,
                 'label' => 'Marque',
                 'attr' => [
@@ -74,7 +62,7 @@ class VoitureType extends AbstractType
                     'placeholder' => 'Ex : Peugeot'
                 ]
             ])
-            ->add('nbPlaces', IntegerType::class, [
+            ->add('nbPlaces', \Symfony\Component\Form\Extension\Core\Type\IntegerType::class, [
                 'required' => true,
                 'label' => 'Nombre de places',
                 'attr' => [
@@ -82,32 +70,35 @@ class VoitureType extends AbstractType
                     'placeholder' => 'Ex : 5'
                 ]
             ])
-            ->add('fumeur', CheckboxType::class, [
+            ->add('fumeur', \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, [
                 'required' => false,
                 'label' => 'Fumeur'
             ])
-            ->add('animaux', CheckboxType::class, [
+            ->add('animaux', \Symfony\Component\Form\Extension\Core\Type\CheckboxType::class, [
                 'required' => false,
                 'label' => 'Animaux'
             ])
-            ->add('preferences', CollectionType::class, [
-                'entry_type' => TextType::class,
+            ->add('preferences', \Symfony\Component\Form\Extension\Core\Type\CollectionType::class, [
+                'entry_type' => \Symfony\Component\Form\Extension\Core\Type\TextType::class,
                 'allow_add' => true,
                 'allow_delete' => true,
                 'by_reference' => false,
-                'label' => 'Préférences personnalisées',
+                'label' => false,
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Ex : musique forte, climatisation, silence demandé',
                 ]
             ]);
-        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Voiture::class,
+            // Activation de la protection CSRF
+            'csrf_protection' => true,
+            'csrf_field_name' => '_token',
+            'csrf_token_id'   => 'voiture_item',
         ]);
     }
 }

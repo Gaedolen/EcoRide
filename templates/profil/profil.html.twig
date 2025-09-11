@@ -63,7 +63,6 @@
                 <div class="car-scroll-wrapper">
                     <div class="car-container">
                         {% for voiture in voituresData %}
-                            {% set voiture = voituresData[loop.index0] %}
                             <div class="car-card">
                                 <ul style="list-style-type:none;">
                                     <li><span class="label">Marque :</span> <span class="value">{{ voiture.marque }}</span></li>
@@ -90,8 +89,9 @@
                                 
                                 <div class="card-actions">
                                     <a href="{{ path('modifier_voiture', { id: voiture.id }) }}" class="btn-card-action">Modifier</a>
-                                    <form method="POST" action="{{ path('supprimer_voiture', { id: voiture.id }) }}" class="delete-form">
-                                        <button type="button" class="btn-card-action" data-voiture-id="{{ voiture.id }}">Supprimer</button>
+                                    <form method="POST" action="{{ path('supprimer_voiture', { id: voiture.id }) }}" id="form-voiture-{{ voiture.id }}" class="delete-voiture-form">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('supprimer_voiture_' ~ voiture.id) }}">
+                                        <button type="button" class="btn-card-action btn-supprimer-voiture" data-form-id="form-voiture-{{ voiture.id }}">Supprimer</button>
                                     </form>
                                 </div>
                             </div>
@@ -113,7 +113,7 @@
     {% endif %}
 
     <!-- Affichage des covoiturages -->
-   {% if user.isChauffeur and covoiturages is not empty %}
+    {% if user.isChauffeur %}
         <div class="covoiturages-section">
             <div class="covoiturages-header">
                 <h1>Mes covoiturages</h1>
@@ -125,69 +125,59 @@
                 <a href="{{ path('historique_covoiturages') }}" class="btn-historique">📜 Historique des covoiturages</a>
             </div>
 
-            <div class="covoiturage-scroll-wrapper">
-                <div class="covoiturage-container">
-                    {% for covoiturage in covoiturages %}
-                        <div class="covoiturage-card {% if covoiturage.statut == 'ferme' %}covoiturage-ferme{% endif %}">
-                            <div class="covoiturage-header-actions">
-                                <div class="covoiturage-header-left">
-                                    <h2 class="titre-covoiturage">Trajet vers {{ covoiturage.lieu_arrivee }} le {{ covoiturage.date_depart|date('d/m/Y') }}</h2>
+            {% if covoiturages is not empty %}
+                <div class="covoiturage-scroll-wrapper">
+                    <div class="covoiturage-container">
+                        {% for covoiturage in covoiturages %}
+                            <div class="covoiturage-card {% if covoiturage.statut == 'ferme' %}covoiturage-ferme{% endif %}">
+                                <div class="covoiturage-header-actions">
+                                    <div class="covoiturage-header-left">
+                                        <h2 class="titre-covoiturage">Trajet vers {{ covoiturage.lieu_arrivee }} le {{ covoiturage.date_depart|date('d/m/Y') }}</h2>
+                                    </div>
+
+                                    {% if covoiturage.statut in ['ouvert','complet'] %}
+                                        <form method="post" action="{{ path('chauffeur_covoiturage_demarrer', { id: covoiturage.id }) }}">
+                                            <button type="submit" class="btn-card-action">Démarrer</button>
+                                        </form>
+                                    {% elseif covoiturage.statut == 'en_cours' %}
+                                        <form method="post" action="{{ path('chauffeur_covoiturage_clore', { id: covoiturage.id }) }}">
+                                            <button type="submit" class="btn-card-action">Arrivé à destination</button>
+                                        </form>
+                                    {% endif %}
                                 </div>
 
-                                <!-- Gestion du bouton "Démarrer" et "Arrivé à destination" en fonction du statut du trajet -->
-                                {% if covoiturage.statut == 'ouvert' or covoiturage.statut == 'complet' %}
-                                    <form method="post" action="{{ path('chauffeur_covoiturage_demarrer', { id: covoiturage.id }) }}">
-                                        <button type="submit" class="btn-card-action">Démarrer</button>
-                                    </form>
-                                {% elseif covoiturage.statut == 'en_cours' %}
-                                    <form method="post" action="{{ path('chauffeur_covoiturage_clore', { id: covoiturage.id }) }}">
-                                        <button type="submit" class="btn-card-action">Arrivé à destination</button>
-                                    </form>
-                                {% endif %}
+                                <ul>
+                                    <li><span class="label">Lieu de départ :</span> <span class="value">{{ covoiturage.lieu_depart }}</span></li>
+                                    <li><span class="label">Date et heure de départ :</span> <span class="value">Le {{ covoiturage.date_depart|date('d/m/Y') }} à {{ covoiturage.heure_depart|date('H:i') }}</span></li>
+                                    <li><span class="label">Lieu d'arrivée :</span> <span class="value">{{ covoiturage.lieu_arrivee }}</span></li>
+                                    <li><span class="label">Date et heure d'arrivée :</span> <span class="value">Le {{ covoiturage.date_arrivee|date('d/m/Y') }} à {{ covoiturage.heure_arrivee|date('H:i') }}</span></li>
+                                    <li><span class="label">Nombre de places :</span> <span class="value">{{ covoiturage.nb_place }}</span></li>
+                                    <li><span class="label">Prix par personne :</span> <span class="value">{{ covoiturage.prix_personne }} €</span></li>
+                                    <li><span class="label">Statut :</span> <span class="value">{{ covoiturage.statut | statut_label }}</span></li>
+                                </ul>
+
+                                <div class="card-actions">
+                                    {% if covoiturage.statut == 'en_cours' %}
+                                        <span class="btn-card-action disabled">Modifier</span>
+                                        <button class="btn-card-action disabled" disabled>Supprimer</button>
+                                    {% else %}
+                                        <a href="{{ path('modifier_covoiturage', { id: covoiturage.id }) }}" class="btn-card-action">Modifier</a>
+                                        <form method="POST" action="{{ path('supprimer_covoiturage', { id: covoiturage.id }) }}" class="delete-covoiturage-form">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('supprimer_covoiturage_' ~ covoiturage.id) }}">
+                                            <button type="button" class="btn-card-action btn-supprimer-covoiturage">Supprimer</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
                             </div>
-
-                            <ul>
-                                <li><span class="label">Lieu de départ :</span> <span class="value">{{ covoiturage.lieu_depart }}</span></li>
-                                <li><span class="label">Date et heure de départ :</span> <span class="value">Le {{ covoiturage.date_depart|date('d/m/Y') }} à {{ covoiturage.heure_depart|date('H:i') }}</span></li>
-                                <li><span class="label">Lieu d'arrivée :</span> <span class="value">{{ covoiturage.lieu_arrivee }}</span></li>
-                                <li><span class="label">Date et heure d'arrivée :</span> <span class="value">Le {{ covoiturage.date_arrivee|date('d/m/Y') }} à {{ covoiturage.heure_arrivee|date('H:i') }}</span></li>
-                                <li><span class="label">Nombre de places :</span> <span class="value">{{ covoiturage.nb_place }}</span></li>
-                                <li><span class="label">Prix par personne :</span> <span class="value">{{ covoiturage.prix_personne }} €</span></li>
-                                <li><span class="label">Statut :</span> <span class="value">{{ covoiturage.statut | statut_label }}</span></li>
-                            </ul>
-
-                            <div class="card-actions">
-                                {# Bouton Modifier #}
-                                {% if covoiturage.statut == 'en_cours' %}
-                                    <span class="btn-card-action disabled">Modifier</span>
-                                {% else %}
-                                    <a href="{{ path('modifier_covoiturage', { id: covoiturage.id }) }}" class="btn-card-action">Modifier</a>
-                                {% endif %}
-
-                                {# Bouton Supprimer #}
-                                {% if covoiturage.statut == 'en_cours' %}
-                                    <button type="button" class="btn-card-action disabled" disabled>Supprimer</button>
-                                {% else %}
-                                    <form method="POST" action="{{ path('supprimer_covoiturage', { id: covoiturage.id }) }}" class="delete-form">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('supprimer_covoiturage_' ~ covoiturage.id) }}">
-                                        <button type="submit" class="btn-card-action">Supprimer</button>
-                                    </form>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endfor %}
+                        {% endfor %}
+                    </div>
                 </div>
-            </div>
-        </div>
-    {% elseif user.isChauffeur %}
-        <div class="covoiturages-section">
-            <div class="covoiturages-header">
-                <h1>Mes covoiturages</h1>
-                <a href="{{ path('ajouter_covoiturage') }}" class="btn-covoiturage">Ajouter un covoiturage</a>
-            </div>
-            <p class="no-car-message">Vous n'avez pas encore ajouté de covoiturage.</p>
+            {% else %}
+                <p class="no-car-message">Vous n'avez pas encore ajouté de covoiturage.</p>
+            {% endif %}
         </div>
     {% endif %}
+
 
     <!-- Affichage des réservations -->
     <div class='reservation-header'>
@@ -324,11 +314,12 @@
         <p class="message">Aucun avis reçu pour le moment.</p>
     {% endif %}
 
-    <div id="confirmation-modal" class="modal hidden"> <!-- Fenêtre pop-up de suppression d'une voiture -->
+    <!-- Modal suppression voiture -->
+    <div id="confirmation-modal" class="modal hidden">
         <div class="modal-content">
             <p>Êtes-vous sûr de vouloir supprimer cette voiture ?<br>
-    <strong>Tous les covoiturages associés à cette voiture seront également supprimés.</strong><br>
-    Les passagers concernés recevront un mail d’annulation.</p>
+            <strong>Tous les covoiturages associés à cette voiture seront également supprimés.</strong><br>
+            Les passagers concernés recevront un mail d’annulation.</p>
             <div class="modal-buttons">
                 <button id="confirm-yes" class="btn-confirm-yes">Oui</button>
                 <button id="confirm-no" class="btn-confirm-no">Non</button>
@@ -336,7 +327,8 @@
         </div>
     </div>
 
-    <div id="confirmation-modal-covoiturage" class="modal hidden"> <!-- Fenêtre pop-up de suppression d'un covoiturage -->
+    <!-- Modal suppression covoiturage -->
+    <div id="confirmation-modal-covoiturage" class="modal hidden">
         <div class="modal-content">
             <p>Êtes-vous sûr de vouloir supprimer ce covoiturage ? Vous risquez de mettre vos passagers dans l'embarras.</p>
             <div class="modal-buttons">
@@ -346,7 +338,8 @@
         </div>
     </div>
 
-    <div id="cancel-reservation-modal" class="modal hidden"> <!-- Fenêtre pop-up de suppression d'une réservation -->
+    <!-- Modal suppression d'une réservation -->
+    <div id="cancel-reservation-modal" class="modal hidden">
         <div class="modal-content">
             <p>Êtes-vous sûr de vouloir annuler cette réservation ?</p>
             <form id="cancel-reservation-form" method="POST" action="">
