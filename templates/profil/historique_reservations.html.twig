@@ -129,6 +129,7 @@
             <form method="POST" action="{{ path('laisser_avis') }}">
                 <input type="hidden" name="cible_id" id="cible_id" value="">
                 <input type="hidden" name="covoiturage_id" id="covoiturage_id" value="">
+                <input type="hidden" name="_token" value="{{ csrf_token('laisser-avis') }}">
 
                 <label for="note">Note (1 à 5) :</label>
                 <select name="note" id="note" required>

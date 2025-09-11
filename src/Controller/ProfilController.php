@@ -11,6 +11,8 @@ use App\Repository\AvisRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use DateTime;
 use PDO;
+use App\Service\PdoService;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\DBAL\Connection;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Doctrine\ORM\EntityManagerInterface;
@@ -22,9 +24,15 @@ use Symfony\Component\Security\Core\Security;
 
 class ProfilController extends AbstractController
 {
-    #[Route('/profil', name: 'app_profil')]
-    public function profil(Request $request, FormFactoryInterface $formFactory,EntityManagerInterface $em, AvisRepository $avisRepository): Response
+    private PDO $pdo;
+    public function __construct(PdoService $pdoService)
     {
+        $this->pdo = $pdoService->getConnection();
+    }
+
+    #[Route('/profil', name: 'app_profil')]
+    public function profil(Request $request, FormFactoryInterface $formFactory, EntityManagerInterface $em, AvisRepository $avisRepository): Response {
+
         /** @var \App\Entity\User $utilisateur */
         $utilisateur = $this->getUser();
 
@@ -34,22 +42,20 @@ class ProfilController extends AbstractController
 
         $photoBase64 = $utilisateur->getPhotoData();
 
-        $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); 
+        $pdo = $this->pdo;
 
         // Récupération des voitures
         $stmt = $pdo->prepare("SELECT * FROM voiture WHERE utilisateur_id = :id");
         $stmt->execute(['id' => $utilisateur->getId()]);
         $voituresData = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Décodage des préférences JSON pour chaque voiture
+        // Décodage des préférences JSON
         foreach ($voituresData as &$row) {
             $preferences = [];
             if (!empty($row['preferences'])) {
-                // Premier décodage JSON
                 $decoded = json_decode($row['preferences'], true);
 
-                // Si c’est encore une string JSON (double encodage), on décode une deuxième fois
+                // Cas d’un double encodage JSON
                 if (is_string($decoded)) {
                     $decoded = json_decode($decoded, true);
                 }
@@ -58,11 +64,10 @@ class ProfilController extends AbstractController
                     $preferences = $decoded;
                 }
             }
-
             $row['preferences'] = $preferences;
         }
 
-        // Récupération des covoiturages actifs pour le profil
+        // Récupération des covoiturages actifs
         $covoiturages = [];
         if ($utilisateur->isChauffeur()) {
             $stmt = $pdo->prepare("
@@ -75,14 +80,12 @@ class ProfilController extends AbstractController
             $covoiturages = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
-
-        // Récupération des avis
+        // Récupération des avis validés
         $avisValides = $avisRepository->findBy([
-            'cible'=> $utilisateur,
-            'isValidated'=> true,
+            'cible' => $utilisateur,
+            'isValidated' => true,
         ]);
 
-        //Ajouter la photo en base64 dans les auteurs
         foreach ($avisValides as $avis) {
             $auteur = $avis->getAuteur();
             if ($auteur) {
@@ -101,7 +104,7 @@ class ProfilController extends AbstractController
             }
         }
 
-        // Récupération des réservations de l'utilisateur
+        // Récupération des réservations
         $stmt = $pdo->prepare("
             SELECT 
                 r.id AS reservation_id,
@@ -137,18 +140,16 @@ class ProfilController extends AbstractController
             WHERE r.utilisateur_id = :user_id
             AND c.statut != 'ferme'
         ");
-
         $stmt->execute(['user_id' => $utilisateur->getId()]);
         $reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($reservations as &$resa) {
-            if (!empty($resa['chauffeur_photo'])) {
-                $resa['chauffeur_photo'] = base64_encode($resa['chauffeur_photo']);
-            } else {
-                $resa['chauffeur_photo'] = null;
-            }
+            // Photo chauffeur
+            $resa['chauffeur_photo'] = !empty($resa['chauffeur_photo'])
+                ? base64_encode($resa['chauffeur_photo'])
+                : null;
 
-            // Conversion dates/heures
+            // Conversion des dates et heures
             $resa['date_depart'] = new DateTime($resa['date_depart']);
             $resa['heure_depart'] = new DateTime($resa['heure_depart']);
             $resa['date_arrivee'] = new DateTime($resa['date_arrivee']);
@@ -161,10 +162,7 @@ class ProfilController extends AbstractController
 
             $resa['est_passe'] = $finTrajet < new DateTime();
 
-            $chauffeurId = $resa['chauffeur_id'];
-            $chauffeur = $em->getRepository(User::class)->find($chauffeurId);
-
-            // Ajout de la condition covoiturage_id pour éviter d'avoir l'avis sur d'autres trajets
+            // Vérifier si un avis existe déjà
             $stmtAvis = $pdo->prepare("
                 SELECT * FROM avis 
                 WHERE auteur_id = :auteur_id 
@@ -177,11 +175,9 @@ class ProfilController extends AbstractController
                 'cible_id' => $resa['chauffeur_id'],
                 'covoiturage_id' => $resa['covoiturage_id'],
             ]);
+            $resa['avis_existant'] = $stmtAvis->fetch(PDO::FETCH_ASSOC) ?: null;
 
-            $avis = $stmtAvis->fetch(PDO::FETCH_ASSOC);
-            $resa['avis_existant'] = $avis ?: null;
-
-            // Ajout de signalements existants
+            // Vérifier si un signalement existe déjà
             $stmtReport = $pdo->prepare("
                 SELECT * FROM report
                 WHERE reported_by_id = :reported_by_id
@@ -189,17 +185,12 @@ class ProfilController extends AbstractController
                 AND covoiturage_id = :covoiturage_id
                 LIMIT 1
             ");
-
             $stmtReport->execute([
                 'reported_by_id' => $utilisateur->getId(),
                 'reported_user_id' => $resa['chauffeur_id'],
                 'covoiturage_id' => $resa['covoiturage_id'],
             ]);
-
-            $report = $stmtReport->fetch(PDO::FETCH_ASSOC);
-
-            // On enregistre le résultat dans le tableau pour Twig
-            $resa['signalement_existant'] = $report ?: null;
+            $resa['signalement_existant'] = $stmtReport->fetch(PDO::FETCH_ASSOC) ?: null;
         }
 
         $avisDonnes = $utilisateur->getAvisDonnes();
@@ -207,7 +198,7 @@ class ProfilController extends AbstractController
         return $this->render('profil/profil.html.twig', [
             'user' => $utilisateur,
             'voituresData' => $voituresData,
-            'photoBase64' => $photoBase64, 
+            'photoBase64' => $photoBase64,
             'covoiturages' => $covoiturages,
             'reservations' => $reservations,
             'avisDonnes' => $avisDonnes,
@@ -219,7 +210,7 @@ class ProfilController extends AbstractController
     public function modifierProfil(Request $request): Response
     {
         /** @var \App\Entity\User $sessionUser */
-        $sessionUser = $this->getUser(); 
+        $sessionUser = $this->getUser();
 
         if (!$sessionUser) {
             throw $this->createAccessDeniedException('Vous devez être connecté pour modifier votre profil.');
@@ -232,16 +223,27 @@ class ProfilController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $photoFile = $form->get('photo')->getData(); 
-            $deletePhoto = $form->get('deletePhoto')->getData(); 
-
-            $binaryPhotoContent = null; 
+            $photoFile = $form->get('photo')->getData();
+            $deletePhoto = $form->get('deletePhoto')->getData();
+            $binaryPhotoContent = null;
 
             if ($deletePhoto) {
-                $binaryPhotoContent = null; 
+                // Suppression de la photo
+                $binaryPhotoContent = null;
             } elseif ($photoFile) {
-                $binaryPhotoContent = file_get_contents($photoFile->getPathname()); 
+                // Vérification du type MIME de la photo
+                $mimeType = $photoFile->getMimeType();
+                $allowedTypes = ['image/jpeg', 'image/png'];
+
+                if (!in_array($mimeType, $allowedTypes, true)) {
+                    $this->addFlash('error', 'Format d\'image non autorisé. Seuls JPG et PNG sont acceptés.');
+                    return $this->redirectToRoute('modifier_profil');
+                }
+
+                // Lecture binaire de la photo
+                $binaryPhotoContent = file_get_contents($photoFile->getPathname());
             } else {
+                // Conserver la photo actuelle si elle existe
                 $currentPhoto = $sessionUser->getPhoto();
                 if ($currentPhoto && is_resource($currentPhoto)) {
                     $binaryPhotoContent = stream_get_contents($currentPhoto);
@@ -252,20 +254,19 @@ class ProfilController extends AbstractController
 
             $sessionUser->setPhoto($binaryPhotoContent);
 
-            // Préparer la requête UPDATE pour PDO.
-            $setClauses = [
-                'pseudo = :pseudo',
-                'nom = :nom',
-                'prenom = :prenom',
-                'adresse = :adresse',
-                'telephone = :telephone',
-                'is_chauffeur = :isChauffeur',
-                'is_passager = :isPassager',
-                'date_naissance = :dateNaissance',
-                'photo = :photo',
-            ];
+            // Requête UPDATE
+            $sql = "UPDATE user SET 
+                        pseudo = :pseudo,
+                        nom = :nom,
+                        prenom = :prenom,
+                        adresse = :adresse,
+                        telephone = :telephone,
+                        is_chauffeur = :isChauffeur,
+                        is_passager = :isPassager,
+                        date_naissance = :dateNaissance,
+                        photo = :photo
+                    WHERE id = :id";
 
-            $sql = "UPDATE user SET " . implode(", ", $setClauses) . " WHERE id = :id";
             $stmt = $pdo->prepare($sql);
 
             if ($binaryPhotoContent === null) {
@@ -274,7 +275,6 @@ class ProfilController extends AbstractController
                 $stmt->bindParam(':photo', $binaryPhotoContent, PDO::PARAM_LOB);
             }
 
-            // Lie les autres paramètres
             $stmt->bindValue(':pseudo', $sessionUser->getPseudo());
             $stmt->bindValue(':nom', $sessionUser->getNom());
             $stmt->bindValue(':prenom', $sessionUser->getPrenom());
@@ -285,14 +285,11 @@ class ProfilController extends AbstractController
             $stmt->bindValue(':dateNaissance', $sessionUser->getDateNaissance()?->format('Y-m-d'));
             $stmt->bindValue(':id', $sessionUser->getId());
 
-            $stmt->execute(); // Exécute la requête après avoir lié tous les paramètres
+            $stmt->execute();
 
             $this->addFlash('success', 'Profil mis à jour avec succès.');
             return $this->redirectToRoute('app_profil');
         }
-
-        $currentPhotoBase64 = null;
-        $currentPhotoBase64 = $sessionUser->getPhotoData();
 
         return $this->render('profil/modifier.html.twig', [
             'form' => $form->createView(),
@@ -310,21 +307,43 @@ class ProfilController extends AbstractController
             throw $this->createAccessDeniedException("Vous devez être connecté.");
         }
 
-        $cibleId = $request->request->get('cible_id');
-        $covoiturageId = $request->request->get('covoiturage_id');
+        // Vérification CSRF
+        $csrfToken = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('laisser-avis', $csrfToken)) {
+            throw $this->createAccessDeniedException('Token CSRF invalide.');
+        }
+
+        $cibleId = (int) $request->request->get('cible_id');
+        $covoiturageId = (int) $request->request->get('covoiturage_id');
         $note = (int) $request->request->get('note');
-        $commentaire = $request->request->get('commentaire');
+        $commentaire = trim($request->request->get('commentaire'));
 
         if (!$cibleId || !$covoiturageId || !$note || !$commentaire) {
             throw new \Exception("Champs manquants.");
         }
 
-        // Connexion PDO
-        $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        // Vérifier que l'utilisateur a bien participé à ce covoiturage
+        $stmtCheckParticipation = $this->pdo->prepare("
+            SELECT COUNT(*) FROM reservation 
+            WHERE utilisateur_id = :userId AND covoiturage_id = :covoiturageId
+        ");
+        $stmtCheckParticipation->execute([
+            'userId' => $utilisateur->getId(),
+            'covoiturageId' => $covoiturageId,
+        ]);
+        if ($stmtCheckParticipation->fetchColumn() == 0) {
+            throw new \Exception("Vous ne pouvez pas laisser un avis pour ce covoiturage.");
+        }
 
-        // Vérifie si l'avis existe déjà pour cet utilisateur et ce covoiturage
-        $stmtCheck = $pdo->prepare("SELECT COUNT(*) FROM avis WHERE auteur_id = :auteur_id AND covoiturage_id = :covoiturage_id");
+        if ($note < 1 || $note > 5) {
+            throw new \Exception("Note invalide.");
+        }
+
+        // Vérifie si l'avis existe déjà
+        $stmtCheck = $this->pdo->prepare("
+            SELECT COUNT(*) FROM avis 
+            WHERE auteur_id = :auteur_id AND covoiturage_id = :covoiturage_id
+        ");
         $stmtCheck->execute([
             ':auteur_id' => $utilisateur->getId(),
             ':covoiturage_id' => $covoiturageId,
@@ -334,7 +353,11 @@ class ProfilController extends AbstractController
         }
 
         // Insertion de l'avis
-        $stmt = $pdo->prepare("INSERT INTO avis (auteur_id, cible_id, covoiturage_id, note, commentaire, date_avis, statut, is_validated) VALUES (:auteur_id, :cible_id, :covoiturage_id, :note, :commentaire, NOW(), :statut, :is_validated)");
+        $stmt = $this->pdo->prepare("
+            INSERT INTO avis 
+            (auteur_id, cible_id, covoiturage_id, note, commentaire, date_avis, statut, is_validated) 
+            VALUES (:auteur_id, :cible_id, :covoiturage_id, :note, :commentaire, NOW(), :statut, :is_validated)
+        ");
         $stmt->execute([
             ':auteur_id' => $utilisateur->getId(),
             ':cible_id' => $cibleId,
@@ -354,11 +377,15 @@ class ProfilController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
+        if (!$user) {
+            throw $this->createAccessDeniedException('Vous devez être connecté pour voir vos covoiturages.');
+        }
+
         // Récupération des covoiturages terminés dont l'utilisateur est chauffeur
         $sql = "SELECT * FROM covoiturage 
-        WHERE utilisateur_id = :userId 
-          AND statut = 'ferme'
-        ORDER BY date_depart ASC, heure_depart ASC";
+                WHERE utilisateur_id = :userId 
+                AND statut = 'ferme'
+                ORDER BY date_depart ASC, heure_depart ASC";
 
         $covoiturages = $connection->fetchAllAssociative($sql, [
             'userId' => $user->getId()
@@ -375,11 +402,11 @@ class ProfilController extends AbstractController
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        if (!$user) {
+            throw $this->createAccessDeniedException('Vous devez être connecté pour voir vos réservations.');
+        }
 
-        // Récupération des réservations dont le covoiturage est fermé
-        $stmt = $pdo->prepare("
+        $stmt = $this->pdo->prepare("
             SELECT r.*, 
                 c.lieu_depart, c.lieu_arrivee, c.date_depart, c.heure_depart, 
                 c.date_arrivee, c.heure_arrivee, c.nb_place, c.prix_personne, c.statut AS covoiturage_statut,
@@ -397,16 +424,17 @@ class ProfilController extends AbstractController
         $stmt->execute(['userId' => $user->getId()]);
         $reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Conversion photo et dates/heures + ajout avis et signalement
         foreach ($reservations as &$resa) {
             $resa['chauffeur_photo'] = $resa['chauffeur_photo'] ? base64_encode($resa['chauffeur_photo']) : null;
+
+            // Conversion des dates et heures
             $resa['date_depart'] = new DateTime($resa['date_depart']);
             $resa['heure_depart'] = new DateTime($resa['heure_depart']);
             $resa['date_arrivee'] = new DateTime($resa['date_arrivee']);
             $resa['heure_arrivee'] = new DateTime($resa['heure_arrivee']);
 
             // Avis existant
-            $stmtAvis = $pdo->prepare("
+            $stmtAvis = $this->pdo->prepare("
                 SELECT * FROM avis 
                 WHERE auteur_id = :auteur_id 
                 AND covoiturage_id = :covoiturage_id
@@ -419,7 +447,7 @@ class ProfilController extends AbstractController
             $resa['avis_existant'] = $stmtAvis->fetch(PDO::FETCH_ASSOC) ?: null;
 
             // Signalement existant
-            $stmtReport = $pdo->prepare("
+            $stmtReport = $this->pdo->prepare("
                 SELECT * FROM report
                 WHERE reported_by_id = :reported_by_id
                 AND reported_user_id = :reported_user_id
