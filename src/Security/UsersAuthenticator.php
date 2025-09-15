@@ -28,15 +28,24 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        $email = $request->getPayload()->getString('email');
+        // Récupération sécurisée des données
+        $email = trim((string) $request->request->get('email', ''));
+        $password = (string) $request->request->get('password', '');
 
+        // Validation serveur : email correct
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new \InvalidArgumentException('Email invalide.');
+        }
+
+        // Pré-remplissage du formulaire en cas d'erreur
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
 
+        // Construction du Passport Symfony
         return new Passport(
             new UserBadge($email),
-            new PasswordCredentials($request->getPayload()->getString('password')),
+            new PasswordCredentials($password),
             [
-                new CsrfTokenBadge('authenticate', $request->getPayload()->getString('_csrf_token')),
+                new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
                 new RememberMeBadge(),
             ]
         );
@@ -44,10 +53,12 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
+        // Redirection vers la page cible si elle existe
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
 
+        // Redirection selon rôle
         $user = $token->getUser();
         $roles = $user->getRoles();
 
@@ -59,7 +70,7 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
             return new RedirectResponse($this->urlGenerator->generate('employe_dashboard'));
         }
 
-        // Sinon, redirection par défaut pour les simples utilisateurs
+        // Redirection par défaut pour les utilisateurs simples
         return new RedirectResponse($this->urlGenerator->generate('app_accueil'));
     }
 

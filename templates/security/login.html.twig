@@ -1,22 +1,24 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}Connexion{% endblock %}
 
 {% block head %}
     <link rel="stylesheet" href="{{ asset('/css/login.css') }}">
 {% endblock %}
 
 {% block body %}
-
 <div class="form-container">
     <form method="post">
         {% if error %}
-            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            <div class="alert alert-danger">
+                Mot de passe ou identifiant invalide.
+            </div>
         {% endif %}
 
         {% if app.user %}
             <div class="mb-3">
-                Vous êtes connecté en tant que {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}">Déconnexion</a>
+                Vous êtes connecté en tant que {{ app.user.userIdentifier }}, 
+                <a href="{{ path('app_logout') }}">Déconnexion</a>
             </div>
         {% endif %}
 
@@ -36,5 +38,4 @@
 
     <p><a href="{{ path('app_register') }}" class="pas-inscrit">Pas encore inscrit ? M'inscrire</a></p>
 </div>
-
 {% endblock %}
