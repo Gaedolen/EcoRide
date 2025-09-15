@@ -167,66 +167,66 @@ class VoitureController extends AbstractController
         try {
             $this->pdoService->beginTransaction();
 
-            // Récupération des covoiturages liés à la voiture
+            // Récupérer tous les covoiturages liés à cette voiture
             $covoiturages = $this->pdoService->fetchAll(
-                "SELECT id, lieu_depart, lieu_arrivee, date_depart 
-                FROM covoiturage 
-                WHERE voiture_id = :id AND utilisateur_id = :user_id",
+                "SELECT * FROM covoiturage WHERE voiture_id = :id AND utilisateur_id = :user_id",
                 ['id' => $id, 'user_id' => $utilisateur->getId()]
             );
 
             foreach ($covoiturages as $covoiturage) {
                 $covoiturageId = $covoiturage['id'];
+                $statut = $covoiturage['statut'];
 
-                // Récupérer les passagers
-                $passagers = $this->pdoService->fetchAll("
-                    SELECT u.email, u.pseudo 
-                    FROM reservation r
-                    JOIN user u ON r.utilisateur_id = u.id
-                    WHERE r.covoiturage_id = :covoiturage_id
-                ", ['covoiturage_id' => $covoiturageId]);
+                if (in_array($statut, ['ouvert','complet'])) {
+                    // Supprimer les réservations et le covoiturage uniquement si ouvert/complet
+                    $passagers = $this->pdoService->fetchAll(
+                        "SELECT u.email, u.pseudo 
+                        FROM reservation r
+                        JOIN user u ON r.utilisateur_id = u.id
+                        WHERE r.covoiturage_id = :covoiturage_id",
+                        ['covoiturage_id' => $covoiturageId]
+                    );
 
-                // Envoyer un mail à chaque passager
-                foreach ($passagers as $passager) {
-                    $email = (new TemplatedEmail())
-                        ->from('contact@ecoride.com')
-                        ->to($passager['email'])
-                        ->subject('Annulation de votre covoiturage')
-                        ->htmlTemplate('emails/annulation_covoiturage.html.twig')
-                        ->context([
-                            'pseudo' => $passager['pseudo'],
-                            'trajet' => $covoiturage
-                        ]);
-                    $mailer->send($email);
+                    foreach ($passagers as $passager) {
+                        $email = (new TemplatedEmail())
+                            ->from('contact@ecoride.com')
+                            ->to($passager['email'])
+                            ->subject('Annulation de votre covoiturage')
+                            ->htmlTemplate('emails/annulation_covoiturage.html.twig')
+                            ->context([
+                                'pseudo' => $passager['pseudo'],
+                                'trajet' => $covoiturage
+                            ]);
+                        $mailer->send($email);
+                    }
+
+                    $this->pdoService->execute(
+                        "DELETE FROM reservation WHERE covoiturage_id = :covoiturage_id",
+                        ['covoiturage_id' => $covoiturageId]
+                    );
+
+                    $this->pdoService->execute(
+                        "DELETE FROM covoiturage WHERE id = :id",
+                        ['id' => $covoiturageId]
+                    );
+
+                } else {
+                    // Covos passés ou en cours : on ne touche pas aux réservations
+                    $this->pdoService->execute(
+                        "UPDATE covoiturage SET voiture_id = NULL WHERE id = :id",
+                        ['id' => $covoiturageId]
+                    );
                 }
-
-                // ⚠️ Supprimer les reports liés à ce covoiturage
-                $this->pdoService->execute(
-                    "DELETE FROM report WHERE covoiturage_id = :covoiturage_id",
-                    ['covoiturage_id' => $covoiturageId]
-                );
-
-                // Supprimer les réservations liées
-                $this->pdoService->execute(
-                    "DELETE FROM reservation WHERE covoiturage_id = :covoiturage_id",
-                    ['covoiturage_id' => $covoiturageId]
-                );
-
-                // Supprimer le covoiturage
-                $this->pdoService->execute(
-                    "DELETE FROM covoiturage WHERE id = :id",
-                    ['id' => $covoiturageId]
-                );
             }
 
-            // Enfin, supprimer la voiture
+            // Supprimer la voiture elle-même
             $this->pdoService->execute(
                 "DELETE FROM voiture WHERE id = :id AND utilisateur_id = :user_id",
                 ['id' => $id, 'user_id' => $utilisateur->getId()]
             );
 
             $this->pdoService->commit();
-            $this->addFlash('success', 'La voiture et ses covoiturages ont été supprimés. Les passagers ont été prévenus.');
+            $this->addFlash('success', 'La voiture et ses covoiturages à venir ont été supprimés. Les passagers ont été prévenus.');
 
         } catch (\Exception $e) {
             $this->pdoService->rollBack();

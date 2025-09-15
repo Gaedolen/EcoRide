@@ -382,10 +382,12 @@ class ProfilController extends AbstractController
         }
 
         // Récupération des covoiturages terminés dont l'utilisateur est chauffeur
-        $sql = "SELECT * FROM covoiturage 
-                WHERE utilisateur_id = :userId 
-                AND statut = 'ferme'
-                ORDER BY date_depart ASC, heure_depart ASC";
+        $sql = "SELECT c.*, v.marque, v.modele, v.immatriculation, v.energie, v.couleur
+            FROM covoiturage c
+            LEFT JOIN voiture v ON c.voiture_id = v.id
+            WHERE c.utilisateur_id = :userId 
+            AND c.statut = 'ferme'
+            ORDER BY c.date_depart ASC, c.heure_depart ASC";
 
         $covoiturages = $connection->fetchAllAssociative($sql, [
             'userId' => $user->getId()

@@ -45,14 +45,22 @@
                             <h3 class="titre-covoiturage">Trajet vers {{ covoiturage.lieu_arrivee }}</h3>
                             <p><strong>Départ :</strong> {{ covoiturage.lieu_depart }}, {{ covoiturage.date_depart|date('d/m/Y') }} à {{ covoiturage.heure_depart|date('H:i') }}</p>
                             <p><strong>Arrivée :</strong> {{ covoiturage.lieu_arrivee }}, {{ covoiturage.date_arrivee|date('d/m/Y') }} à {{ covoiturage.heure_arrivee|date('H:i') }}</p>
+                            <p><strong>Nombre de places :</strong> {{ covoiturage.nb_place }}</p>
+                            <p><strong>Prix par personne :</strong> {{ covoiturage.prix_personne }} €</p>
                         </div>
 
                         <div class="separator-vertical"></div>
-
                         <div class="covoiturage-right">
-                            <p><strong>Nombre de places :</strong> {{ covoiturage.nb_place }}</p>
-                            <p><strong>Prix par personne :</strong> {{ covoiturage.prix_personne }} €</p>
-                            <p><strong>Statut :</strong> {{ covoiturage.statut }}</p>
+                            <h3 class="titre-covoiturage">Ma voiture</h3>
+                            {% if covoiturage.marque is not empty %}
+                                <p><strong>Marque : </strong> {{ covoiturage.marque }}</p>
+                                <p><strong>Modèle : </strong> {{ covoiturage.modele }}</p>
+                                <p><strong>Immatriculation : </strong> {{ covoiturage.immatriculation }}</p>
+                                <p><strong>Energie : </strong> {{ covoiturage.energie }}</p>
+                                <p><strong>Couleur : </strong> {{ covoiturage.couleur }}</p>
+                            {% else %}
+                                <p><em>La voiture a été supprimée</em></p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>

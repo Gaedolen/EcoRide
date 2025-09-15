@@ -137,10 +137,12 @@
 
                                     {% if covoiturage.statut in ['ouvert','complet'] %}
                                         <form method="post" action="{{ path('chauffeur_covoiturage_demarrer', { id: covoiturage.id }) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('demarrer_covoiturage_' ~ covoiturage.id) }}">
                                             <button type="submit" class="btn-card-action">Démarrer</button>
                                         </form>
                                     {% elseif covoiturage.statut == 'en_cours' %}
                                         <form method="post" action="{{ path('chauffeur_covoiturage_clore', { id: covoiturage.id }) }}">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('clore_covoiturage_' ~ covoiturage.id) }}">
                                             <button type="submit" class="btn-card-action">Arrivé à destination</button>
                                         </form>
                                     {% endif %}

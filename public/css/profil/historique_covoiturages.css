@@ -21,7 +21,7 @@
     display: flex;
     gap: 20px;
 }
-
+ 
 .covoiturage-left,
 .covoiturage-right {
     flex: 1;

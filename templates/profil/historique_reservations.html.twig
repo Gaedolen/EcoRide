@@ -83,7 +83,7 @@
                                 <!-- Bloc conducteur -->
                                 <div class="bloc bloc-conducteur">
                                     <h3>Conducteur</h3>
-                                    <img src="{{ resa.chauffeur_photo ? 'data:image/jpeg;base64,' ~ resa.chauffeur_photo : asset('images/default-user.png') }}" alt="Photo" class="chauffeur-photo">
+                                    <img src="{{ resa.chauffeur_photo ? 'data:image/jpeg;base64,' ~ resa.chauffeur_photo : asset('images/se-connecter.png') }}" alt="Photo" class="chauffeur-photo">
                                     <p><strong>{{ resa.chauffeur_pseudo }}</strong></p>
                                     <p><strong>Note : </strong>{{ resa.chauffeur_note ?? 'Non noté' }}/5</p>
                                 </div>
@@ -109,10 +109,14 @@
                                 <!-- Bloc voiture -->
                                 <div class="bloc bloc-voiture">
                                     <h3>Véhicule</h3>
-                                    <p><strong>Marque :</strong> {{ resa.marque }}</p>
-                                    <p><strong>Modèle :</strong> {{ resa.modele }}</p>
-                                    <p><strong>Couleur :</strong> {{ resa.couleur }}</p>
-                                    <p><strong>Énergie :</strong> {{ resa.voiture_energie }}</p>
+                                    {% if resa.marque is not empty %}
+                                        <p><strong>Marque :</strong> {{ resa.marque }}</p>
+                                        <p><strong>Modèle :</strong> {{ resa.modele }}</p>
+                                        <p><strong>Couleur :</strong> {{ resa.couleur }}</p>
+                                        <p><strong>Énergie :</strong> {{ resa.voiture_energie }}</p>
+                                    {% else %}
+                                        <p><em>La voiture a été supprimée</em></p>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

@@ -82,7 +82,7 @@ class Covoiturage
     private ?float $prix_personne = null;
 
     #[ORM\ManyToOne(targetEntity: Voiture::class, inversedBy: 'covoiturages')]
-    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
+    #[ORM\JoinColumn(nullable: true, onDelete: "SET NULL")]
     private ?Voiture $voiture = null;
 
 

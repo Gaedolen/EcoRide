@@ -3,17 +3,20 @@
 namespace App\Form;
 
 use App\Entity\Covoiturage;
+use App\Entity\Voiture;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\TimeType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use App\Entity\Voiture;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormError;
 
 class CovoiturageType extends AbstractType
 {
@@ -24,10 +27,7 @@ class CovoiturageType extends AbstractType
                 'widget' => 'single_text',
                 'label' => 'Date de départ',
                 'html5' => true,
-                'attr' => [
-                    'min' => (new \DateTime())->format('Y-m-d'),
-                    'class' => 'form-input',
-                ],
+                'attr' => ['min' => (new \DateTime())->format('Y-m-d'), 'class' => 'form-input'],
                 'constraints' => [
                     new Assert\NotBlank(),
                     new Assert\GreaterThanOrEqual('today', message: 'La date de départ doit être aujourd’hui ou plus tard.'),
@@ -36,32 +36,19 @@ class CovoiturageType extends AbstractType
             ->add('heure_depart', TimeType::class, [
                 'widget' => 'single_text',
                 'label' => 'Heure de départ',
-                'attr' => [
-                    'class' => 'form-input',
-                ],
-                'constraints' => [
-                    new Assert\NotBlank(),
-                ],
+                'attr' => ['class' => 'form-input'],
+                'constraints' => [new Assert\NotBlank()],
             ])
             ->add('lieu_depart', TextType::class, [
                 'label' => 'Lieu de départ',
-                'attr' => [
-                    'class' => 'form-input',
-                    'placeholder' => 'Entrez la ville de départ',
-                ],
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(['max' => 255]),
-                ],
+                'attr' => ['class' => 'form-input', 'placeholder' => 'Entrez la ville de départ'],
+                'constraints' => [new Assert\NotBlank(), new Assert\Length(['max' => 255])],
             ])
             ->add('date_arrivee', DateType::class, [
                 'widget' => 'single_text',
                 'label' => 'Date d’arrivée',
                 'html5' => true,
-                'attr' => [
-                    'min' => (new \DateTime())->format('Y-m-d'),
-                    'class' => 'form-input',
-                ],
+                'attr' => ['min' => (new \DateTime())->format('Y-m-d'), 'class' => 'form-input'],
                 'constraints' => [
                     new Assert\NotBlank(),
                     new Assert\GreaterThanOrEqual('today', message: 'La date d’arrivée doit être aujourd’hui ou plus tard.'),
@@ -70,29 +57,16 @@ class CovoiturageType extends AbstractType
             ->add('heureArrivee', TimeType::class, [
                 'label' => 'Heure d\'arrivée',
                 'widget' => 'single_text',
-                'input' => 'datetime',
-                'html5' => true,
-                'constraints' => [
-                    new Assert\NotBlank(),
-                ],
+                'constraints' => [new Assert\NotBlank()],
             ])
             ->add('lieu_arrivee', TextType::class, [
                 'label' => 'Lieu d’arrivée',
-                'attr' => [
-                    'class' => 'form-input',
-                    'placeholder' => 'Entrez la ville d\'arrivée',
-                ],
-                'constraints' => [
-                    new Assert\NotBlank(),
-                    new Assert\Length(['max' => 255]),
-                ],
+                'attr' => ['class' => 'form-input', 'placeholder' => 'Entrez la ville d\'arrivée'],
+                'constraints' => [new Assert\NotBlank(), new Assert\Length(['max' => 255])],
             ])
             ->add('nb_place', IntegerType::class, [
                 'label' => 'Nombre de places',
-                'attr' => [
-                    'min' => 1,
-                    'step' => 1,
-                ],
+                'attr' => ['min' => 1, 'step' => 1],
                 'data' => 1,
                 'constraints' => [
                     new Assert\NotBlank(),
@@ -114,22 +88,28 @@ class CovoiturageType extends AbstractType
             ->add('voiture', EntityType::class, [
                 'class' => Voiture::class,
                 'label' => 'Voiture utilisée',
-                'choice_label' => function (Voiture $v) {
-                    return $v->getMarque() . ' ' . $v->getModele() . ' (' . $v->getImmatriculation() . ')';
-                },
+                'choice_label' => fn(Voiture $v) => $v->getMarque() . ' ' . $v->getModele() . ' (' . $v->getImmatriculation() . ')',
                 'placeholder' => 'Choisissez une voiture',
                 'query_builder' => function (\Doctrine\ORM\EntityRepository $er) use ($options) {
-                    if (!isset($options['user'])) {
-                        return $er->createQueryBuilder('v')->where('1=0');
-                    }
+                    if (!isset($options['user'])) return $er->createQueryBuilder('v')->where('1=0');
                     return $er->createQueryBuilder('v')
                         ->where('v.utilisateur = :user')
                         ->setParameter('user', $options['user']);
                 },
-                'constraints' => [
-                    new Assert\NotNull(message: 'Veuillez choisir une voiture.'),
-                ],
+                'constraints' => [new Assert\NotNull(message: 'Veuillez choisir une voiture.')],
             ]);
+
+        // Validation logique date/heure
+        $builder->addEventListener(FormEvents::POST_SUBMIT, function (FormEvent $event) {
+            $data = $event->getData();
+            $form = $event->getForm();
+
+            if ($data->getDateArrivee() < $data->getDateDepart() ||
+                ($data->getDateArrivee() == $data->getDateDepart() && $data->getHeureArrivee() <= $data->getHeureDepart())
+            ) {
+                $form->get('date_arrivee')->addError(new FormError('La date et l’heure d’arrivée doivent être après la date et l’heure de départ.'));
+            }
+        });
     }
 
     public function configureOptions(OptionsResolver $resolver): void
