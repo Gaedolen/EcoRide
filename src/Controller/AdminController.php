@@ -25,6 +25,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 #[IsGranted('ROLE_ADMIN')]
 class AdminController extends AbstractController
 {
+    #[IsGranted('ROLE_ADMIN')]
     #[Route('/admin', name: 'admin_dashboard')]
     public function dashboard(EntityManagerInterface $em): Response
     {
@@ -39,7 +40,12 @@ class AdminController extends AbstractController
             ORDER BY jour ASC
         ";
         $stmt1 = $connection->prepare($sql1);
-        $covoituragesParJour = $stmt1->executeQuery()->fetchAllAssociative();
+        $covoituragesParJour = $stmt1->executeQuery([])->fetchAllAssociative();
+
+        foreach ($covoituragesParJour as &$row) {
+            $row['totalCovoiturages'] = (int) $row['totalCovoiturages'];
+            $row['jour'] = (string) $row['jour'];
+        }
 
         // Crédits gagnés par jour
         $sql2 = "
@@ -53,39 +59,39 @@ class AdminController extends AbstractController
             ORDER BY jour ASC
         ";
         $stmt2 = $connection->prepare($sql2);
-        $creditsParJour = $stmt2->executeQuery()->fetchAllAssociative();
+        $creditsParJour = $stmt2->executeQuery([])->fetchAllAssociative();
+
+        foreach ($creditsParJour as &$row) {
+            $row['credits_plateforme'] = (int) $row['credits_plateforme'];
+            $row['jour'] = (string) $row['jour'];
+        }
 
         // Total des crédits gagnés
         $totalCredits = array_sum(array_column($creditsParJour, 'credits_plateforme'));
 
-        //dd($covoituragesParJour, $creditsParJour, $totalCredits);
-
         return $this->render('admin/dashboard.html.twig', [
             'covoituragesParJour' => $covoituragesParJour,
             'creditsParJour' => $creditsParJour,
-            'totalCredits' => $totalCredits ?? 0
+            'totalCredits' => (int) ($totalCredits ?? 0)
         ]);
     }
 
     #[Route('/admin/utilisateurs', name: 'admin_gestion_utilisateurs')]
-    public function gestionUtilisateurs(EntityManagerInterface $em, UserRepository $userRepository): Response
-    {
-        // Récupérer uniquement les utilisateurs avec le rôle USER
+    public function gestionUtilisateurs(EntityManagerInterface $em, UserRepository $userRepository): Response {
         $users = $userRepository->findByRoleLibelle('USER');
 
-        // Récupérer tous les signalements faits par les employés
         $reports = $em->getRepository(Report::class)->findAll();
 
         $reportsByUser = [];
         foreach ($reports as $report) {
             $reportedBy = $report->getReportedBy();
-            if ($reportedBy && $reportedBy->getRole()->getLibelle() === 'EMPLOYE') {
-                $userId = $report->getReportedUser()->getId();
-                if (!isset($reportsByUser[$userId])) {
-                    $reportsByUser[$userId] = [];
-                }
-                $reportsByUser[$userId][] = $report;
-            }
+            $reportedUser = $report->getReportedUser();
+
+            if (!$reportedBy || !$reportedUser) continue;
+            if ($reportedBy->getRole()->getLibelle() !== 'EMPLOYE') continue;
+
+            $userId = $reportedUser->getId();
+            $reportsByUser[$userId][] = $report;
         }
 
         return $this->render('admin/gestion_utilisateurs.html.twig', [
@@ -95,90 +101,42 @@ class AdminController extends AbstractController
     }
 
     #[Route('/admin/utilisateur/suspendre/{id}', name: 'admin_suspendre_utilisateur', methods: ['POST'])]
-    public function suspendreUtilisateur(Request $request, User $user, EntityManagerInterface $em, MailerInterface $mailer): Response {
-        // Récupérer les données JSON envoyées par fetch
-        $data = json_decode($request->getContent(), true);
-
-        // Vérifier que les données existent
-        if (!$data || !isset($data['_token'])) {
-            return $this->json(['success' => false, 'error' => 'Données manquantes'], 400);
-        }
-
-        // Vérifier le token CSRF
-        if (!$this->isCsrfTokenValid('suspend_user_' . $user->getId(), $data['_token'])) {
+    #[IsGranted('ROLE_ADMIN')]
+    public function suspendreUtilisateur(Request $request, User $user, EntityManagerInterface $em, MailerInterface $mailer): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true) ?? [];
+        if (!($data['_token'] ?? null) || !$this->isCsrfTokenValid('suspend_user_' . $user->getId(), $data['_token'])) {
             return $this->json(['success' => false, 'error' => 'Token CSRF invalide'], 400);
         }
 
-        // Déterminer la raison complète de la suspension
-        $reason = $data['reason'] ?? null;
-        if ($reason === 'autres') {
-            $reason = $data['otherReason'] ?? '';
-        }
+        $reason = $data['reason'] ?? '';
+        if ($reason === 'autres') $reason = $data['otherReason'] ?? '';
 
-        // Enregistrer la suspension et la raison
         $user->setIsSuspended(true);
         $user->setSuspendReason($reason);
         $em->flush();
 
-        // Envoyer le mail à l'utilisateur
-        $email = (new TemplatedEmail())
-            ->from('no-reply@ecoride.com')
-            ->to($user->getEmail())
-            ->subject('Votre compte a été suspendu')
-            ->htmlTemplate('emails/suspension.html.twig')
-            ->context([
-                'user' => $user,
-                'reason' => $reason
-            ]);
-        $mailer->send($email);
+        $unsuspendToken = $this->container->get('security.csrf.token_manager')->getToken('unsuspend_user_' . $user->getId())->getValue();
 
-        // Répondre au front-end
-        return $this->json([
-            'success' => true,
-            'userId' => $user->getId(),
-            'reason' => $reason
-        ]);
+        return $this->json(['success' => true, 'userId' => $user->getId(), 'unsuspendToken' => $unsuspendToken]);
     }
 
-    #[Route('/admin/utilisateur/{id}/unsuspendre', name: 'admin_unsuspendre_utilisateur', methods: ['POST'])]
-    public function unsuspendUser(Request $request, User $user, EntityManagerInterface $em, MailerInterface $mailer): Response
+    #[Route('/admin/utilisateur/unsuspendre/{id}', name: 'admin_unsuspendre_utilisateur', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function unsuspendUser(Request $request, User $user, EntityManagerInterface $em, MailerInterface $mailer): JsonResponse
     {
-        if (!$this->isCsrfTokenValid('unsuspend_user_' . $user->getId(), $request->request->get('_token'))) {
-            $this->addFlash('error', 'Token CSRF invalide');
-            return $this->redirectToRoute('admin_gestion_utilisateurs');
+        $data = json_decode($request->getContent(), true) ?? [];
+        if (!($data['_token'] ?? null) || !$this->isCsrfTokenValid('unsuspend_user_' . $user->getId(), $data['_token'])) {
+            return $this->json(['success' => false, 'error' => 'Token CSRF invalide'], 400);
         }
 
         $user->setIsSuspended(false);
+        $user->setSuspendReason(null);
         $em->flush();
 
-        if ($request->isXmlHttpRequest()) {
-            return $this->json(['success' => true]);
-        }
+        $suspendToken = $this->container->get('security.csrf.token_manager')->getToken('suspend_user_' . $user->getId())->getValue();
 
-         // Envoi du mail de réactivation
-        $email = (new TemplatedEmail())
-            ->from('no-reply@ecoride.com')
-            ->to($user->getEmail())
-            ->subject('Votre compte a été réactivé')
-            ->htmlTemplate('emails/reactivation_utilisateur.html.twig')
-            ->context([
-                'user' => $user,
-            ]);
-
-        $mailer->send($email);
-
-        return $this->redirectToRoute('admin_gestion_utilisateurs');
-    }
-
-
-    #[Route('/admin/employes', name: 'admin_employes')]
-    public function employes(UserRepository $userRepository): Response
-    {
-        $employes = $userRepository->findByRole('EMPLOYE');
-
-        return $this->render('admin/employes.html.twig', [
-            'employes' => $employes
-        ]);
+        return $this->json(['success' => true, 'userId' => $user->getId(), 'suspendToken' => $suspendToken]);
     }
 
     #[Route('/admin/employes/creer', name: 'admin_creer_employe')]

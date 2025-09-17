@@ -21,50 +21,43 @@
             </thead>
             <tbody>
                 {% for user in users %}
-                    <tr>
-                        <td>
-                            {{ user.pseudo }}
-                            {% if reportsByUser[user.id] is defined %}
-                                ⚠️
-                            {% endif %}
-                        </td>
-                        <td>{{ user.email }}</td>
-                        <td>
-                            {% if reportsByUser[user.id] is defined %}
-                                <ul>
-                                    {% for report in reportsByUser[user.id] %}
-                                        <li>{{ report.message }} (signalé par {{ report.reportedBy.pseudo }})</li>
-                                    {% endfor %}
-                                </ul>
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if user.isSuspended %}
-                                <div class="user-actions">
-                                    <span class="status suspended">Compte suspendu</span>
-                                    <form method="post" action="{{ path('admin_unsuspendre_utilisateur', {'id': user.id}) }}" class="unsuspend-form">
-                                        <input type="hidden" name="_token" value="{{ csrf_token('unsuspend_user_' ~ user.id) }}">
-                                        <button type="submit" class="btn-reactivate">Réactiver</button>
-                                    </form>
-                                </div>
-                            {% else %}
-                                <button class="btn-suspend" 
-                                        data-user-id="{{ user.id }}" 
-                                        data-user-pseudo="{{ user.pseudo }}"
-                                        data-csrf-token="{{ csrf_token('suspend_user_' ~ user.id) }}">
-                                    Suspendre
-                                </button>
-                            {% endif %}
-                        </td>
-                    </tr>
+                <tr>
+                    <td>{{ user.pseudo|e }} {% if reportsByUser[user.id]|default([]) is not empty %}⚠️{% endif %}</td>
+                    <td>{{ user.email|e }}</td>
+                    <td>
+                        {% set userReports = reportsByUser[user.id]|default([]) %}
+                        {% if userReports is not empty %}
+                            <ul>
+                            {% for report in userReports %}
+                                <li>{{ report.message|e }} (signalé par {{ report.reportedBy.pseudo|e }})</li>
+                            {% endfor %}
+                            </ul>
+                        {% else %}-{% endif %}
+                    </td>
+                    <td>
+                        {% if not user.isSuspended %}
+                            <button class="btn-suspend"
+                                    data-user-id="{{ user.id }}"
+                                    data-user-pseudo="{{ user.pseudo|e('html_attr') }}"
+                                    data-csrf-suspend="{{ csrf_token('suspend_user_' ~ user.id) }}"
+                                    data-csrf-unsuspend="{{ csrf_token('unsuspend_user_' ~ user.id) }}">
+                                Suspendre
+                            </button>
+                        {% else %}
+                            <button class="btn-reactivate"
+                                    data-user-id="{{ user.id }}"
+                                    data-csrf-unsuspend="{{ csrf_token('unsuspend_user_' ~ user.id) }}">
+                                Réactiver
+                            </button>
+                        {% endif %}
+                    </td>
+                </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 
-    <!-- Modal de suspension d'un compte -->
+    <!-- Modal suspendre -->
     <div id="modal-suspendre" class="modal" style="display:none; justify-content:center; align-items:center;">
         <div class="modal-content">
             <span class="modal-close">&times;</span>
@@ -90,4 +83,3 @@
 
     <script src="{{ asset('js/gestion_utilisateurs.js') }}"></script>
 {% endblock %}
-
