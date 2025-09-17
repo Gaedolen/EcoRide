@@ -75,6 +75,7 @@ class EmployeType extends AbstractType
             ])
             ->add('password', PasswordType::class, [
                 'mapped' => false,
+                'required' => true,
                 'constraints' => [
                     new Assert\NotBlank(),
                     new Assert\Length(['min' => 8, 'max' => 4096]),

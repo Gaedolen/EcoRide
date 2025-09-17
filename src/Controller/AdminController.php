@@ -139,7 +139,19 @@ class AdminController extends AbstractController
         return $this->json(['success' => true, 'userId' => $user->getId(), 'suspendToken' => $suspendToken]);
     }
 
+    #[Route('/admin/employes', name: 'admin_employes')]
+    #[IsGranted('ROLE_ADMIN')]
+    public function employes(UserRepository $userRepository): Response
+    {
+        $employes = $userRepository->findByRole('EMPLOYE');
+
+        return $this->render('admin/employes.html.twig', [
+            'employes' => $employes
+        ]);
+    }
+
     #[Route('/admin/employes/creer', name: 'admin_creer_employe')]
+    #[IsGranted('ROLE_ADMIN')]
     public function creerEmploye(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher): Response
     {
         $employe = new User();
@@ -147,6 +159,7 @@ class AdminController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Vérifier ou créer le rôle EMPLOYE
             $role = $em->getRepository(Role::class)->findOneBy(['libelle' => 'EMPLOYE']);
             if (!$role) {
                 $role = new Role();
@@ -156,11 +169,24 @@ class AdminController extends AbstractController
 
             $employe->setRole($role);
             $employe->setIsVerified(true);
-            $hashedPassword = $hasher->hashPassword($employe, $employe->getPassword());
+
+            // Récupérer le mot de passe depuis le formulaire (non mappé)
+            $plainPassword = $form->get('password')->getData();
+            if (!$plainPassword) {
+                $this->addFlash('error', 'Le mot de passe est obligatoire.');
+                return $this->render('admin/nouveau_employe.html.twig', [
+                    'form' => $form->createView(),
+                ]);
+            }
+
+            // Hashage sécurisé
+            $hashedPassword = $hasher->hashPassword($employe, $plainPassword);
             $employe->setPassword($hashedPassword);
 
             $em->persist($employe);
             $em->flush();
+
+            $this->addFlash('success', 'Employé créé avec succès !');
 
             return $this->redirectToRoute('admin_employes');
         }
@@ -170,8 +196,10 @@ class AdminController extends AbstractController
         ]);
     }
 
-   #[Route('/admin/employe/supprimer/{id}', name: 'admin_supprimer_employe', methods: ['POST'])]
-    public function supprimerEmploye(int $id, Request $request, UserRepository $userRepository, EntityManagerInterface $em, CsrfTokenManagerInterface $csrfTokenManager): RedirectResponse {
+    #[Route('/admin/employe/supprimer/{id}', name: 'admin_supprimer_employe', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function supprimerEmploye(int $id, Request $request, UserRepository $userRepository, EntityManagerInterface $em, CsrfTokenManagerInterface $csrfTokenManager): RedirectResponse
+    {
         $user = $userRepository->find($id);
 
         if (!$user || $user->getRole()->getLibelle() !== 'EMPLOYE') {
@@ -186,6 +214,7 @@ class AdminController extends AbstractController
         $em->remove($user);
         $em->flush();
 
+        $this->addFlash('success', 'Employé supprimé avec succès.');
         return $this->redirectToRoute('admin_employes');
     }
 }

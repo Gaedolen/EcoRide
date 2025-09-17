@@ -29,16 +29,16 @@
                         {% set today = "now"|date("Y-m-d") %}
                         {% set age = (date(today).diff(naissance)).y %}
                         <tr>
-                            <td data-label="Nom">{{ employe.nom }}</td>
-                            <td data-label="Prénom">{{ employe.prenom }}</td>
-                            <td data-label="Date de naissance">{{ naissance|date('d/m/Y') }} ({{ age }} ans)</td>
-                            <td data-label="Email">{{ employe.email }}</td>
-                            <td data-label="Téléphone">{{ employe.telephone }}</td>
-                            <td data-label="Adresse">{{ employe.adresse }}</td>
-                            <td data-label="Gérer">
+                            <td>{{ employe.nom|e }}</td>
+                            <td>{{ employe.prenom|e }}</td>
+                            <td>{{ naissance|date('d/m/Y') }} ({{ age }} ans)</td>
+                            <td>{{ employe.email|e }}</td>
+                            <td>{{ employe.telephone|e }}</td>
+                            <td>{{ employe.adresse|e }}</td>
+                            <td>
                                 <form method="post" action="{{ path('admin_supprimer_employe', {'id': employe.id}) }}" class="form-delete">
                                     <input type="hidden" name="_token" value="{{ csrf_token('delete-employe-' ~ employe.id) }}">
-                                    <button class="btn-delete" type="submit">Supprimer</button>
+                                    <button type="submit" class="btn-delete">Supprimer</button>
                                 </form>
                             </td>
                         </tr>
@@ -53,10 +53,11 @@
 
         <div class="actions">
             <a href="{{ path('admin_dashboard') }}" class="back-btn">⬅ Retour au dashboard</a>
-            <a href="{{ path('admin_creer_employe') }}">Ajouter un employé</a>
+            <a href="{{ path('admin_creer_employe') }}" class="btn-add">Ajouter un employé</a>
         </div>
     </div>
 
+    <!-- Modal de confirmation -->
     <div class="modal-confirm" style="display: none;">
         <div class="modal-content">
             <p>Voulez-vous vraiment supprimer cet employé ? Cette action est irréversible.</p>
