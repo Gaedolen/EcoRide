@@ -240,7 +240,7 @@ class CovoiturageController extends AbstractController
     }
 
     #[Route('/covoiturage/{id}/reserver', name: 'reserver_trajet', methods: ['POST'])]
-    public function reserver(int $id, Request $request): Response
+    public function reserver(int $id, Request $request, MailerInterface $mailer): Response
     {
         /** @var \App\Entity\User $utilisateur */
         $utilisateur = $this->getUser();
@@ -316,6 +316,24 @@ class CovoiturageController extends AbstractController
             $pdo->commit();
 
             $this->addFlash('success', 'Réservation confirmée !');
+
+            // Envoi du mail au chauffeur
+            $stmt = $pdo->prepare("SELECT u.email, u.pseudo FROM covoiturage c JOIN user u ON c.utilisateur_id = u.id WHERE c.id = :id");
+            $stmt->execute(['id' => $id]);
+            $chauffeur = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($chauffeur) {
+                $email = (new TemplatedEmail())
+                    ->from('noreply@ecoride.fr')
+                    ->to($chauffeur['email'])
+                    ->subject('Nouvelle réservation')
+                    ->htmlTemplate('emails/nouvelle_reservation.html.twig')
+                    ->context([
+                        'chauffeurPseudo' => $chauffeur['pseudo'],
+                        'passagerPseudo' => $utilisateur->getPseudo()
+                    ]);
+                $mailer->send($email);
+            }
 
         } catch (\Exception $e) {
             $pdo->rollBack();
@@ -649,7 +667,7 @@ class CovoiturageController extends AbstractController
     }
 
     #[Route('/reservation/{id}/annuler', name: 'annuler_reservation', methods: ['POST'])]
-    public function annulerReservation(int $id, Request $request): Response
+    public function annulerReservation(int $id, Request $request, MailerInterface $mailer): Response
     {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
@@ -706,6 +724,24 @@ class CovoiturageController extends AbstractController
             $pdo->commit();
 
             $this->addFlash('success', 'Votre réservation a été annulée, 2 crédits vous ont été remboursés.');
+
+            // Envoi du mail au chauffeur
+            $stmt = $pdo->prepare("SELECT c.utilisateur_id, u.email, u.pseudo FROM reservation r JOIN covoiturage c ON r.covoiturage_id = c.id JOIN user u ON c.utilisateur_id = u.id WHERE r.id = :id");
+            $stmt->execute(['id' => $id]);
+            $chauffeur = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($chauffeur) {
+                $email = (new TemplatedEmail())
+                    ->from('noreply@ecoride.fr')
+                    ->to($chauffeur['email'])
+                    ->htmlTemplate('emails/annulation_reservation.html.twig')
+                    ->context([
+                        'chauffeurPseudo' => $chauffeur['pseudo'],
+                        'passagerPseudo' => $user->getPseudo()
+                    ]);
+                $mailer->send($email);
+            }
+
         } catch (\Exception $e) {
             $pdo->rollBack();
             $this->addFlash('error', 'Impossible d’annuler la réservation. Réessayez.');

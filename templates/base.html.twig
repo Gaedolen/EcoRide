@@ -38,20 +38,42 @@
                             </div>
 
                             <nav class="nav-menu">
-                                <a href="{{ path('app_accueil') }}">Accueil</a>
-                                <span class="separator">|</span>
-                                <a href="{{ path('app_covoiturage') }}">Covoiturages</a>
-                                <span class="separator">|</span>
-                                <a href="{{ path('app_contact')}}">Contact</a>
-                                <span class="separator">|</span>
                                 {% if app.user %}
+                                    <!-- Liens communs à tous les utilisateurs connectés -->
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <a href="{{ path('admin_dashboard') }}">Accueil</a>
+                                        <span class="separator">|</span>
+                                        <a href="{{ path('admin_employes') }}">Gérer les employés</a>
+                                        <span class="separator">|</span>
+                                        <a href="{{ path('admin_gestion_utilisateurs') }}">Gérer les utilisateurs</a>
+                                    {% elseif is_granted('ROLE_EMPLOYE') %}
+                                        <a href="{{ path('employe_dashboard') }}">Accueil</a>
+                                        <span class="separator">|</span>
+                                        <a href="{{ path('employe_moderer_avis') }}">Modérer</a>
+                                        <span class="separator">|</span>
+                                        <a href="{{ path('employe_covoiturages_problematiques') }}">Signalements</a>
+                                    {% else %}
+                                        <a href="{{ path('app_accueil') }}">Accueil</a>
+                                        <span class="separator">|</span>
+                                        <a href="{{ path('app_covoiturage') }}">Covoiturages</a>
+                                        <span class="separator">|</span>
+                                        <a href="{{ path('app_contact') }}">Contact</a>
+                                    {% endif %}
+
+                                    <!-- Liens communs à tous les utilisateurs connectés -->
+                                    <span class="separator">|</span>
                                     <a href="{{ path('app_profil') }}">Mon Compte</a>
                                     <span class="separator">|</span>
                                     <a href="{{ path('app_logout') }}">Déconnexion</a>
                                 {% else %}
-                                    <a href="{{ path('app_login') }}">
-                                        Se connecter
-                                    </a>
+                                    <!-- Utilisateur non connecté -->
+                                    <a href="{{ path('app_accueil') }}">Accueil</a>
+                                    <span class="separator">|</span>
+                                    <a href="{{ path('app_covoiturage') }}">Covoiturages</a>
+                                    <span class="separator">|</span>
+                                    <a href="{{ path('app_contact') }}">Contact</a>
+                                    <span class="separator">|</span>
+                                    <a href="{{ path('app_login') }}">Se connecter</a>
                                 {% endif %}
                             </nav>
                         </div>
