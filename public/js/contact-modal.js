@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Ouvrir la modal
             modal.style.display = 'flex';
         });
-    });
+    }); 
 
     // Fermer la modal
     closeBtn.addEventListener('click', () => modal.style.display = 'none');

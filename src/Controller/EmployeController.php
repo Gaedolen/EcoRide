@@ -71,7 +71,7 @@ class EmployeController extends AbstractController
             $em->persist($cible);
         } elseif ($action === 'refuse') {
             $avis->setStatut('refuse');
-            $avis->setStatut(false);
+            $avis->setIsValidated(false);
 
             // Envoi du mail à l'auteur
             $email = (new TemplatedEmail())
@@ -92,11 +92,13 @@ class EmployeController extends AbstractController
     }
 
     #[Route('/employe/covoiturages_problematiques', name: 'employe_covoiturages_problematiques')]
-    public function covoituragesProblematiques(Request $request, EntityManagerInterface $em, Security $security, UserRepository $userRepository): Response {
+    public function covoituragesProblematiques(Request $request, EntityManagerInterface $em, Security $security): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_EMPLOYE'); // sécurité
+
         // Récupération des covoiturages signalés
         $reports = $em->getRepository(Report::class)->findPendingReportsFromUsers();
 
-        // Création d'un formulaire de signalement vide
         $report = new Report();
         $report->setReportedBy($security->getUser());
 
@@ -104,12 +106,11 @@ class EmployeController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-
             $reportedUser = $report->getReportedUser();
 
             $lastCovoiturage = $em->getRepository(Covoiturage::class)->findOneBy(
-            ['utilisateur' => $reportedUser],
-            ['date_arrivee' => 'DESC']
+                ['utilisateur' => $reportedUser],
+                ['date_arrivee' => 'DESC']
             );
 
             $report->setReportedBy($this->getUser());
@@ -125,13 +126,15 @@ class EmployeController extends AbstractController
 
         return $this->render('employe/covoiturages_problematiques.html.twig', [
             'reports' => $reports,
-            'form' => $form->createView()
+            'form' => $form->createView(),
         ]);
     }
 
     #[Route('/employe/signalement/traiter/{id}', name: 'employe_traiter_signalement', methods: ['POST'])]
     public function traiterSignalement(int $id, EntityManagerInterface $em, Request $request): RedirectResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_EMPLOYE'); // sécurité
+
         $report = $em->getRepository(Report::class)->find($id);
         if (!$report || !$this->isCsrfTokenValid('traiter_report_' . $id, $request->request->get('_token'))) {
             throw $this->createAccessDeniedException();
@@ -148,6 +151,8 @@ class EmployeController extends AbstractController
     #[Route('/employe/signalement/ignorer/{id}', name: 'employe_ignorer_signalement', methods: ['POST'])]
     public function ignorerSignalement(int $id, EntityManagerInterface $em, Request $request): RedirectResponse
     {
+        $this->denyAccessUnlessGranted('ROLE_EMPLOYE'); // sécurité
+
         $report = $em->getRepository(Report::class)->find($id);
         if (!$report || !$this->isCsrfTokenValid('ignorer_report_' . $id, $request->request->get('_token'))) {
             throw $this->createAccessDeniedException();
@@ -161,30 +166,61 @@ class EmployeController extends AbstractController
         return $this->redirectToRoute('employe_covoiturages_problematiques');
     }
 
+    #[Route('/employe/signalement/admin', name: 'employe_signalement_admin', methods: ['POST'])]
+    public function signalerUtilisateurAdmin(Request $request, EntityManagerInterface $em, UserRepository $userRepository): RedirectResponse
+    {
+        $this->denyAccessUnlessGranted('ROLE_EMPLOYE');
+
+        $reportedUserId = $request->request->get('reportedUser');
+        $message = $request->request->get('message');
+
+        if (!$this->isCsrfTokenValid('signalement_admin', $request->request->get('_token'))) {
+            throw $this->createAccessDeniedException('Token CSRF invalide.');
+        }
+
+        $reportedUser = $userRepository->find($reportedUserId);
+        if (!$reportedUser) {
+            $this->addFlash('error', 'Utilisateur introuvable.');
+            return $this->redirectToRoute('employe_covoiturages_problematiques');
+        }
+
+        $report = new Report();
+        $report->setReportedBy($this->getUser());
+        $report->setReportedUser($reportedUser);
+        $report->setMessage($message);
+        $report->setStatut('en_attente_admin');
+
+        $em->persist($report);
+        $em->flush();
+
+        $this->addFlash('success', 'Signalement envoyé à l’admin.');
+        return $this->redirectToRoute('employe_covoiturages_problematiques');
+    }
+
     #[Route('/employe/contacter/{id}', name: 'employe_contacter_utilisateur', methods: ['POST'])]
     public function contacterUtilisateur(Request $request, User $user, MailerInterface $mailer): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_EMPLOYE'); // sécurité
+        $this->denyAccessUnlessGranted('ROLE_EMPLOYE');
 
-        if ($request->isMethod('POST')) {
-            $token = $request->request->get('_token');
-            if (!$this->isCsrfTokenValid('contacter_utilisateur', $token)) {
-                throw $this->createAccessDeniedException('Token CSRF invalide.');
-            }
-
-            $subject = $request->request->get('subject');
-            $message = $request->request->get('message');
-
-            $email = (new TemplatedEmail())
-                ->from('contact@ecoride.com')
-                ->to($user->getEmail())
-                ->subject($subject)
-                ->html($message);
-
-            $mailer->send($email);
-
-            $this->addFlash('success', 'Email envoyé à ' . $user->getPseudo());
+        $token = $request->request->get('_token');
+        if (!$this->isCsrfTokenValid('contacter_utilisateur', $token)) {
+            throw $this->createAccessDeniedException('Token CSRF invalide.');
         }
+
+        $subject = substr($request->request->get('subject'), 0, 150);
+        $message = substr($request->request->get('message'), 0, 2000);
+
+        $email = (new TemplatedEmail())
+            ->from('contact@ecoride.com')
+            ->to($user->getEmail())
+            ->subject($subject)
+            ->html($this->renderView('emails/contact_utilisateur.html.twig', [
+                'message' => $message,
+                'pseudo' => $user->getPseudo()
+            ]));
+
+        $mailer->send($email);
+        $this->addFlash('success', 'Email envoyé à ' . $user->getPseudo());
 
         return $this->redirectToRoute('employe_covoiturages_problematiques');
     }
@@ -192,6 +228,8 @@ class EmployeController extends AbstractController
     #[Route('/employe/signalement/historique', name: 'employe_historique_signalements')]
     public function historiqueSignalements(EntityManagerInterface $em): Response
     {
+        $this->denyAccessUnlessGranted('ROLE_EMPLOYE');
+
         $reports = $em->getRepository(Report::class)->findBy(
             ['statut' => ['traite', 'ignore']],
             ['createdAt' => 'DESC']
@@ -205,7 +243,10 @@ class EmployeController extends AbstractController
     #[Route('/employe/search-user', name: 'employe_search_user')]
     public function searchUser(Request $request, UserRepository $userRepository): JsonResponse
     {
-        $term = $request->query->get('q');
+        $this->denyAccessUnlessGranted('ROLE_EMPLOYE'); // Restriction aux employés
+
+        $term = substr($request->query->get('q', ''), 0, 50); // Limiter la longueur
+
         $users = $userRepository->createQueryBuilder('u')
             ->where('u.pseudo LIKE :term')
             ->setParameter('term', '%'.$term.'%')

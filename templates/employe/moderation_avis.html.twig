@@ -9,6 +9,14 @@
 {% block body %}
     <h1 class="titre">Modération des Avis</h1>
 
+    {% for label, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="flash-{{ label }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+
     <div class="table-container">
         <table>
             <thead>
@@ -30,7 +38,7 @@
                         <td>{{ a.commentaire }}</td>
                         <td>{{ a.dateAvis|date('d/m/Y') }}</td>
                         <td>
-                             <form method="post" action="{{ path('employe_moderer_avis_action', {id: a.id}) }}">
+                            <form method="post" action="{{ path('employe_moderer_avis_action', {id: a.id}) }}">
                                 <input type="hidden" name="_token" value="{{ csrf_token('moderation_avis_' ~ a.id) }}">
                                 <div class="moderation-actions">
                                     <button type="submit" name="action" value="approuve" class="approve">Approuver</button>
@@ -41,7 +49,7 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="5">Aucun avis en attente de modération</td>
+                        <td colspan="6" style="text-align:center;">Aucun avis en attente de modération</td>
                     </tr>
                 {% endfor %}
             </tbody>

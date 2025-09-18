@@ -73,7 +73,7 @@
     <h2 class="titre">Signaler un utilisateur</h2>
 
     <div class="signalement-container">
-        {{ form_start(form) }}
+        {{ form_start(form, {'attr': {'id': 'form-signalement'}, 'csrf_token_id': 'signalement_employe'}) }}
             {{ form_row(form.reportedUser) }}
             {{ form_row(form.message) }}
             <button type="submit">Envoyer le signalement</button>
