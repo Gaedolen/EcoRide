@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Security;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class ProfilController extends AbstractController
 {
@@ -304,18 +305,17 @@ class ProfilController extends AbstractController
     }
 
     #[Route('/laisser-avis', name: 'laisser_avis', methods: ['POST'])]
-    public function laisserAvis(Request $request): Response
+    public function laisserAvis(Request $request): JsonResponse
     {
         /** @var \App\Entity\User $utilisateur */
         $utilisateur = $this->getUser();
         if (!$utilisateur) {
-            throw $this->createAccessDeniedException("Vous devez être connecté.");
+            return new JsonResponse(['success' => false, 'message' => 'Vous devez être connecté.'], 403);
         }
 
-        // Vérification CSRF
         $csrfToken = $request->request->get('_token');
         if (!$this->isCsrfTokenValid('laisser-avis', $csrfToken)) {
-            throw $this->createAccessDeniedException('Token CSRF invalide.');
+            return new JsonResponse(['success' => false, 'message' => 'Token CSRF invalide.'], 400);
         }
 
         $cibleId = (int) $request->request->get('cible_id');
@@ -324,10 +324,10 @@ class ProfilController extends AbstractController
         $commentaire = trim($request->request->get('commentaire'));
 
         if (!$cibleId || !$covoiturageId || !$note || !$commentaire) {
-            throw new \Exception("Champs manquants.");
+            return new JsonResponse(['success' => false, 'message' => 'Champs manquants.'], 400);
         }
 
-        // Vérifier que l'utilisateur a bien participé à ce covoiturage
+        // Vérifier que l'utilisateur a participé
         $stmtCheckParticipation = $this->pdo->prepare("
             SELECT COUNT(*) FROM reservation 
             WHERE utilisateur_id = :userId AND covoiturage_id = :covoiturageId
@@ -337,15 +337,11 @@ class ProfilController extends AbstractController
             'covoiturageId' => $covoiturageId,
         ]);
         if ($stmtCheckParticipation->fetchColumn() == 0) {
-            throw new \Exception("Vous ne pouvez pas laisser un avis pour ce covoiturage.");
-        }
-
-        if ($note < 1 || $note > 5) {
-            throw new \Exception("Note invalide.");
+            return new JsonResponse(['success' => false, 'message' => 'Vous ne pouvez pas laisser un avis pour ce covoiturage.'], 403);
         }
 
         // Vérifie si l'avis existe déjà
-        $stmtCheck = $this->pdo->prepare("
+                $stmtCheck = $this->pdo->prepare("
             SELECT COUNT(*) FROM avis 
             WHERE auteur_id = :auteur_id AND covoiturage_id = :covoiturage_id
         ");
@@ -353,11 +349,14 @@ class ProfilController extends AbstractController
             ':auteur_id' => $utilisateur->getId(),
             ':covoiturage_id' => $covoiturageId,
         ]);
-        if ($stmtCheck->fetchColumn() > 0) {
-            throw new \Exception("Vous avez déjà laissé un avis pour ce covoiturage.");
-        }
 
-        // Insertion de l'avis
+        $exists = $stmtCheck->fetchColumn();
+
+        if ($exists > 0) {
+            return new JsonResponse(['success' => 'exists']);
+        }
+        
+        // Insertion
         $stmt = $this->pdo->prepare("
             INSERT INTO avis 
             (auteur_id, cible_id, covoiturage_id, note, commentaire, date_avis, statut, is_validated) 
@@ -373,7 +372,7 @@ class ProfilController extends AbstractController
             ':is_validated' => 0,
         ]);
 
-        return $this->redirectToRoute('historique_reservations');
+        return new JsonResponse(['success' => true]);
     }
 
     #[Route('/historique/covoiturages', name: 'historique_covoiturages')]

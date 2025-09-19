@@ -17,12 +17,13 @@ class ReportController extends AbstractController
     #[Route('/report', name: 'report_submit', methods: ['POST'])]
     public function submit(Request $request, EntityManagerInterface $em): JsonResponse
     {
+        /** CSRF */
         $token = $request->request->get('_token');
-
         if (!$this->isCsrfTokenValid('report_user', $token)) {
             return new JsonResponse(['success' => false, 'message' => 'Token CSRF invalide.'], 400);
         }
 
+        /** Utilisateur connecté */
         /** @var User $user */
         $user = $this->getUser();
         if (!$user) {
@@ -31,7 +32,7 @@ class ReportController extends AbstractController
 
         $reportedUserId = $request->request->get('reported_user_id');
         $covoiturageId = $request->request->get('covoiturage_id');
-        $message = $request->request->get('message');
+        $message = trim($request->request->get('message'));
 
         if (!$reportedUserId || !$covoiturageId || !$message) {
             return new JsonResponse(['success' => false, 'message' => 'Données manquantes'], 400);
@@ -44,13 +45,19 @@ class ReportController extends AbstractController
             return new JsonResponse(['success' => false, 'message' => 'Utilisateur ou covoiturage introuvable'], 404);
         }
 
-        // Vérifie si le signalement existe déjà pour ce covoiturage et cet utilisateur
+        // Vérifier si un signalement existe déjà pour ce covoiturage ET cet utilisateur
         $existingReport = $em->getRepository(Report::class)->findOneBy([
             'reportedBy' => $user,
             'reportedUser' => $reportedUser,
             'covoiturage' => $covoiturage,
         ]);
 
+        if ($existingReport) {
+            // Si déjà signalé ce covoiturage, on ne fait rien
+            return new JsonResponse(['success' => true, 'message' => 'Signalement déjà enregistré']);
+        }
+
+        // Création du report
         $report = new Report();
         $report->setReportedBy($user)
             ->setReportedUser($reportedUser)

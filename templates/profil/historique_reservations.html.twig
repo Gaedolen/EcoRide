@@ -45,7 +45,7 @@
                                 {% set signalement = resa.signalement_existant %}
 
                                 <!-- Bouton avis -->
-                                {% if avis %}
+                                {% if avis and avis.statut != 'refuse' %}
                                     {% if avis.is_validated %}
                                         <span class="badge badge-success">✅ Avis déposé</span>
                                     {% else %}
@@ -126,11 +126,12 @@
         {% endfor %}
     </div>
 
-    <div id="avis-popup" class="popup-overlay" style="display:none;"> <!-- Fenêtre pop-up pour laisser un avis -->
+    <!-- Fenêtre pop-up pour laisser un avis -->
+    <div id="avis-popup" class="popup-overlay" style="display:none;">
         <div class="popup-content">
             <button class="close-popup" aria-label="Fermer">&times;</button>
 
-            <form method="POST" action="{{ path('laisser_avis') }}">
+            <form id="avis-form" method="POST" action="{{ path('laisser_avis') }}">
                 <input type="hidden" name="cible_id" id="cible_id" value="">
                 <input type="hidden" name="covoiturage_id" id="covoiturage_id" value="">
                 <input type="hidden" name="_token" value="{{ csrf_token('laisser-avis') }}">
