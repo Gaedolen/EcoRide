@@ -467,6 +467,13 @@ class ProfilController extends AbstractController
                 'covoiturage_id' => $resa['covoiturage_id'],
             ]);
             $resa['signalement_existant'] = $stmtReport->fetch(PDO::FETCH_ASSOC) ?: null;
+
+            // Calculer la note arrondie
+            if (isset($resa['chauffeur_note'])) {
+                $resa['chauffeur_note_formatted'] = round($resa['chauffeur_note'], 1);
+            } else {
+                $resa['chauffeur_note_formatted'] = null;
+            }
         }
 
         return $this->render('profil/historique_reservations.html.twig', [

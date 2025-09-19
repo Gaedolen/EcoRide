@@ -12,22 +12,22 @@
         {% if app.user.id != trajet.utilisateur_id %}
             <form method="POST" action="{{ path('reserver_trajet', { id: trajet.id }) }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('reserver_covoiturage_' ~ trajet.id) }}">
-                
-                {% if aDejaReserve %}
-                    <button class="btn-reserver disabled-btn" disabled>
-                        Vous participez déjà à ce trajet
-                    </button>
-                {% else %}
+
+                {% if app.user.isPassager %}
                     <button type="submit" 
                             class="btn-reserver {% if app.user.credits < 2 %}disabled-btn{% endif %}" 
                             data-credits="{{ app.user.credits }}"
                             {% if app.user.credits < 2 %}disabled{% endif %}>
                         Covoiturer !
                     </button>
+                {% else %}
+                    <button class="btn-reserver disabled-btn" disabled>
+                        Vous devez être inscrit comme passager
+                    </button>
                 {% endif %}
             </form>
         {% else %}
-            <button class="btn-reserver disabled-btn" onclick="return false;">
+            <button class="btn-reserver disabled-btn" disabled>
                 Vous êtes le conducteur
             </button>
         {% endif %}

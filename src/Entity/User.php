@@ -85,8 +85,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private ?bool $isChauffeur = false;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => false])]
-    private ?bool $isPassager = false;
+    #[ORM\Column(type: 'boolean', options: ['default' => true])]
+    private ?bool $isPassager = true;
 
     #[ORM\Column(type: 'float', nullable: true)]
     private ?float $note = null;

@@ -85,7 +85,7 @@
                                     <h3>Conducteur</h3>
                                     <img src="{{ resa.chauffeur_photo ? 'data:image/jpeg;base64,' ~ resa.chauffeur_photo : asset('images/se-connecter.png') }}" alt="Photo" class="chauffeur-photo">
                                     <p><strong>{{ resa.chauffeur_pseudo }}</strong></p>
-                                    <p><strong>Note : </strong>{{ resa.chauffeur_note ?? 'Non noté' }}/5</p>
+                                    <p><strong>Note : </strong>{{ resa.chauffeur_note_formatted ?? 'Non noté' }}/5</p>
                                 </div>
 
                                 <!-- Ligne verticale -->

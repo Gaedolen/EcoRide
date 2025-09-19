@@ -1,24 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const avisPopup = document.getElementById('avis-popup');
-    const avisClose = avisPopup.querySelector('.close-popup');
-    const cibleIdInput = document.getElementById('cible_id');
-    const covoiturageIdInput = document.getElementById('covoiturage_id');
-
     const reportPopup = document.getElementById('report-popup');
     const reportClose = document.getElementById('close-report-popup');
     const reportForm = document.getElementById('report-form');
 
+    // Ouverture du popup
     document.addEventListener('click', (e) => {
-        // Laisser un avis
-        if (e.target.classList.contains('open-avis-popup')) {
-            e.preventDefault();
-            const button = e.target;
-            cibleIdInput.value = button.dataset.cibleId;
-            covoiturageIdInput.value = button.dataset.avisCovoiturageId;
-            avisPopup.style.display = 'flex';
-        }
-
-        // Signaler
         if (e.target.classList.contains('open-report-popup')) {
             e.preventDefault();
             const button = e.target;
@@ -28,31 +14,56 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Fermeture des popups
-    avisClose.addEventListener('click', () => { avisPopup.style.display = 'none'; });
+    // Fermeture du popup
     reportClose.addEventListener('click', () => { reportPopup.style.display = 'none'; });
-
     window.addEventListener('click', e => {
-        if (e.target === avisPopup) avisPopup.style.display = 'none';
         if (e.target === reportPopup) reportPopup.style.display = 'none';
     });
 
-    // Soumission du report via fetch
+    // Soumission du formulaire
     reportForm.addEventListener('submit', e => {
         e.preventDefault();
+        e.stopPropagation(); // Empêche toute propagation
+
+        const reportedUserId = document.getElementById('reportedUserId').value;
+        const covoiturageId = document.getElementById('covoiturageId').value;
+        const message = document.getElementById('message').value;
+        const token = document.getElementById('report-token').value;
+
+        if (!message) return alert('Veuillez saisir un message.');
+
         fetch(reportForm.action, {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: new URLSearchParams({
-                reported_user_id: document.getElementById('reportedUserId').value,
-                covoiturage_id: document.getElementById('covoiturageId').value,
-                message: document.getElementById('message').value
+                reported_user_id: reportedUserId,
+                covoiturage_id: covoiturageId,
+                message: message,
+                _token: token
             })
         })
         .then(res => res.json())
         .then(data => {
-            reportPopup.style.display = 'none';
-            reportForm.reset();
+            if (data.success) {
+                // Fermer le popup et réinitialiser le formulaire
+                reportPopup.style.display = 'none';
+                reportForm.reset();
+
+                // Mettre à jour le bouton en badge "Signalement en attente"
+                const button = document.querySelector(`.open-report-popup[data-reported-user-id="${reportedUserId}"][data-covoiturage-id="${covoiturageId}"]`);
+                if (button) {
+                    const badge = document.createElement('span');
+                    badge.className = 'badge badge-warning';
+                    badge.textContent = '⏳ Signalement en attente';
+                    button.replaceWith(badge);
+                }
+            } else {
+                alert(data.message || 'Erreur lors de l\'envoi du signalement.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Erreur réseau lors de l\'envoi du signalement.');
         });
     });
 });
