@@ -23,5 +23,5 @@ services:
         exclude:
             - '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
 
-    App\Twig\AppExtension:
+    App\Twig\Extension\AppExtension:
         tags: ['twig.extension']
