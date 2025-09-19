@@ -116,7 +116,7 @@
                                     <img src="{{ trajet.user_photo ? 'data:image/jpeg;base64,' ~ trajet.user_photo : asset('images/se-connecter.png') }}" alt="photo" class="chauffeur-photo">
                                     <div>
                                         <p class="chauffeur-nom">{{ trajet.user_pseudo }}</p>
-                                        <p>Note : {{ trajet.user_note ?? 'Non noté' }}/5</p>
+                                        <p>Note : {{ trajet.user_note is not null ? (trajet.user_note | number_format(1, '.', '')) : 'Non noté' }}/5</p>
                                     </div>
                                 </div>
 
@@ -134,7 +134,7 @@
                                     {% set m = (duree % 3600) // 60 %}
                                     <p><strong>Durée :</strong> {{ trajet.duree_heures }}h{% if trajet.duree_minutes > 0 %} {{ trajet.duree_minutes }}min{% endif %}</p>
 
-                                    <p>👥 {{ trajet.nb_place }} place{{ trajet.nb_place > 1 ? 's' : '' }}</p>
+                                    <p>👥 {{ trajet.places_disponibles }} place{{ trajet.places_disponibles > 1 ? 's' : '' }}</p>
 
                                     {% if trajet.voiture_energie in ['Électrique', 'Electrique'] %}
                                         <span class="eco-badge">🌱 Écologique</span>

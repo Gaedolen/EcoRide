@@ -37,7 +37,9 @@
         <div class="details-col conducteur">
             <img src="{{ trajet.chauffeur_photo ? 'data:image/jpeg;base64,' ~ trajet.chauffeur_photo : asset('images/se-connecter.png') }}" class="chauffeur-photo" alt="Photo">
             <p class="chauffeur-name">{{ trajet.chauffeur_pseudo }}</p>
-            <p><strong>Note : </strong>{{ trajet.chauffeur_note ?? 'Non noté' }}/5</p>
+            <p><strong>Note : </strong>
+                {{ trajet.chauffeur_note is not null ? (trajet.chauffeur_note | number_format(1, '.', '')) : 'Non noté' }}/5
+            </p>
         </div>
 
         <div class="separator-vertical"></div>
@@ -52,7 +54,7 @@
             {% set m = (duree % 3600) // 60 %}
             <p><strong>Durée :</strong> {{ trajet.duree_heures }}h{% if trajet.duree_minutes > 0 %} {{ trajet.duree_minutes }}min{% endif %}</p>
 
-            <p><strong>Places disponibles :</strong> {{ trajet.nb_place }}</p>
+            <p><strong>Places disponibles :</strong> {{ trajet.places_disponibles }}</p>
             <p><strong>Prix :</strong> {{ trajet.prix_personne }} €</p>
             {% if trajet.energie in ['Électrique', 'Electrique'] %}
                 <span class="eco-badge">🌱 Écologique</span>

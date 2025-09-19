@@ -142,6 +142,13 @@ class CovoiturageController extends AbstractController
 
             $trajet['duree_heures'] = $diff->days * 24 + $diff->h;
             $trajet['duree_minutes'] = $diff->i;
+
+            // Calculer les places disponibles
+            $stmtRes = $pdo->prepare("SELECT COUNT(*) FROM reservation WHERE covoiturage_id = :id");
+            $stmtRes->execute(['id' => $trajet['id']]);
+            $nbReservations = (int) $stmtRes->fetchColumn();
+
+            $trajet['places_disponibles'] = $trajet['nb_place'] - $nbReservations;
         }
 
         return $this->render('covoiturage/resultats.html.twig', [
@@ -150,8 +157,13 @@ class CovoiturageController extends AbstractController
     }
 
     #[Route('/covoiturage/{id}', name: 'details_trajet', requirements: ['id' => '\d+'])]
-    public function details(int $id): Response
+    public function details(int $id, Security $security): Response
     {
+        if (!$security->getUser()) {
+            $this->addFlash('warning', 'Vous devez être connecté pour voir ce covoiturage.');
+            return $this->redirectToRoute('app_login');
+        }
+
         $pdo = $this->pdo;
 
         // Récupération du covoiturage et des infos liées
@@ -235,6 +247,14 @@ class CovoiturageController extends AbstractController
             ]);
             $aDejaReserve = $stmt->fetchColumn() > 0;
         }
+
+        // Calculer le nombre de réservations existantes
+        $stmtRes = $pdo->prepare("SELECT COUNT(*) FROM reservation WHERE covoiturage_id = :id");
+        $stmtRes->execute(['id' => $id]);
+        $nbReservations = (int) $stmtRes->fetchColumn();
+
+        // Calculer les places disponibles
+        $trajet['places_disponibles'] = $trajet['nb_place'] - $nbReservations;
 
         return $this->render('covoiturage/details.html.twig', [
             'trajet' => $trajet,
