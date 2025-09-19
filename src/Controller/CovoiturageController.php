@@ -154,6 +154,7 @@ class CovoiturageController extends AbstractController
     {
         $pdo = $this->pdo;
 
+        // Récupération du covoiturage et des infos liées
         $stmt = $pdo->prepare("
             SELECT 
                 c.*, 
@@ -166,7 +167,6 @@ class CovoiturageController extends AbstractController
             JOIN voiture v ON v.id = c.voiture_id
             WHERE c.id = :id
         ");
-
         $stmt->execute(['id' => $id]);
         $trajet = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -174,27 +174,18 @@ class CovoiturageController extends AbstractController
             throw $this->createNotFoundException("Ce covoiturage n'existe pas.");
         }
 
+        // Décodage des préférences
         if (!empty($trajet['preferences'])) {
             $decoded = json_decode($trajet['preferences'], true);
-
             if (is_string($decoded)) {
                 $decoded = json_decode($decoded, true);
             }
-
-            if (is_array($decoded)) {
-                $trajet['preferences'] = $decoded;
-            } else {
-                $trajet['preferences'] = [];
-            }
+            $trajet['preferences'] = is_array($decoded) ? $decoded : [];
         } else {
             $trajet['preferences'] = [];
         }
 
-        if (!$trajet) {
-            throw $this->createNotFoundException("Ce covoiturage n'existe pas.");
-        }
-
-        // Encodage de la photo s'il y en a une
+        // Encodage photo si nécessaire
         if (!empty($trajet['chauffeur_photo'])) {
             $firstChar = substr($trajet['chauffeur_photo'], 0, 1);
             $isBase64 = in_array($firstChar, ['/', 'i', 'R', 'U', 'A', 'Q']);
@@ -209,15 +200,10 @@ class CovoiturageController extends AbstractController
         $trajet['date_arrivee'] = new DateTime($trajet['date_arrivee']);
         $trajet['heure_arrivee'] = new DateTime($trajet['heure_arrivee']);
 
-        // Calcul de la durée réelle
-        $datetimeDepart = new DateTime(
-    $trajet['date_depart']->format('Y-m-d') . ' ' . $trajet['heure_depart']->format('H:i:s')
-        );
-        $datetimeArrivee = new DateTime(
-            $trajet['date_arrivee']->format('Y-m-d') . ' ' . $trajet['heure_arrivee']->format('H:i:s')
-        );
+        // Calcul durée
+        $datetimeDepart = new DateTime($trajet['date_depart']->format('Y-m-d') . ' ' . $trajet['heure_depart']->format('H:i:s'));
+        $datetimeArrivee = new DateTime($trajet['date_arrivee']->format('Y-m-d') . ' ' . $trajet['heure_arrivee']->format('H:i:s'));
         $diff = $datetimeDepart->diff($datetimeArrivee);
-
         $trajet['duree_heures'] = $diff->days * 24 + $diff->h;
         $trajet['duree_minutes'] = $diff->i;
 
@@ -232,10 +218,28 @@ class CovoiturageController extends AbstractController
         $stmt->execute(['conducteur_id' => $trajet['utilisateur_id']]);
         $avis = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+        // Vérification si l'utilisateur connecté a déjà réservé
+        /** @var \App\Entity\User $utilisateur */
+        $utilisateur = $this->getUser();
+        $aDejaReserve = false;
+
+        if ($utilisateur) {
+            $stmt = $pdo->prepare("
+                SELECT COUNT(*) 
+                FROM reservation 
+                WHERE utilisateur_id = :uid AND covoiturage_id = :cid
+            ");
+            $stmt->execute([
+                'uid' => $utilisateur->getId(),
+                'cid' => $id
+            ]);
+            $aDejaReserve = $stmt->fetchColumn() > 0;
+        }
 
         return $this->render('covoiturage/details.html.twig', [
             'trajet' => $trajet,
             'avis' => $avis,
+            'aDejaReserve' => $aDejaReserve,
         ]);
     }
 
@@ -369,7 +373,7 @@ class CovoiturageController extends AbstractController
 
             $errors = [];
 
-            // --- Validation serveur ---
+            // Validation serveur
             if ($covoiturage->getNbPlace() < 1) $errors[] = 'Le nombre de places doit être au moins de 1.';
             if ($covoiturage->getPrixPersonne() < 0) $errors[] = 'Le prix par personne ne peut pas être négatif.';
             if (empty($covoiturage->getLieuDepart()) || empty($covoiturage->getLieuArrivee())) $errors[] = 'Les lieux de départ et d’arrivée doivent être renseignés.';
@@ -387,7 +391,7 @@ class CovoiturageController extends AbstractController
                 ]);
             }
 
-            // --- Traitement PDO ---
+            // Traitement PDO
             $pdo = $this->pdo;
 
             $dateHeureDepart = DateTime::createFromFormat(
@@ -457,129 +461,106 @@ class CovoiturageController extends AbstractController
         ]);
     }
 
-    #[Route('/covoiturage/{id}/modifier', name: 'modifier_covoiturage', methods: ['GET', 'POST'])]
-    public function modifierCovoiturage(Request $request, int $id): Response
-    {
-        /** @var \App\Entity\User $utilisateur */
-        $utilisateur = $this->getUser();
-
-        if (!$utilisateur || !$utilisateur->isChauffeur()) {
-            throw $this->createAccessDeniedException('Accès refusé.');
-        }
-
+    #[Route('/covoiturage/{id}/modifier', name: 'modifier_covoiturage')]
+    public function modifierCovoiturage(
+        int $id,
+        Request $request,
+        EntityManagerInterface $em,
+        Security $security
+    ): Response {
         $pdo = $this->pdo;
 
-        // Vérifier que le covoiturage appartient à l'utilisateur
-        $stmt = $pdo->prepare("SELECT * FROM covoiturage WHERE id = :id AND utilisateur_id = :userId FOR UPDATE");
-        $pdo->beginTransaction(); // protéger la lecture et la modification
-        $stmt->execute(['id' => $id, 'userId' => $utilisateur->getId()]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        // Récupérer le covoiturage existant
+        $stmt = $pdo->prepare("SELECT * FROM covoiturage WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch();
 
         if (!$row) {
-            $pdo->rollBack();
             throw $this->createNotFoundException('Covoiturage non trouvé.');
         }
 
-        $covoiturage = new Covoiturage();
-        $covoiturage
-            ->setDateDepart(new DateTime($row['date_depart']))
-            ->setHeureDepart(new DateTime($row['heure_depart']))
-            ->setLieuDepart($row['lieu_depart'])
-            ->setDateArrivee(new DateTime($row['date_arrivee']))
-            ->setHeureArrivee(new DateTime($row['heure_arrivee']))
-            ->setLieuArrivee($row['lieu_arrivee'])
-            ->setNbPlace((int)$row['nb_place'])
-            ->setPrixPersonne((float)$row['prix_personne']);
+        // Hydrater l’entité avec Doctrine (utile pour validations)
+        $covoiturage = $em->getRepository(Covoiturage::class)->find($id);
 
-        $form = $this->createForm(CovoiturageType::class, $covoiturage, ['user' => $utilisateur]);
+        // Vérifier le nombre de réservations existantes
+        $stmtRes = $pdo->prepare("SELECT COUNT(*) FROM reservation WHERE covoiturage_id = :id");
+        $stmtRes->execute(['id' => $id]);
+        $nbReservations = (int) $stmtRes->fetchColumn();
+
+        // Formulaire
+        $form = $this->createForm(CovoiturageType::class, $covoiturage, [
+            'user' => $security->getUser()
+        ]);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted()) {
-            // Vérification CSRF
-            if (!$this->isCsrfTokenValid('modifier_covoiturage_' . $id, $request->request->get('_token'))) {
-                $pdo->rollBack();
-                $this->addFlash('error', 'Token CSRF invalide.');
-                return $this->redirectToRoute('app_profil');
-            }
-        }
-
         if ($form->isSubmitted() && $form->isValid()) {
-            $errors = [];
+            // Récupérer les données du formulaire
+            $dateDepart = $covoiturage->getDateDepart()->format('Y-m-d');
+            $heureDepart = $covoiturage->getHeureDepart()->format('H:i:s');
+            $lieuDepart = $covoiturage->getLieuDepart();
+            $dateArrivee = $covoiturage->getDateArrivee()->format('Y-m-d');
+            $heureArrivee = $covoiturage->getHeureArrivee()->format('H:i:s');
+            $lieuArrivee = $covoiturage->getLieuArrivee();
+            $nbPlace = $covoiturage->getNbPlace();
+            $prixPersonne = $covoiturage->getPrixPersonne();
+            $voiture = $covoiturage->getVoiture()?->getId();
 
-            // --- Validation serveur ---
-            if ($covoiturage->getNbPlace() < 1) $errors[] = 'Le nombre de places doit être au moins de 1.';
-            if ($covoiturage->getPrixPersonne() < 0) $errors[] = 'Le prix par personne ne peut pas être négatif.';
-            if (empty($covoiturage->getLieuDepart()) || empty($covoiturage->getLieuArrivee())) $errors[] = 'Les lieux de départ et d’arrivée doivent être renseignés.';
-            if ($covoiturage->getDateDepart() < new DateTime('today')) $errors[] = 'La date de départ doit être aujourd’hui ou dans le futur.';
-            $heureFormat = $covoiturage->getHeureDepart()->format('H:i:s');
-            if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $heureFormat)) $errors[] = 'L’heure de départ n’est pas valide.';
-            if (!$covoiturage->getVoiture()?->getId()) $errors[] = 'Vous devez sélectionner une voiture.';
-
-            if (count($errors) > 0) {
-                foreach ($errors as $err) $this->addFlash('error', $err);
-                $pdo->rollBack();
-                return $this->render('covoiturage/modifier.html.twig', [
-                    'form' => $form->createView(),
-                    'covoiturage' => $covoiturage,
-                ]);
+            // Empêcher de mettre moins de places que le nombre déjà réservé
+            if ($nbPlace < $nbReservations) {
+                $this->addFlash('error', "Impossible de définir moins de $nbReservations places car il y a déjà $nbReservations réservation(s).");
+                return $this->redirectToRoute('modifier_covoiturage', ['id' => $id]);
             }
 
-            $now = new DateTime();
-            $dateHeureDepart = DateTime::createFromFormat(
-                'Y-m-d H:i:s',
-                $covoiturage->getDateDepart()->format('Y-m-d') . ' ' . $covoiturage->getHeureDepart()->format('H:i:s')
-            );
-            $isPast = $dateHeureDepart < $now;
-            $statut = $isPast ? 'ferme' : (($covoiturage->getNbPlace() <= 0) ? 'complet' : 'ouvert');
+            // Calculer les places disponibles
+            $placesDisponibles = $nbPlace - $nbReservations;
 
-            try {
-                $stmtUpdate = $pdo->prepare("
-                    UPDATE covoiturage SET
-                        date_depart = :date_depart,
-                        heure_depart = :heure_depart,
-                        lieu_depart = :lieu_depart,
-                        date_arrivee = :date_arrivee,
-                        heure_arrivee = :heure_arrivee,
-                        lieu_arrivee = :lieu_arrivee,
-                        nb_place = :nb_place,
-                        prix_personne = :prix_personne,
-                        voiture_id = :voiture_id,
-                        statut = :statut
-                    WHERE id = :id
-                ");
+            // Déterminer le statut
+            $statut = $placesDisponibles <= 0 ? 'complet' : 'ouvert';
 
-                $stmtUpdate->execute([
-                    'date_depart' => $covoiturage->getDateDepart()->format('Y-m-d'),
-                    'heure_depart' => $covoiturage->getHeureDepart()->format('H:i:s'),
-                    'lieu_depart' => $covoiturage->getLieuDepart(),
-                    'date_arrivee' => $covoiturage->getDateArrivee()->format('Y-m-d'),
-                    'heure_arrivee' => $covoiturage->getHeureArrivee()->format('H:i:s'),
-                    'lieu_arrivee' => $covoiturage->getLieuArrivee(),
-                    'nb_place' => $covoiturage->getNbPlace(),
-                    'prix_personne' => $covoiturage->getPrixPersonne(),
-                    'voiture_id' => $covoiturage->getVoiture()->getId(),
-                    'statut' => $statut,
-                    'id' => $id,
-                ]);
+            // Mettre à jour en BDD
+            $update = $pdo->prepare("
+                UPDATE covoiturage
+                SET date_depart = :date_depart,
+                    heure_depart = :heure_depart,
+                    lieu_depart = :lieu_depart,
+                    date_arrivee = :date_arrivee,
+                    heure_arrivee = :heure_arrivee,
+                    lieu_arrivee = :lieu_arrivee,
+                    nb_place = :nb_place,
+                    prix_personne = :prix_personne,
+                    voiture_id = :voiture_id,
+                    statut = :statut
+                WHERE id = :id
+            ");
 
-                $pdo->commit();
-            } catch (\PDOException $e) {
-                $pdo->rollBack();
-                $this->addFlash('error', 'Erreur lors de la modification du covoiturage : ' . $e->getMessage());
-                return $this->render('covoiturage/modifier.html.twig', [
-                    'form' => $form->createView(),
-                    'covoiturage' => $covoiturage,
-                ]);
-            }
+            $update->execute([
+                'date_depart' => $dateDepart,
+                'heure_depart' => $heureDepart,
+                'lieu_depart' => $lieuDepart,
+                'date_arrivee' => $dateArrivee,
+                'heure_arrivee' => $heureArrivee,
+                'lieu_arrivee' => $lieuArrivee,
+                'nb_place' => $nbPlace,
+                'prix_personne' => $prixPersonne,
+                'voiture_id' => $voiture,
+                'statut' => $statut,
+                'id' => $id
+            ]);
 
-            $this->addFlash('success', 'Covoiturage modifié avec succès.');
+            $em->refresh($covoiturage);
+
+            $this->addFlash('success', 'Covoiturage modifié avec succès ✅');
             return $this->redirectToRoute('app_profil');
         }
 
-        $pdo->rollBack(); // fin de transaction si formulaire non soumis ou invalide
+        // Calculer les places disponibles
+        $placesDisponibles = $covoiturage->getNbPlace() - $nbReservations;
+
         return $this->render('covoiturage/modifier.html.twig', [
             'form' => $form->createView(),
             'covoiturage' => $covoiturage,
+            'reservationsCount' => $nbReservations,
+            'placesDisponibles' => $placesDisponibles,
         ]);
     }
 

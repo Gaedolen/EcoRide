@@ -154,6 +154,7 @@
                                     <li><span class="label">Lieu d'arrivée :</span> <span class="value">{{ covoiturage.lieu_arrivee }}</span></li>
                                     <li><span class="label">Date et heure d'arrivée :</span> <span class="value">Le {{ covoiturage.date_arrivee|date('d/m/Y') }} à {{ covoiturage.heure_arrivee|date('H:i') }}</span></li>
                                     <li><span class="label">Nombre de places :</span> <span class="value">{{ covoiturage.nb_place }}</span></li>
+                                    <li><span class="label">Places disponibles:</span> <span class="value">{{ covoiturage.nb_place - covoiturage.reservations_count }}</span></li>
                                     <li><span class="label">Prix par personne :</span> <span class="value">{{ covoiturage.prix_personne }} €</span></li>
                                     <li><span class="label">Statut :</span> <span class="value">{{ covoiturage.statut | statut_label }}</span></li>
                                 </ul>

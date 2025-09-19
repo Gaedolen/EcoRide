@@ -54,7 +54,7 @@ class CovoiturageType extends AbstractType
                     new Assert\GreaterThanOrEqual('today', message: 'La date d’arrivée doit être aujourd’hui ou plus tard.'),
                 ],
             ])
-            ->add('heureArrivee', TimeType::class, [
+            ->add('heure_arrivee', TimeType::class, [
                 'label' => 'Heure d\'arrivée',
                 'widget' => 'single_text',
                 'constraints' => [new Assert\NotBlank()],
@@ -74,7 +74,7 @@ class CovoiturageType extends AbstractType
                     new Assert\LessThanOrEqual(10, message: 'Le nombre de places ne peut pas dépasser 10.'),
                 ],
             ])
-            ->add('prixPersonne', NumberType::class, [
+            ->add('prix_personne', NumberType::class, [
                 'label' => 'Prix par personne',
                 'scale' => 2,
                 'html5' => true,

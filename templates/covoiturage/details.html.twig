@@ -13,12 +13,18 @@
             <form method="POST" action="{{ path('reserver_trajet', { id: trajet.id }) }}">
                 <input type="hidden" name="_token" value="{{ csrf_token('reserver_covoiturage_' ~ trajet.id) }}">
                 
-                <button type="button" 
-                        class="btn-reserver {% if app.user.credits < 2 %}disabled-btn{% endif %}" 
-                        data-credits="{{ app.user.credits }}"
-                        {% if app.user.credits < 2 %}disabled{% endif %}>
-                    Covoiturer !
-                </button>
+                {% if aDejaReserve %}
+                    <button class="btn-reserver disabled-btn" disabled>
+                        Vous participez déjà à ce trajet
+                    </button>
+                {% else %}
+                    <button type="submit" 
+                            class="btn-reserver {% if app.user.credits < 2 %}disabled-btn{% endif %}" 
+                            data-credits="{{ app.user.credits }}"
+                            {% if app.user.credits < 2 %}disabled{% endif %}>
+                        Covoiturer !
+                    </button>
+                {% endif %}
             </form>
         {% else %}
             <button class="btn-reserver disabled-btn" onclick="return false;">

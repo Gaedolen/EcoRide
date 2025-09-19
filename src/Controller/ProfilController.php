@@ -71,10 +71,15 @@ class ProfilController extends AbstractController
         $covoiturages = [];
         if ($utilisateur->isChauffeur()) {
             $stmt = $pdo->prepare("
-                SELECT * FROM covoiturage 
-                WHERE utilisateur_id = :id 
-                AND statut IN ('ouvert', 'en_cours', 'complet')
-                ORDER BY date_depart ASC, heure_depart ASC
+                SELECT 
+                    c.*, 
+                    COUNT(r.id) AS reservations_count
+                FROM covoiturage c
+                LEFT JOIN reservation r ON r.covoiturage_id = c.id
+                WHERE c.utilisateur_id = :id 
+                AND c.statut IN ('ouvert', 'en_cours', 'complet')
+                GROUP BY c.id
+                ORDER BY c.date_depart ASC, c.heure_depart ASC
             ");
             $stmt->execute(['id' => $utilisateur->getId()]);
             $covoiturages = $stmt->fetchAll(PDO::FETCH_ASSOC);
