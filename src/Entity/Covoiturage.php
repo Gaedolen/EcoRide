@@ -16,11 +16,6 @@ use App\Entity\Reservation;
 #[ORM\Entity(repositoryClass: CovoiturageRepository::class)]
 class Covoiturage
 {
-    // Constantes d'état ()
-    public const ETAT_A_VENIR = 'a_venir';
-    public const ETAT_EN_COURS = 'en_cours';
-    public const ETAT_TERMINE = 'termine';
-
     // Constantes de statut ()
     public const STATUT_OUVERT = 'ouvert';
     public const STATUT_COMPLET = 'complet';
@@ -88,9 +83,6 @@ class Covoiturage
 
     #[ORM\OneToMany(mappedBy: 'covoiturage', targetEntity: Reservation::class)]
     private Collection $reservations;
-
-    #[ORM\Column(length: 20)]
-    private ?string $etat = self::ETAT_A_VENIR;
 
     public function getId(): ?int
     {
@@ -263,18 +255,6 @@ class Covoiturage
     public function getReservations(): Collection
     {
         return $this->reservations;
-    }
-
-    public function getEtat(): ?string
-    {
-        return $this->etat;
-    }
-
-    public function setEtat(string $etat): self
-    {
-        $this->etat = $etat;
-
-        return $this;
     }
 
     // Fonctions personnalisées
