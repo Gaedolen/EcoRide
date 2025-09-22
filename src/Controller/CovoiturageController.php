@@ -38,17 +38,15 @@ class CovoiturageController extends AbstractController
         $date = $request->query->get('date_depart');
         $heure = $request->query->get('heure_depart');
 
-        // Vérification côté serveur : date >= aujourd'hui
         if ($date) {
             $dateDepart = DateTime::createFromFormat('Y-m-d', $date);
             $aujourdhui = new DateTime('today');
             if ($dateDepart < $aujourdhui) {
                 $this->addFlash('error', 'Vous ne pouvez pas rechercher un covoiturage pour une date passée.');
-                return $this->redirectToRoute('app_covoiturage'); // redirection vers le formulaire
+                return $this->redirectToRoute('app_covoiturage');
             }
         }
 
-        // Paramètres de filtre
         $noteMin = $request->query->get('note_min');
         $ecologique = $request->query->get('ecologique');
         $prixMin = $request->query->get('prix_min');
@@ -57,20 +55,21 @@ class CovoiturageController extends AbstractController
         $minutesMax = (int) $request->query->get('temps_max_minutes');
         $tempsMaxTotal = ($heuresMax * 60) + $minutesMax;
 
-        // Connexion PDO
         $pdo = $this->pdo;
 
-        // Construction dynamique de la requête SQL
+        // Construction SQL
         $sql = "
             SELECT 
                 c.*, 
                 u.pseudo AS user_pseudo,
                 u.photo AS user_photo,
                 u.note AS user_note,
-                v.energie AS voiture_energie
+                v.energie AS voiture_energie,
+                (c.nb_place - COUNT(r.id)) AS places_disponibles
             FROM covoiturage c
             JOIN user u ON u.id = c.utilisateur_id
             JOIN voiture v ON v.id = c.voiture_id
+            LEFT JOIN reservation r ON r.covoiturage_id = c.id
             WHERE c.lieu_depart = :depart
             AND c.lieu_arrivee = :arrivee
             AND c.date_depart = :date
@@ -85,42 +84,41 @@ class CovoiturageController extends AbstractController
             ':heure' => $heure,
         ];
 
-        // Filtres dynamiques
+        // Filtres dynamiques (avant GROUP BY)
         if ($noteMin !== null && $noteMin !== '') {
             $sql .= " AND u.note >= :note_min";
             $params[':note_min'] = (int)$noteMin;
         }
-
         if ($ecologique === '1') {
             $sql .= " AND v.energie IN ('Électrique', 'Electrique')";
         }
-
         if ($prixMin !== null && $prixMin !== '') {
             $sql .= " AND c.prix_personne >= :prix_min";
             $params[':prix_min'] = (float)$prixMin;
         }
-
         if ($prixMax !== null && $prixMax !== '') {
             $sql .= " AND c.prix_personne <= :prix_max";
             $params[':prix_max'] = (float)$prixMax;
         }
-
         if ($tempsMaxTotal > 0) {
             $sql .= " AND TIME_TO_SEC(TIMEDIFF(c.heure_arrivee, c.heure_depart)) <= :temps_max_sec";
             $params[':temps_max_sec'] = $tempsMaxTotal * 60;
         }
 
-        // Préparation et exécution
+        // Groupement + limite finale
+        $sql .= "
+            GROUP BY c.id, u.pseudo, u.photo, u.note, v.energie
+            LIMIT 50
+        ";
+
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $trajets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Traitement des trajets
         foreach ($trajets as &$trajet) {
-            // Vérifie si user_photo est déjà encodée en Base64
             if (!empty($trajet['user_photo'])) {
                 $firstChar = substr($trajet['user_photo'], 0, 1);
-                $isBase64 = in_array($firstChar, ['/', 'i', 'R', 'U', 'A', 'Q']); // caractères typiques d'une image encodée
+                $isBase64 = in_array($firstChar, ['/', 'i', 'R', 'U', 'A', 'Q']);
                 $trajet['user_photo'] = $isBase64 ? $trajet['user_photo'] : base64_encode($trajet['user_photo']);
             } else {
                 $trajet['user_photo'] = null;
@@ -131,7 +129,6 @@ class CovoiturageController extends AbstractController
             $trajet['date_depart'] = new DateTime($trajet['date_depart']);
             $trajet['date_arrivee'] = new DateTime($trajet['date_arrivee']);
 
-            // Calcul de la durée réelle
             $datetimeDepart = new DateTime(
                 $trajet['date_depart']->format('Y-m-d') . ' ' . $trajet['heure_depart']->format('H:i:s')
             );
@@ -142,13 +139,6 @@ class CovoiturageController extends AbstractController
 
             $trajet['duree_heures'] = $diff->days * 24 + $diff->h;
             $trajet['duree_minutes'] = $diff->i;
-
-            // Calculer les places disponibles
-            $stmtRes = $pdo->prepare("SELECT COUNT(*) FROM reservation WHERE covoiturage_id = :id");
-            $stmtRes->execute(['id' => $trajet['id']]);
-            $nbReservations = (int) $stmtRes->fetchColumn();
-
-            $trajet['places_disponibles'] = $trajet['nb_place'] - $nbReservations;
         }
 
         return $this->render('covoiturage/resultats.html.twig', [

@@ -46,7 +46,7 @@ class AdminFixture extends Fixture
             $admin->setDateNaissance(new \DateTime('2000-01-01'));
             $admin->setNote(5);
 
-            $hashedPassword = $this->hasher->hashPassword($admin, 'admin123');
+            $hashedPassword = $this->hasher->hashPassword($admin, 'Admin123!');
             $admin->setPassword($hashedPassword);
 
             $admin->setRole($adminRole);

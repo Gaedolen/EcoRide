@@ -6,6 +6,7 @@ doctrine:
         # either here or in the DATABASE_URL env var (see .env file)
         driver: 'pdo_pgsq'
         server_version: '17'
+        logging: true
         #server_version: '10.4.32-MariaDB'
 
         profiling_collect_backtrace: '%kernel.debug%'
