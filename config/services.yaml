@@ -7,8 +7,8 @@ services:
     session.handler.pdo:
         class: Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
         arguments:
-            - '%env(DATABASE_URL)%'
-            - { lock_mode: 0 }
+            - '%env(resolve:DATABASE_URL)%'
+            - { db_table: 'sessions', lock_mode: 0 }
 
     # lier globalement $databaseUrl à la variable d'environnement
     _instanceof:
