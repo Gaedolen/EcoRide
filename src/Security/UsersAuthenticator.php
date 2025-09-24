@@ -67,7 +67,7 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
         }
 
         if (in_array('ROLE_EMPLOYE', $roles, true)) {
-            return new RedirectResponse($this->urlGenerator->generate('employe_dashboard'));
+            return new RedirectResponse(url: $this->urlGenerator->generate('employe_dashboard'));
         }
 
         // Redirection par défaut pour les utilisateurs simples

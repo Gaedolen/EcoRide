@@ -1,2 +1,2 @@
 <?php
-echo password_hash('Admin123!', PASSWORD_BCRYPT);
+echo password_hash('Admin1234!', PASSWORD_BCRYPT);
