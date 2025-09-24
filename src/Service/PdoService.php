@@ -13,12 +13,12 @@ class PdoService
         $url = parse_url($databaseUrl);
 
         $dbHost = $url['host'] ?? '127.0.0.1';
-        $dbPort = $url['port'] ?? '3306';
-        $dbName = ltrim($url['path'], '/');
-        $dbUser = $url['user'] ?? 'root';
+        $dbPort = $url['port'] ?? '5432';
+        $dbName = ltrim($url['path'] ?? '', '/');
+        $dbUser = $url['user'] ?? 'postgres';
         $dbPass = $url['pass'] ?? '';
 
-        $dsn = "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4";
+        $dsn = "pgsql:host={$dbHost};port={$dbPort};dbname={$dbName};sslmode=require";
 
         $this->pdo = new PDO($dsn, $dbUser, $dbPass, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
