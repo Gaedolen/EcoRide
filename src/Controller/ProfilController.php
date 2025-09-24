@@ -115,7 +115,7 @@ class ProfilController extends AbstractController
             SELECT 
                 r.id AS reservation_id,
                 c.id AS covoiturage_id,
-                c.utilisateur_id,
+                c.utilisateur_id AS chauffeur_id,
                 c.voiture_id,
                 c.date_depart,
                 c.heure_depart,
@@ -141,10 +141,11 @@ class ProfilController extends AbstractController
                 v.preferences
             FROM reservation r
             JOIN covoiturage c ON r.covoiturage_id = c.id
-            JOIN user u ON u.id = c.utilisateur_id
+            JOIN utilisateurs u ON u.id = c.utilisateur_id
             JOIN voiture v ON v.id = c.voiture_id
             WHERE r.utilisateur_id = :user_id
             AND c.statut != 'ferme'
+            ORDER BY c.date_depart ASC, c.heure_depart ASC
         ");
         $stmt->execute(['user_id' => $utilisateur->getId()]);
         $reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -261,7 +262,7 @@ class ProfilController extends AbstractController
             $sessionUser->setPhoto($binaryPhotoContent);
 
             // Requête UPDATE
-            $sql = "UPDATE user SET 
+            $sql = "UPDATE utilisateurs SET 
                         pseudo = :pseudo,
                         nom = :nom,
                         prenom = :prenom,
@@ -421,7 +422,7 @@ class ProfilController extends AbstractController
                 u.id AS chauffeur_id
             FROM reservation r
             JOIN covoiturage c ON r.covoiturage_id = c.id
-            JOIN user u ON u.id = c.utilisateur_id
+            JOIN utilisateurs u ON u.id = c.utilisateur_id
             JOIN voiture v ON v.id = c.voiture_id
             WHERE r.utilisateur_id = :userId
             AND c.statut = 'ferme'

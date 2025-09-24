@@ -182,7 +182,7 @@ class VoitureController extends AbstractController
                     $passagers = $this->pdoService->fetchAll(
                         "SELECT u.email, u.pseudo 
                         FROM reservation r
-                        JOIN user u ON r.utilisateur_id = u.id
+                        JOIN utilisateurs u ON r.utilisateur_id = u.id
                         WHERE r.covoiturage_id = :covoiturage_id",
                         ['covoiturage_id' => $covoiturageId]
                     );
@@ -226,7 +226,7 @@ class VoitureController extends AbstractController
             );
 
             $this->pdoService->commit();
-            $this->addFlash('success', 'La voiture et ses covoiturages à venir ont été supprimés. Les passagers ont été prévenus.');
+            $this->addFlash('success', message: 'La voiture et ses covoiturages à venir ont été supprimés. Les passagers ont été prévenus.');
 
         } catch (\Exception $e) {
             $this->pdoService->rollBack();

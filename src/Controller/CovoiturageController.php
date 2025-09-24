@@ -67,7 +67,7 @@ class CovoiturageController extends AbstractController
                 v.energie AS voiture_energie,
                 (c.nb_place - COUNT(r.id)) AS places_disponibles
             FROM covoiturage c
-            JOIN user u ON u.id = c.utilisateur_id
+            JOIN utilisateurs u ON u.id = c.utilisateur_id
             JOIN voiture v ON v.id = c.voiture_id
             LEFT JOIN reservation r ON r.covoiturage_id = c.id
             WHERE c.lieu_depart = :depart
@@ -165,7 +165,7 @@ class CovoiturageController extends AbstractController
                 u.photo AS chauffeur_photo,
                 v.marque, v.modele, v.energie, v.nb_places, v.couleur, v.animaux, v.fumeur, v.preferences
             FROM covoiturage c
-            JOIN user u ON u.id = c.utilisateur_id
+            JOIN utilisateurs u ON u.id = c.utilisateur_id
             JOIN voiture v ON v.id = c.voiture_id
             WHERE c.id = :id
         ");
@@ -213,7 +213,7 @@ class CovoiturageController extends AbstractController
         $stmt = $pdo->prepare("
             SELECT a.note, a.commentaire, u.pseudo AS auteur_pseudo
             FROM avis a
-            JOIN user u ON u.id = a.auteur_id
+            JOIN utilisateurs u ON u.id = a.auteur_id
             WHERE a.cible_id = :conducteur_id
             ORDER BY a.id DESC
         ");
@@ -321,7 +321,7 @@ class CovoiturageController extends AbstractController
 
             // Décrémenter crédits de l’utilisateur
             $utilisateur->setCredits($utilisateur->getCredits() - 2);
-            $stmt = $pdo->prepare("UPDATE user SET credits = :credits WHERE id = :id");
+            $stmt = $pdo->prepare("UPDATE utilisateurs SET credits = :credits WHERE id = :id");
             $stmt->execute([
                 'credits' => $utilisateur->getCredits(),
                 'id' => $utilisateur->getId()
@@ -332,7 +332,7 @@ class CovoiturageController extends AbstractController
             $this->addFlash('success', 'Réservation confirmée !');
 
             // Envoi du mail au chauffeur
-            $stmt = $pdo->prepare("SELECT u.email, u.pseudo FROM covoiturage c JOIN user u ON c.utilisateur_id = u.id WHERE c.id = :id");
+            $stmt = $pdo->prepare("SELECT u.email, u.pseudo FROM covoiturage c JOIN utilisateurs u ON c.utilisateur_id = u.id WHERE c.id = :id");
             $stmt->execute(['id' => $id]);
             $chauffeur = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -417,7 +417,7 @@ class CovoiturageController extends AbstractController
 
                 // Décrémenter crédits
                 $user->removeCredits(2);
-                $stmtUpdate = $pdo->prepare("UPDATE user SET credits = :credits WHERE id = :id");
+                $stmtUpdate = $pdo->prepare("UPDATE utilisateurs SET credits = :credits WHERE id = :id");
                 $stmtUpdate->execute([
                     'credits' => $user->getCredits(),
                     'id' => $user->getId()
@@ -609,14 +609,14 @@ class CovoiturageController extends AbstractController
             $stmt = $pdo->prepare("
                 SELECT u.id, u.email
                 FROM reservation r
-                JOIN user u ON r.utilisateur_id = u.id
+                JOIN utilisateurs u ON r.utilisateur_id = u.id
                 WHERE r.covoiturage_id = :id
             ");
             $stmt->execute(['id' => $id]);
             $passagers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
             // Rembourser passagers
-            $updateStmt = $pdo->prepare("UPDATE user SET credits = credits + 2 WHERE id = :id");
+            $updateStmt = $pdo->prepare("UPDATE utilisateurs SET credits = credits + 2 WHERE id = :id");
             foreach ($passagers as $passager) {
                 $updateStmt->execute(['id' => $passager['id']]);
             }
@@ -701,7 +701,7 @@ class CovoiturageController extends AbstractController
             $stmt->execute(['id' => $id]);
 
             // Remboursement du passager
-            $stmt = $pdo->prepare("UPDATE user SET credits = credits + 2 WHERE id = :id");
+            $stmt = $pdo->prepare("UPDATE utilisateurs SET credits = credits + 2 WHERE id = :id");
             $stmt->execute(['id' => $user->getId()]);
 
             // Réincrémenter nb_place et mettre statut à 'ouvert' si nécessaire
@@ -717,7 +717,7 @@ class CovoiturageController extends AbstractController
             $this->addFlash('success', 'Votre réservation a été annulée, 2 crédits vous ont été remboursés.');
 
             // Envoi du mail au chauffeur
-            $stmt = $pdo->prepare("SELECT c.utilisateur_id, u.email, u.pseudo FROM reservation r JOIN covoiturage c ON r.covoiturage_id = c.id JOIN user u ON c.utilisateur_id = u.id WHERE r.id = :id");
+            $stmt = $pdo->prepare("SELECT c.utilisateur_id, u.email, u.pseudo FROM reservation r JOIN covoiturage c ON r.covoiturage_id = c.id JOIN utilisateurs u ON c.utilisateur_id = u.id WHERE r.id = :id");
             $stmt->execute(['id' => $id]);
             $chauffeur = $stmt->fetch(PDO::FETCH_ASSOC);
 
