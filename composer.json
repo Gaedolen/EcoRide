@@ -10,7 +10,6 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-pdo": "*",
-        "ext-pdo_pgsql": "*",
         "ext-pgsql": "*",
         "doctrine/dbal": "^4.3",
         "doctrine/doctrine-bundle": "^2.16",
