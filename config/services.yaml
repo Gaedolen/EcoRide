@@ -10,6 +10,12 @@ services:
             - '%env(resolve:DATABASE_URL)%'
             - { db_table: 'sessions', lock_mode: 0 }
 
+     # Objet PDO pour l'injection
+    pdo:
+        class: PDO
+        arguments:
+            - '%env(DATABASE_URL)%'
+            
     # lier globalement $databaseUrl à la variable d'environnement
     _instanceof:
         App\Service\PdoService:

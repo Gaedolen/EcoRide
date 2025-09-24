@@ -2,9 +2,11 @@ framework:
     secret: '%env(APP_SECRET)%'
 
     session:
-        handler_id: 'session.handler.pdo'
+        handler_id: 'pdo'
         cookie_secure: auto
         cookie_samesite: lax
+        cookie_httponly: true
+        storage_factory_id: session.storage.factory.native
 
     csrf_protection: true
     form: true
