@@ -16,10 +16,10 @@ security:
             security: false
         main:
             entry_point: App\Security\UsersAuthenticator
-            form_login:
-                login_path: app_login
-                check_path: app_login
-                default_target_path: admin_dashboard
+            # form_login:
+            #     login_path: app_login
+            #     check_path: app_login
+            #     default_target_path: admin_dashboard
             lazy: true
             provider: app_user_provider
             custom_authenticator: App\Security\UsersAuthenticator
