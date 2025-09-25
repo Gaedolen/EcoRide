@@ -101,8 +101,6 @@
                 <p>J'accepte les conditions</p>
             </div>
 
-            {{ form_errors(registrationForm) }}
-
             <input type="hidden" name="{{ registrationForm._token.vars.full_name }}" value="{{ registrationForm._token.vars.value }}">
 
             <button type="submit" class="bouton">M'inscrire</button>

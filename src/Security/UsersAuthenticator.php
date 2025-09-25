@@ -32,6 +32,8 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
         $email = trim((string) $request->request->get('email', ''));
         $password = (string) $request->request->get('password', '');
 
+        dump($email, $password);
+
         // Validation serveur : email correct
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Email invalide.');
