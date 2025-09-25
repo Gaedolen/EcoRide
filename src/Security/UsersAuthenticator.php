@@ -14,7 +14,6 @@ use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\Security\Http\Authenticator\Passport\Credentials\PasswordCredentials;
 use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
 use Symfony\Component\Security\Http\SecurityRequestAttributes;
-use App\Repository\UserRepository;
 use Symfony\Component\Security\Http\Util\TargetPathTrait;
 
 class UsersAuthenticator extends AbstractLoginFormAuthenticator
@@ -23,13 +22,8 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
 
     public const LOGIN_ROUTE = 'app_login';
 
-    private UrlGeneratorInterface $urlGenerator;
-    private UserRepository $userRepository;
-
-    public function __construct(UrlGeneratorInterface $urlGenerator, UserRepository $userRepository)
+    public function __construct(private UrlGeneratorInterface $urlGenerator)
     {
-        $this->urlGenerator = $urlGenerator;
-        $this->userRepository = $userRepository;
     }
 
     public function authenticate(Request $request): Passport
@@ -37,10 +31,6 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
         // Récupération sécurisée des données
         $email = trim((string) $request->request->get('email', ''));
         $password = (string) $request->request->get('password', '');
-
-        // Debug : vérifier ce qu'on reçoit
-        dump('Email reçu : ', $email);
-        dump('Mot de passe reçu : ', $password);
 
         // Validation serveur : email correct
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -52,16 +42,7 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
 
         // Construction du Passport Symfony
         return new Passport(
-            new UserBadge($email, function($userIdentifier) { // ajout à partif de $email à return$user;});
-            $user = $this->userRepository->findOneBy(['email' => $userIdentifier]);
-            
-            // Debug : vérifier si l'utilisateur est trouvé
-            dump('Utilisateur trouvé : ', $user);
-            if (!$user) {
-                throw new \Symfony\Component\Security\Core\Exception\UserNotFoundException();
-            }
-            return $user;
-        }),
+            new UserBadge($email),
             new PasswordCredentials($password),
             [
                 new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
