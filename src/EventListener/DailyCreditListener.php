@@ -55,14 +55,14 @@ class DailyCreditListener implements EventSubscriberInterface
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         // Vérifier la dernière date de crédit
-        $stmt = $pdo->prepare("SELECT dernier_credit_jour, credits FROM \"user\" WHERE id = :id");
+        $stmt = $pdo->prepare("SELECT dernier_credit_jour, credits FROM \"utilisateurs\" WHERE id = :id");
         $stmt->execute(['id' => $userId]);
         $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($userData && (!$userData['dernier_credit_jour'] || $userData['dernier_credit_jour'] < $today)) {
             // Ajouter 1 crédit et mettre à jour la date
             $stmt = $pdo->prepare(
-                "UPDATE \"user\" SET credits = credits + 1, dernier_credit_jour = :today WHERE id = :id"
+                "UPDATE \"utilisateurs\" SET credits = credits + 1, dernier_credit_jour = :today WHERE id = :id"
             );
             $stmt->execute([
                 'id' => $userId,
