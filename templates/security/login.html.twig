@@ -9,6 +9,11 @@
 {% block body %}
 <div class="form-container">
     <form method="post">
+
+        {% if error %}
+            <pre>{{ dump(error) }}</pre>
+        {% endif %}
+
         {% if error %}
             <div class="alert alert-danger">
                 Mot de passe ou identifiant invalide.
