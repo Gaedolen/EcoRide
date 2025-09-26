@@ -10,9 +10,7 @@
 <div class="form-container">
     <form method="post">
 
-        {% if error %}
-            <pre>{{ dump(error) }}</pre>
-        {% endif %}
+        {{ dump(app.session.all()) }}
 
         {% if error %}
             <div class="alert alert-danger">
