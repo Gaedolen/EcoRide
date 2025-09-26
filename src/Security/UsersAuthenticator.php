@@ -29,13 +29,16 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
     public function authenticate(Request $request): Passport
     {
         // Récupération des données du formulaire
-        $postData = $request->request->all(); // récupère tout le POST
-        $formData = $postData['login_form'] ?? []; // sous-tableau du formulaire
-        // $formData = $request->request->get('login_form');
+        $postData = $request->request->all();
+        $formData = $postData['login_form'] ?? []; 
 
         $email = trim((string) ($formData['email'] ?? ''));
         $password = (string) ($formData['password'] ?? '');
         $csrfToken = (string) $formData['_token'] ?? '';
+
+        echo $email;
+        echo $password;
+        echo $csrfToken;
 
         // Validation du format de l'email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
