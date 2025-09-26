@@ -47,7 +47,7 @@
                 <label class="label">Se souvenir de moi</label>
             </div>
 
-            <p>Token CSRF complet : {{ loginForm._token.vars.value }}</p>
+            {{ form_row(loginForm._token) }}
 
             {{ form_row(loginForm.submit, {'attr': {'class': 'connexion'}}) }}
 

@@ -15,14 +15,19 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
         main:
-            entry_point: App\Security\UsersAuthenticator
+            #entry_point: App\Security\UsersAuthenticator
             # form_login:
             #     login_path: app_login
             #     check_path: app_login
             #     default_target_path: admin_dashboard
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                csrf_token_generator: security.csrf.token_manager
+            #    default_target_path: admin_dashboard
             lazy: true
             provider: app_user_provider
-            custom_authenticator: App\Security\UsersAuthenticator
+            #custom_authenticator: App\Security\UsersAuthenticator
             logout:
                 path: app_logout
                 target: app_accueil
