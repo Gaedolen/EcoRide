@@ -28,10 +28,6 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        $csrfTokenFromRequest = $request->request->get('_csrf_token');
-        dump('Token envoyé par le formulaire :', $csrfTokenFromRequest);
-        dump('Token attendu :', $request->getSession()->get('_csrf_token.authenticate'));
-        
         // Récupération sécurisée des données
         $email = trim((string) $request->request->get('email', ''));
         $password = (string) $request->request->get('password', '');
