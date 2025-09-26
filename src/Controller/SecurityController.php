@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\Request;
+use App\Form\LoginFormType;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 class SecurityController extends AbstractController
@@ -13,17 +14,21 @@ class SecurityController extends AbstractController
     #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
     {
-        // Forcer le démarrage de la session
-        $session = $request->getSession();
-        if (!$session->isStarted()) {
-            $session->start();
-        }
-
-        // get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
+        // Récupération du dernier email saisi
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
+        // Création du formulaire et pré-remplissage du champ email
+        $form = $this->createForm(LoginFormType::class, [
+            'email' => $lastUsername,
+        ]);
+
+        // Récupération de l'erreur de connexion
+        $error = $authenticationUtils->getLastAuthenticationError();
+
+        return $this->render('security/login.html.twig', [
+            'loginForm' => $form->createView(),
+            'error' => $error,
+        ]);
     }
 
     #[Route(path: '/logout', name: 'app_logout')]
