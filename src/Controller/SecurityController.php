@@ -19,15 +19,9 @@ class SecurityController extends AbstractController
             $session->start();
         }
 
-        // Test rapide : stocker une variable dans la session
-        $session->set('test_session', 'ok');
-
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
         $lastUsername = $authenticationUtils->getLastUsername();
-
-        // Affichage pour debug
-        dump($session->all());
 
         return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
     }
