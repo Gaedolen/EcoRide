@@ -12,25 +12,8 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 class SecurityController extends AbstractController
 {
     #[Route(path: '/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
+    public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        // Récupération du dernier email saisi
-        $lastUsername = $authenticationUtils->getLastUsername();
-
-        // Récupération de l'erreur de connexion
-        $error = $authenticationUtils->getLastAuthenticationError();
-
-        // Création du formulaire et pré-remplissage du champ email
-        $form = $this->createForm(LoginFormType::class, [
-             'email' => $lastUsername,
-        ]);
-
-        // return $this->render('security/login.html.twig', [
-        //     'loginForm' => $form->createView(),
-        //     'last_username' => $lastUsername,
-        //     'error' => $error,
-        // ]);
-
         return $this->render('security/login.html.twig', [
             'last_username' => $authenticationUtils->getLastUsername(),
             'error' => $authenticationUtils->getLastAuthenticationError(),
