@@ -22,9 +22,14 @@ class SecurityController extends AbstractController
         // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        // Accéder à la session via la requête
         $session = $request->getSession();
-        $session->set('test', 'ok');
-        dump($session->all());
+        print("Contenu de la session :\n");
+        print_r($session->all());
+
+        // Vérifier le token CSRF généré
+        $csrfToken = $this->container->get('security.csrf.token_manager')->getToken('authenticate')->getValue();
+        print("\nToken CSRF généré : $csrfToken\n");
 
         return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
     }
