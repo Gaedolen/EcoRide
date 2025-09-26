@@ -13,23 +13,21 @@ class SecurityController extends AbstractController
     #[Route(path: '/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils, Request $request): Response
     {
-        // if ($this->getUser()) {
-        //     return $this->redirectToRoute('target_path');
-        // }
+        // Forcer le démarrage de la session
+        $session = $request->getSession();
+        if (!$session->isStarted()) {
+            $session->start();
+        }
+
+        // Test rapide : stocker une variable dans la session
+        $session->set('test_session', 'ok');
 
         // get the login error if there is one
         $error = $authenticationUtils->getLastAuthenticationError();
-        // last username entered by the user
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        // Accéder à la session via la requête
-        $session = $request->getSession();
-        print("Contenu de la session :\n");
-        print_r($session->all());
-
-        // Vérifier le token CSRF généré
-        $csrfToken = $this->container->get('security.csrf.token_manager')->getToken('authenticate')->getValue();
-        print("\nToken CSRF généré : $csrfToken\n");
+        // Affichage pour debug
+        dump($session->all());
 
         return $this->render('security/login.html.twig', ['last_username' => $lastUsername, 'error' => $error]);
     }
