@@ -126,7 +126,6 @@ class ProfilController extends AbstractController
                 c.statut,
                 c.nb_place,
                 c.prix_personne,
-                c.etat,
                 u.pseudo AS chauffeur_pseudo,
                 u.photo AS chauffeur_photo,
                 u.note AS chauffeur_note,
