@@ -27,13 +27,13 @@
         <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" placeholder="Email" required autofocus>
         <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" placeholder="Mot de passe" required>
 
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-        <p>Token généré : {{ csrf_token('authenticate') }}</p>
-
         <div class="checkbox">
             <input type="checkbox" name="_remember_me">
             <label class="label">Se souvenir de moi</label>
         </div>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
 
         <button class="connexion" type="submit">Connexion</button>
     </form>
