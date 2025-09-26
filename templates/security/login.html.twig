@@ -47,7 +47,7 @@
                 <label class="label">Se souvenir de moi</label>
             </div>
 
-            {{ form_row(loginForm._csrf_token) }}
+            {{ form_row(loginForm._token) }}
 
             {{ form_row(loginForm.submit, {'attr': {'class': 'connexion'}}) }}
 
