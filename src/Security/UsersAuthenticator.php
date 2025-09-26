@@ -28,24 +28,25 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
 
     public function authenticate(Request $request): Passport
     {
-        // Récupération sécurisée des données
-        $email = trim((string) $request->request->get('loginForm')['email'] ?? '');
-        $password = (string) $request->request->get('password', '');
+        $formData = $request->request->get('loginForm');
+        if (!is_array($formData)) {
+            $formData = [];
+        }
+        $email = trim((string) ($formData['email'] ?? ''));
+        $password = (string) ($formData['password'] ?? '');
+        $rememberMe = isset($formData['remember_me']) ? true : false;
 
-        // Validation serveur : email correct
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Email invalide.');
         }
 
-        // Pré-remplissage du formulaire en cas d'erreur
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
 
-        // Construction du Passport Symfony
         return new Passport(
             new UserBadge($email),
             new PasswordCredentials($password),
             [
-                new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
+                new CsrfTokenBadge('authenticate', $formData['_token'] ?? ''),
                 new RememberMeBadge(),
             ]
         );
