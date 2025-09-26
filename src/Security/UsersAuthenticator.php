@@ -29,7 +29,7 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
     public function authenticate(Request $request): Passport
     {
         // Récupération des données du formulaire
-        $formData = $request->request->get('loginForm');
+        $formData = $request->request->get('logi_form');
         if (!is_array($formData)) {
             $formData = [];
         }
@@ -53,7 +53,7 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
             new UserBadge($email),
             new PasswordCredentials($password),
             [
-                new CsrfTokenBadge('authenticate', $request->request->get('loginForm')['_token'] ?? ''),
+                new CsrfTokenBadge('authenticate', $csrfToken),
                 new RememberMeBadge(), // Symfony gère automatiquement le remember-me
             ]
         );

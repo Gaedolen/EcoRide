@@ -17,13 +17,13 @@ class SecurityController extends AbstractController
         // Récupération du dernier email saisi
         $lastUsername = $authenticationUtils->getLastUsername();
 
+        // Récupération de l'erreur de connexion
+        $error = $authenticationUtils->getLastAuthenticationError();
+
         // Création du formulaire et pré-remplissage du champ email
         $form = $this->createForm(LoginFormType::class, [
             'email' => $lastUsername,
         ]);
-
-        // Récupération de l'erreur de connexion
-        $error = $authenticationUtils->getLastAuthenticationError();
 
         return $this->render('security/login.html.twig', [
             'loginForm' => $form->createView(),
