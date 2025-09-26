@@ -29,7 +29,7 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
     public function authenticate(Request $request): Passport
     {
         // Récupération sécurisée des données
-        $email = trim((string) $request->request->get('email', ''));
+        $email = trim((string) $request->request->get('loginForm')['email'] ?? '');
         $password = (string) $request->request->get('password', '');
 
         // Validation serveur : email correct
