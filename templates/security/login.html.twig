@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{# {% extends 'base.html.twig' %}
 
 {% block title %}Connexion{% endblock %}
 
@@ -55,4 +55,47 @@
 
         <p><a href="{{ path('app_register') }}" class="pas-inscrit">Pas encore inscrit ? M'inscrire</a></p>
     </div>
+{% endblock %} #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ asset('/css/login.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="form-container">
+    <form action="{{ path('app_login') }}" method="post">
+
+        {% if error %}
+            <div class="alert alert-danger">Mot de passe ou identifiant invalide.</div>
+        {% endif %}
+
+        {% if app.user %}
+            <div class="mb-3">
+                Connecté en tant que {{ app.user.userIdentifier }},
+                <a href="{{ path('app_logout') }}">Déconnexion</a>
+            </div>
+        {% endif %}
+
+        <h1>Connexion</h1>
+
+        <input type="email" name="email" placeholder="Email" value="{{ last_username }}" required autofocus class="form-control">
+        <input type="password" name="password" placeholder="Mot de passe" required class="form-control">
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        <div class="checkbox">
+            <input type="checkbox" name="remember_me" id="remember_me">
+            <label for="remember_me">Se souvenir de moi</label>
+        </div>
+
+        <button type="submit" class="connexion">Connexion</button>
+
+    </form>
+
+    <p><a href="{{ path('app_register') }}" class="pas-inscrit">Pas encore inscrit ? M'inscrire</a></p>
+</div>
 {% endblock %}
