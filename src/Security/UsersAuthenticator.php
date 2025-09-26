@@ -36,8 +36,6 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
         $password = (string) ($formData['password'] ?? '');
         $csrfToken = (string) $formData['_token'] ?? '';
 
-        dump($formData, $email, $password, $csrfToken);
-
         // Validation du format de l'email
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             throw new \InvalidArgumentException('Email invalide.');
