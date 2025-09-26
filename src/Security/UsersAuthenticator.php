@@ -49,7 +49,7 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
             new UserBadge($email),
             new PasswordCredentials($password),
             [
-                new CsrfTokenBadge('authenticate', $csrfToken),
+                // new CsrfTokenBadge('authenticate', $csrfToken),
                 new RememberMeBadge(),
             ]
         );
