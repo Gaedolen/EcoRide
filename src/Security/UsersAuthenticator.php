@@ -43,6 +43,8 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
             throw new \InvalidArgumentException('Email invalide.');
         }
 
+        dump($request->request->all());
+
         // Pré-remplissage du formulaire en cas d'erreur
         $request->getSession()->set(SecurityRequestAttributes::LAST_USERNAME, $email);
 
@@ -51,7 +53,7 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
             new UserBadge($email),
             new PasswordCredentials($password),
             [
-                new CsrfTokenBadge('authenticate', $csrfToken),
+                new CsrfTokenBadge('authenticate', $request->request->get('loginForm')['_token'] ?? ''),
                 new RememberMeBadge(), // Symfony gère automatiquement le remember-me
             ]
         );
