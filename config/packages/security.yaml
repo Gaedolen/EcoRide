@@ -29,7 +29,7 @@ security:
                 enable_csrf: true
                 csrf_parameter: _csrf_token
                 csrf_token_id: authenticate
-                # default_target_path: admin_dashboard
+                default_target_path: /
             
             logout:
                 path: app_logout
