@@ -227,18 +227,26 @@ class ProfilController extends AbstractController
 
         if ($databaseUrl) {
             $parts = parse_url($databaseUrl);
-            $host = $parts['host'];
-            $db   = ltrim($parts['path'], '/');
-            $user = $parts['user'];
-            $pass = $parts['pass'];
-            $port = $parts['port'] ?? 3306;
+            $scheme = $parts['scheme'];
+            $host   = $parts['host'];
+            $db     = ltrim($parts['path'], '/');
+            $user   = $parts['user'];
+            $pass   = $parts['pass'];
+            $port   = $parts['port'] ?? ($scheme === 'mysql' ? 3306 : 5432);
 
-            $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
+            if ($scheme === 'postgres') {
+                // Heroku Postgres
+                $dsn = "pgsql:host=$host;port=$port;dbname=$db";
+            } else {
+                // ClearDB MySQL ou local
+                $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
+            }
+
             $pdo = new PDO($dsn, $user, $pass, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ]);
         } else {
-            // Cas local (XAMPP)
+            // Cas local sans DATABASE_URL
             $pdo = new PDO("mysql:host=127.0.0.1;dbname=ecoride;charset=utf8mb4", "root", "", [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ]);
