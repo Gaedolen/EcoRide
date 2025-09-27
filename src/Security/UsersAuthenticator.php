@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
@@ -46,7 +47,7 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
         }
 
         return new Passport(
-            $user,
+            new UserBadge($email),
             new PasswordCredentials($password),
             [
                 new CsrfTokenBadge('authenticate', $request->request->get('_csrf_token')),
