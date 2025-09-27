@@ -226,35 +226,25 @@ class ProfilController extends AbstractController
         // Connexion PDO dynamique (local + Heroku)
         $databaseUrl = getenv('DATABASE_URL');
 
-        if ($databaseUrl) {
-            $parts = parse_url($databaseUrl);
-
-            $host = $parts['host'];
-            $port = $parts['port'] ?? 5432;
-            $db   = ltrim($parts['path'], '/');
-            $user = $parts['user'];
-            $pass = $parts['pass'];
-
-            $dsn = "pgsql:host=$host;port=$port;dbname=$db;sslmode=require";
-
-            try {
-                $pdo = new PDO($dsn, $user, $pass, [
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                ]);
-            } catch (PDOException $e) {
-                throw new \RuntimeException('Erreur de connexion à la base : ' . $e->getMessage());
-            }
-        } else {
-            // Local XAMPP MySQL
-            try {
+        try {
+            if ($databaseUrl) {
+                $parts = parse_url($databaseUrl);
+                $host = $parts['host'];
+                $port = $parts['port'] ?? 5432;
+                $db   = ltrim($parts['path'], '/');
+                $user = $parts['user'];
+                $pass = $parts['pass'];
+                $dsn = "pgsql:host=$host;port=$port;dbname=$db;sslmode=require";
+                $pdo = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+            } else {
+                // Local XAMPP MySQL
                 $pdo = new PDO("mysql:host=127.0.0.1;dbname=ecoride;charset=utf8mb4", "root", "", [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 ]);
-            } catch (PDOException $e) {
-                throw new \RuntimeException('Erreur de connexion à la base locale : ' . $e->getMessage());
             }
+        } catch (PDOException $e) {
+            throw new \RuntimeException('Erreur de connexion à la base : ' . $e->getMessage());
         }
-
 
         $form = $this->createForm(ProfilType::class, $sessionUser);
         $form->handleRequest($request);
@@ -265,22 +255,16 @@ class ProfilController extends AbstractController
             $binaryPhotoContent = null;
 
             if ($deletePhoto) {
-                // Suppression de la photo
                 $binaryPhotoContent = null;
             } elseif ($photoFile) {
-                // Vérification du type MIME de la photo
                 $mimeType = $photoFile->getMimeType();
                 $allowedTypes = ['image/jpeg', 'image/png'];
-
                 if (!in_array($mimeType, $allowedTypes, true)) {
                     $this->addFlash('error', 'Format d\'image non autorisé. Seuls JPG et PNG sont acceptés.');
                     return $this->redirectToRoute('modifier_profil');
                 }
-
-                // Lecture binaire de la photo
                 $binaryPhotoContent = file_get_contents($photoFile->getPathname());
             } else {
-                // Conserver la photo actuelle si elle existe
                 $currentPhoto = $sessionUser->getPhoto();
                 if ($currentPhoto && is_resource($currentPhoto)) {
                     $binaryPhotoContent = stream_get_contents($currentPhoto);
@@ -291,7 +275,7 @@ class ProfilController extends AbstractController
 
             $sessionUser->setPhoto($binaryPhotoContent);
 
-            // Requête UPDATE
+            // Requête UPDATE PDO
             $sql = "UPDATE utilisateurs SET 
                         pseudo = :pseudo,
                         nom = :nom,
@@ -322,16 +306,25 @@ class ProfilController extends AbstractController
             $stmt->bindValue(':dateNaissance', $sessionUser->getDateNaissance()?->format('Y-m-d'));
             $stmt->bindValue(':id', $sessionUser->getId());
 
-            $stmt->execute();
+            try {
+                $stmt->execute();
+                if ($stmt->rowCount() > 0) {
+                    $this->addFlash('success', 'Profil mis à jour avec succès.');
+                } else {
+                    $this->addFlash('info', 'Aucune modification détectée.');
+                }
+            } catch (PDOException $e) {
+                $this->addFlash('error', 'Erreur lors de la mise à jour du profil : ' . $e->getMessage());
+                return $this->redirectToRoute('modifier_profil');
+            }
 
-            $this->addFlash('success', 'Profil mis à jour avec succès.');
             return $this->redirectToRoute('app_profil');
         }
 
         return $this->render('profil/modifier.html.twig', [
             'form' => $form->createView(),
             'user' => $sessionUser,
-            'currentPhotoBase64' => $sessionUser->getPhotoData(),
+            'currentPhotoBase64' => $sessionUser->getPhoto() ? base64_encode(stream_get_contents(is_resource($sessionUser->getPhoto()) ? $sessionUser->getPhoto() : fopen('data://text/plain;base64,' . base64_encode($sessionUser->getPhoto()), 'r'))) : null,
         ]);
     }
 
