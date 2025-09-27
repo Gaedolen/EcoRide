@@ -237,7 +237,6 @@ class ProfilController extends AbstractController
                 $dsn = "pgsql:host=$host;port=$port;dbname=$db;sslmode=require";
                 $pdo = new PDO($dsn, $user, $pass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
             } else {
-                // Local XAMPP MySQL
                 $pdo = new PDO("mysql:host=127.0.0.1;dbname=ecoride;charset=utf8mb4", "root", "", [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 ]);
@@ -266,10 +265,8 @@ class ProfilController extends AbstractController
                 $binaryPhotoContent = file_get_contents($photoFile->getPathname());
             } else {
                 $currentPhoto = $sessionUser->getPhoto();
-                if ($currentPhoto && is_resource($currentPhoto)) {
-                    $binaryPhotoContent = stream_get_contents($currentPhoto);
-                } elseif ($currentPhoto) {
-                    $binaryPhotoContent = $currentPhoto;
+                if ($currentPhoto) {
+                    $binaryPhotoContent = is_resource($currentPhoto) ? stream_get_contents($currentPhoto) : $currentPhoto;
                 }
             }
 
@@ -308,11 +305,7 @@ class ProfilController extends AbstractController
 
             try {
                 $stmt->execute();
-                if ($stmt->rowCount() > 0) {
-                    $this->addFlash('success', 'Profil mis à jour avec succès.');
-                } else {
-                    $this->addFlash('info', 'Aucune modification détectée.');
-                }
+                $this->addFlash('success', $stmt->rowCount() > 0 ? 'Profil mis à jour avec succès.' : 'Aucune modification détectée.');
             } catch (PDOException $e) {
                 $this->addFlash('error', 'Erreur lors de la mise à jour du profil : ' . $e->getMessage());
                 return $this->redirectToRoute('modifier_profil');
@@ -321,10 +314,18 @@ class ProfilController extends AbstractController
             return $this->redirectToRoute('app_profil');
         }
 
+        // Préparer la photo pour affichage sans erreur de type
+        $currentPhotoBase64 = null;
+        $photoData = $sessionUser->getPhoto();
+        if ($photoData) {
+            $photoContent = is_resource($photoData) ? stream_get_contents($photoData) : $photoData;
+            $currentPhotoBase64 = base64_encode($photoContent);
+        }
+
         return $this->render('profil/modifier.html.twig', [
             'form' => $form->createView(),
             'user' => $sessionUser,
-            'currentPhotoBase64' => $sessionUser->getPhoto() ? base64_encode(stream_get_contents(is_resource($sessionUser->getPhoto()) ? $sessionUser->getPhoto() : fopen('data://text/plain;base64,' . base64_encode($sessionUser->getPhoto()), 'r'))) : null,
+            'currentPhotoBase64' => $currentPhotoBase64,
         ]);
     }
 
