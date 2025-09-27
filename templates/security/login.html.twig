@@ -100,11 +100,15 @@
     </div>
 {% endblock %} #}
 
-    {% extends 'base.html.twig' %}
+{% extends 'base.html.twig' %}
 
-    {% block title %}Connexion{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{{ asset('/css/login.css') }}">
+{% endblock %}
 
-    {% block body %}
+{% block title %}Connexion{% endblock %}
+
+{% block body %}
     <h1>Connexion</h1>
 
     {{ form_start(loginForm) }}
@@ -141,4 +145,5 @@
     {% if error %}
         <div class="error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
     {% endif %}
+
 {% endblock %}
