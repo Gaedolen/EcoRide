@@ -57,7 +57,7 @@
     </div>
 {% endblock %} #}
 
-{% extends 'base.html.twig' %}
+{# {% extends 'base.html.twig' %}
 
 {% block title %}Connexion{% endblock %}
 
@@ -98,4 +98,47 @@
 
         <p><a href="{{ path('app_register') }}" class="pas-inscrit">Pas encore inscrit ? M'inscrire</a></p>
     </div>
+{% endblock %} #}
+
+    {% extends 'base.html.twig' %}
+
+    {% block title %}Connexion{% endblock %}
+
+    {% block body %}
+    <h1>Connexion</h1>
+
+    {{ form_start(loginForm) }}
+
+        {{ form_row(loginForm.email, {
+            'attr': {
+                'class': 'form-control',
+                'placeholder': 'Email',
+                'autocomplete': 'email',
+                'autofocus': true
+            }
+        }) }}
+
+        {{ form_row(loginForm.password, {
+            'attr': {
+                'class': 'form-control',
+                'placeholder': 'Mot de passe',
+                'autocomplete': 'current-password'
+            }
+        }) }}
+
+        <div class="checkbox">
+            {{ form_widget(loginForm.remember_me) }}
+            <label class="label">Se souvenir de moi</label>
+        </div>
+
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+        <button type="submit">Se connecter</button>
+
+    {{ form_end(loginForm) }}
+
+    {% if error %}
+        <div class="error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
 {% endblock %}
