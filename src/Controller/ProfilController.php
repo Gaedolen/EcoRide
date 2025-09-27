@@ -226,29 +226,35 @@ class ProfilController extends AbstractController
         // Connexion PDO dynamique (local + Heroku)
         $databaseUrl = getenv('DATABASE_URL');
 
-        try {
-            if ($databaseUrl) {
-                // PostgreSQL Heroku
-                $parts = parse_url($databaseUrl);
-                $host = $parts['host'];
-                $port = $parts['port'] ?? 5432;
-                $user = $parts['user'];
-                $pass = $parts['pass'];
-                $db   = ltrim($parts['path'], '/');
+        if ($databaseUrl) {
+            $parts = parse_url($databaseUrl);
 
-                $dsn = "pgsql:host=$host;port=$port;dbname=$db;sslmode=require";
+            $host = $parts['host'];
+            $port = $parts['port'] ?? 5432;
+            $db   = ltrim($parts['path'], '/');
+            $user = $parts['user'];
+            $pass = $parts['pass'];
+
+            $dsn = "pgsql:host=$host;port=$port;dbname=$db;sslmode=require";
+
+            try {
                 $pdo = new PDO($dsn, $user, $pass, [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 ]);
-            } else {
-                // MySQL local
+            } catch (PDOException $e) {
+                throw new \RuntimeException('Erreur de connexion à la base : ' . $e->getMessage());
+            }
+        } else {
+            // Local XAMPP MySQL
+            try {
                 $pdo = new PDO("mysql:host=127.0.0.1;dbname=ecoride;charset=utf8mb4", "root", "", [
                     PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 ]);
+            } catch (PDOException $e) {
+                throw new \RuntimeException('Erreur de connexion à la base locale : ' . $e->getMessage());
             }
-        } catch (PDOException $e) {
-            throw new \RuntimeException('Erreur de connexion à la base : ' . $e->getMessage());
         }
+
 
         $form = $this->createForm(ProfilType::class, $sessionUser);
         $form->handleRequest($request);
