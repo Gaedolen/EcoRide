@@ -139,9 +139,11 @@
 
             <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-            <button type="submit">Se connecter</button>
+            {{ form_row(loginForm.submit, {'attr': {'class': 'connexion'}}) }}
 
         {{ form_end(loginForm) }}
+
+        <p><a href="{{ path('app_register') }}" class="pas-inscrit">Pas encore inscrit ? M'inscrire</a></p>
 
         {% if error %}
             <div class="error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
