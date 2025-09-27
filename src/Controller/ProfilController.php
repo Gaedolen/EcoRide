@@ -222,8 +222,27 @@ class ProfilController extends AbstractController
             throw $this->createAccessDeniedException('Vous devez être connecté pour modifier votre profil.');
         }
 
-        $pdo = new PDO('mysql:host=localhost;dbname=ecoride;charset=utf8', 'root', '');
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        // Connexion PDO dynamique (local + Heroku)
+        $databaseUrl = getenv('DATABASE_URL');
+
+        if ($databaseUrl) {
+            $parts = parse_url($databaseUrl);
+            $host = $parts['host'];
+            $db   = ltrim($parts['path'], '/');
+            $user = $parts['user'];
+            $pass = $parts['pass'];
+            $port = $parts['port'] ?? 3306;
+
+            $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
+            $pdo = new PDO($dsn, $user, $pass, [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            ]);
+        } else {
+            // Cas local (XAMPP)
+            $pdo = new PDO("mysql:host=127.0.0.1;dbname=ecoride;charset=utf8mb4", "root", "", [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            ]);
+        }
 
         $form = $this->createForm(ProfilType::class, $sessionUser);
         $form->handleRequest($request);
