@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 
 class LoginFormType extends AbstractType
 {
@@ -22,6 +23,11 @@ class LoginFormType extends AbstractType
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'Se connecter'
+            ])
+            ->add('remember_me', CheckboxType::class, [
+            'label' => 'Se souvenir de moi',
+            'required' => false,
+            'mapped' => false,
             ]);
     }
 
