@@ -109,41 +109,43 @@
 {% block title %}Connexion{% endblock %}
 
 {% block body %}
-    <h1>Connexion</h1>
+    <div class="form-container">
+        <h1>Connexion</h1>
 
-    {{ form_start(loginForm) }}
+        {{ form_start(loginForm) }}
 
-        {{ form_row(loginForm.email, {
-            'attr': {
-                'class': 'form-control',
-                'placeholder': 'Email',
-                'autocomplete': 'email',
-                'autofocus': true
-            }
-        }) }}
+            {{ form_row(loginForm.email, {
+                'attr': {
+                    'class': 'form-control',
+                    'placeholder': 'Email',
+                    'autocomplete': 'email',
+                    'autofocus': true
+                }
+            }) }}
 
-        {{ form_row(loginForm.password, {
-            'attr': {
-                'class': 'form-control',
-                'placeholder': 'Mot de passe',
-                'autocomplete': 'current-password'
-            }
-        }) }}
+            {{ form_row(loginForm.password, {
+                'attr': {
+                    'class': 'form-control',
+                    'placeholder': 'Mot de passe',
+                    'autocomplete': 'current-password'
+                }
+            }) }}
 
-        <div class="checkbox">
-            {{ form_widget(loginForm.remember_me) }}
-            <label class="label">Se souvenir de moi</label>
-        </div>
+            <div class="checkbox">
+                {{ form_widget(loginForm.remember_me) }}
+                <label class="label">Se souvenir de moi</label>
+            </div>
 
 
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
 
-        <button type="submit">Se connecter</button>
+            <button type="submit">Se connecter</button>
 
-    {{ form_end(loginForm) }}
+        {{ form_end(loginForm) }}
 
-    {% if error %}
-        <div class="error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
+        {% if error %}
+            <div class="error">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+        {% endif %}
 
+    </div>
 {% endblock %}

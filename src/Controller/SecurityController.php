@@ -16,12 +16,20 @@ class SecurityController extends AbstractController
     #[Route('/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
+        // Récupère l'erreur de connexion (si elle existe)
         $error = $authenticationUtils->getLastAuthenticationError();
+        // Dernier email entré
         $lastUsername = $authenticationUtils->getLastUsername();
 
-        $form = $this->createForm(LoginFormType::class, [
-            'email' => $lastUsername
-        ]);
+        // Création du formulaire
+    $form = $this->createForm(LoginFormType::class, [
+        'email' => $lastUsername
+    ], [
+        'csrf_protection' => true,
+        'csrf_field_name' => '_csrf_token',
+        'csrf_token_id'   => 'authenticate',
+        'attr' => ['name' => ''],
+    ]);
 
         return $this->render('security/login.html.twig', [
             'loginForm' => $form->createView(),
