@@ -11,6 +11,7 @@ use App\Repository\AvisRepository;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use DateTime;
 use PDO;
+use PDOException;
 use App\Service\PdoService;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\DBAL\Connection;
@@ -225,31 +226,28 @@ class ProfilController extends AbstractController
         // Connexion PDO dynamique (local + Heroku)
         $databaseUrl = getenv('DATABASE_URL');
 
-        if ($databaseUrl) {
-            $parts = parse_url($databaseUrl);
-            $scheme = $parts['scheme'];
-            $host   = $parts['host'];
-            $db     = ltrim($parts['path'], '/');
-            $user   = $parts['user'];
-            $pass   = $parts['pass'];
-            $port   = $parts['port'] ?? ($scheme === 'mysql' ? 3306 : 5432);
+        try {
+            if ($databaseUrl) {
+                // PostgreSQL Heroku
+                $parts = parse_url($databaseUrl);
+                $host = $parts['host'];
+                $port = $parts['port'] ?? 5432;
+                $user = $parts['user'];
+                $pass = $parts['pass'];
+                $db   = ltrim($parts['path'], '/');
 
-            if ($scheme === 'postgres') {
-                // Heroku Postgres
-                $dsn = "pgsql:host=$host;port=$port;dbname=$db";
+                $dsn = "pgsql:host=$host;port=$port;dbname=$db;sslmode=require";
+                $pdo = new PDO($dsn, $user, $pass, [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                ]);
             } else {
-                // ClearDB MySQL ou local
-                $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
+                // MySQL local
+                $pdo = new PDO("mysql:host=127.0.0.1;dbname=ecoride;charset=utf8mb4", "root", "", [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                ]);
             }
-
-            $pdo = new PDO($dsn, $user, $pass, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            ]);
-        } else {
-            // Cas local sans DATABASE_URL
-            $pdo = new PDO("mysql:host=127.0.0.1;dbname=ecoride;charset=utf8mb4", "root", "", [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            ]);
+        } catch (PDOException $e) {
+            throw new \RuntimeException('Erreur de connexion à la base : ' . $e->getMessage());
         }
 
         $form = $this->createForm(ProfilType::class, $sessionUser);
