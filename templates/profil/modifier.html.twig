@@ -55,7 +55,7 @@
                         }
             }) }}
 
-            <div class="checkbox-group">
+            {# <div class="checkbox-group">
                 <input type="checkbox" id="isChauffeur" name="{{ form.isChauffeur.vars.full_name }}" class="custom-checkbox"
                     {% if form.isChauffeur.vars.value %} checked {% endif %}>
                 <label for="isChauffeur" class="checkbox-label">Je suis chauffeur</label>
@@ -65,6 +65,20 @@
                 <input type="checkbox" id="isPassager" name="{{ form.isPassager.vars.full_name }}" class="custom-checkbox"
                     {% if form.isPassager.vars.value %} checked {% endif %}>
                 <label for="isPassager" class="checkbox-label">Je suis passager</label>
+            </div> #}
+
+            <div class="checkbox-group">
+                {{ form_widget(form.isChauffeur, {
+                    attr: { class: 'custom-checkbox' }
+                }) }}
+                {{ form_label(form.isChauffeur, 'Je suis chauffeur', { label_attr: { class: 'checkbox-label' } }) }}
+            </div>
+
+            <div class="checkbox-group">
+                {{ form_widget(form.isPassager, {
+                    attr: { class: 'custom-checkbox' }
+                }) }}
+                {{ form_label(form.isPassager, 'Je suis passager', { label_attr: { class: 'checkbox-label' } }) }}
             </div>
 
             <div class='photo-upload-wrapper'>
@@ -87,8 +101,8 @@
 
             <button type="submit" class='btn-modification'>Enregistrer mes modifications</button>
 
-            {% do form.isChauffeur.setRendered() %}
-            {% do form.isPassager.setRendered() %}
+            {# {% do form.isChauffeur.setRendered() %}
+            {% do form.isPassager.setRendered() %} #}
         {{ form_end(form) }}
     </div>
 
