@@ -152,9 +152,18 @@ class ProfilController extends AbstractController
 
         foreach ($reservations as &$resa) {
             // Photo chauffeur
-            $resa['chauffeur_photo'] = !empty($resa['chauffeur_photo'])
-                ? base64_encode($resa['chauffeur_photo'])
-                : null;
+            if (!empty($resa['chauffeur_photo'])) {
+                $photoData = is_resource($resa['chauffeur_photo']) 
+                    ? stream_get_contents($resa['chauffeur_photo']) 
+                    : $resa['chauffeur_photo'];
+
+                $firstChar = substr($photoData, 0, 1);
+                $isBase64 = in_array($firstChar, ['/', 'i', 'R', 'U', 'A', 'Q']);
+
+                $resa['chauffeur_photo'] = $isBase64 ? $photoData : base64_encode($photoData);
+            } else {
+                $resa['chauffeur_photo'] = null;
+            }
 
             // Conversion des dates et heures
             $resa['date_depart'] = new DateTime($resa['date_depart']);
@@ -464,7 +473,18 @@ class ProfilController extends AbstractController
         $reservations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($reservations as &$resa) {
-            $resa['chauffeur_photo'] = $resa['chauffeur_photo'] ? base64_encode($resa['chauffeur_photo']) : null;
+            if (!empty($resa['chauffeur_photo'])) {
+                $photoData = is_resource($resa['chauffeur_photo'])
+                    ? stream_get_contents($resa['chauffeur_photo'])
+                    : $resa['chauffeur_photo'];
+
+                $firstChar = substr($photoData, 0, 1);
+                $isBase64 = in_array($firstChar, ['/', 'i', 'R', 'U', 'A', 'Q']);
+
+                $resa['chauffeur_photo'] = $isBase64 ? $photoData : base64_encode($photoData);
+            } else {
+                $resa['chauffeur_photo'] = null;
+            }
 
             // Conversion des dates et heures
             $resa['date_depart'] = new DateTime($resa['date_depart']);
