@@ -117,9 +117,13 @@ class CovoiturageController extends AbstractController
 
         foreach ($trajets as &$trajet) {
             if (!empty($trajet['user_photo'])) {
-                $firstChar = substr($trajet['user_photo'], 0, 1);
+                $photoData = is_resource($trajet['user_photo'])
+                    ? stream_get_contents($trajet['user_photo'])
+                    : $trajet['user_photo'];
+                
+                $firstChar = substr($photoData, 0, 1);
                 $isBase64 = in_array($firstChar, ['/', 'i', 'R', 'U', 'A', 'Q']);
-                $trajet['user_photo'] = $isBase64 ? $trajet['user_photo'] : base64_encode($trajet['user_photo']);
+                $trajet['user_photo'] = $isBase64 ? $photoData : base64_encode($photoData);
             } else {
                 $trajet['user_photo'] = null;
             }
