@@ -248,7 +248,12 @@ class ProfilController extends AbstractController
         $form = $this->createForm(ProfilType::class, $sessionUser);
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted()) {
+            if (!$form->isValid()) {
+                // DEBUG si le formulaire a des erreurs
+                dd($form->getErrors(true, false));
+            }
+
             $photoFile = $form->get('photo')->getData();
             $deletePhoto = $form->get('deletePhoto')->getData();
             $binaryPhotoContent = null;
@@ -305,16 +310,19 @@ class ProfilController extends AbstractController
 
             try {
                 $stmt->execute();
-                $this->addFlash('success', $stmt->rowCount() > 0 ? 'Profil mis à jour avec succès.' : 'Aucune modification détectée.');
+                $this->addFlash(
+                    'success',
+                    $stmt->rowCount() > 0 ? 'Profil mis à jour avec succès.' : 'Aucune modification détectée.'
+                );
             } catch (PDOException $e) {
-                $this->addFlash('error', 'Erreur lors de la mise à jour du profil : ' . $e->getMessage());
-                return $this->redirectToRoute('modifier_profil');
+                // DEBUG si erreur SQL
+                dd($e->getMessage());
             }
 
             return $this->redirectToRoute('app_profil');
         }
 
-        // Préparer la photo pour affichage sans erreur de type
+        // Préparer la photo pour affichage
         $currentPhotoBase64 = null;
         $photoData = $sessionUser->getPhoto();
         if ($photoData) {
