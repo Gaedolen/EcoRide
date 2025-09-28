@@ -193,9 +193,13 @@ class CovoiturageController extends AbstractController
 
         // Encodage photo si nécessaire
         if (!empty($trajet['chauffeur_photo'])) {
-            $firstChar = substr($trajet['chauffeur_photo'], 0, 1);
+            $photoData = is_resource($trajet['chauffeur_photo'])
+                ? stream_get_contents($trajet['chauffeur_photo'])
+                : $trajet['chauffeur_photo'];
+
+            $firstChar = substr($photoData, 0, 1);
             $isBase64 = in_array($firstChar, ['/', 'i', 'R', 'U', 'A', 'Q']);
-            $trajet['chauffeur_photo'] = $isBase64 ? $trajet['chauffeur_photo'] : base64_encode($trajet['chauffeur_photo']);
+            $trajet['chauffeur_photo'] = $isBase64 ? $photoData : base64_encode($photoData);
         } else {
             $trajet['chauffeur_photo'] = null;
         }
