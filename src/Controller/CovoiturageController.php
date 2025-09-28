@@ -410,7 +410,6 @@ class CovoiturageController extends AbstractController
             );
             $now = new DateTime();
             $statut = ($dateHeureDepart < $now) ? 'ferme' : (($covoiturage->getNbPlace() <= 0) ? 'complet' : 'ouvert');
-            $etat = 'a_venir';
 
             try {
                 $pdo->beginTransaction();
@@ -427,11 +426,11 @@ class CovoiturageController extends AbstractController
                 $stmt = $pdo->prepare("
                     INSERT INTO covoiturage (
                         utilisateur_id, date_depart, heure_depart, lieu_depart,
-                        date_arrivee, heure_arrivee, lieu_arrivee, statut, etat,
+                        date_arrivee, heure_arrivee, lieu_arrivee, statut,
                         nb_place, prix_personne, voiture_id
                     ) VALUES (
                         :utilisateur_id, :date_depart, :heure_depart, :lieu_depart,
-                        :date_arrivee, :heure_arrivee, :lieu_arrivee, :statut, :etat,
+                        :date_arrivee, :heure_arrivee, :lieu_arrivee, :statut,
                         :nb_place, :prix_personne, :voiture_id
                     )
                 ");
@@ -447,7 +446,6 @@ class CovoiturageController extends AbstractController
                     'prix_personne' => $covoiturage->getPrixPersonne(),
                     'voiture_id'    => $covoiturage->getVoiture()->getId(),
                     'statut'        => $statut,
-                    'etat'          => $etat,
                 ]);
 
                 $pdo->commit();
