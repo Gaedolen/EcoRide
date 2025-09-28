@@ -55,7 +55,7 @@
                         }
             }) }}
 
-            {# <div class="checkbox-group">
+            <div class="checkbox-group">
                 <input type="checkbox" id="isChauffeur" name="{{ form.isChauffeur.vars.full_name }}" class="custom-checkbox"
                     {% if form.isChauffeur.vars.value %} checked {% endif %}>
                 <label for="isChauffeur" class="checkbox-label">Je suis chauffeur</label>
@@ -65,9 +65,9 @@
                 <input type="checkbox" id="isPassager" name="{{ form.isPassager.vars.full_name }}" class="custom-checkbox"
                     {% if form.isPassager.vars.value %} checked {% endif %}>
                 <label for="isPassager" class="checkbox-label">Je suis passager</label>
-            </div> #}
+            </div>
 
-            <div class="checkbox-group">
+            {# <div class="checkbox-group">
                 {{ form_widget(form.isChauffeur, {
                     attr: { class: 'custom-checkbox' }
                 }) }}
@@ -79,7 +79,7 @@
                     attr: { class: 'custom-checkbox' }
                 }) }}
                 {{ form_label(form.isPassager, 'Je suis passager', { label_attr: { class: 'checkbox-label' } }) }}
-            </div>
+            </div> #}
 
             <div class='photo-upload-wrapper'>
                 <label for='{{ form.photo.vars.id }}' class='custom-upload'>Choisir une photo</label>
