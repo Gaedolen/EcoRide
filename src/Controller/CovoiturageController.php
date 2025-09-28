@@ -311,10 +311,11 @@ class CovoiturageController extends AbstractController
             }
 
             // Insérer réservation
-            $stmt = $pdo->prepare("INSERT INTO reservation (utilisateur_id, covoiturage_id) VALUES (:uid, :cid)");
+            $stmt = $pdo->prepare("INSERT INTO reservation (utilisateur_id, covoiturage_id, date_reservation) VALUES (:uid, :cid, :date_reservation)");
             $stmt->execute([
                 'uid' => $utilisateur->getId(),
-                'cid' => $id
+                'cid' => $id,
+                'date_reservation' => (new DateTime())->format('Y-m-d H:i:s')
             ]);
 
             // Décrémenter places
