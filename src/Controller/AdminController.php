@@ -115,12 +115,19 @@ class AdminController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/utilisateur/suspendre/{id}', name: 'admin_suspendre_utilisateur', methods: ['POST'])]
+   #[Route('/admin/utilisateur/suspendre/{id}', name: 'admin_suspendre_utilisateur', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function suspendreUtilisateur(Request $request, User $user, EntityManagerInterface $em, MailerInterface $mailer): JsonResponse
+    public function suspendreUtilisateur(int $id, Request $request, UserRepository $userRepository, EntityManagerInterface $em, MailerInterface $mailer): JsonResponse
     {
+        $user = $userRepository->find($id);
+        if (!$user) {
+            return $this->json(['success' => false, 'error' => 'Utilisateur non trouvé'], 404);
+        }
+
         $data = json_decode($request->getContent(), true) ?? [];
-        if (!($data['_token'] ?? null) || !$this->isCsrfTokenValid('suspend_user_' . $user->getId(), $data['_token'])) {
+        $csrfToken = $data['_token'] ?? null;
+
+        if (!$csrfToken || !$this->isCsrfTokenValid('suspend_user_' . $user->getId(), $csrfToken)) {
             return $this->json(['success' => false, 'error' => 'Token CSRF invalide'], 400);
         }
 
@@ -131,21 +138,19 @@ class AdminController extends AbstractController
         $user->setSuspendReason($reason);
         $em->flush();
 
-        // Envoi du mail
         if ($user->getEmail()) {
             $email = (new TemplatedEmail())
                 ->from('noreply@ecoride.fr')
                 ->to($user->getEmail())
                 ->subject('Votre compte a été suspendu')
                 ->htmlTemplate('emails/suspension_utilisateur.html.twig')
-                ->context([
-                    'user' => $user,
-                    'reason' => $reason
-                ]);
+                ->context(['user' => $user, 'reason' => $reason]);
             $mailer->send($email);
         }
 
-        $unsuspendToken = $this->container->get('security.csrf.token_manager')->getToken('unsuspend_user_' . $user->getId())->getValue();
+        $unsuspendToken = $this->container->get('security.csrf.token_manager')
+            ->getToken('unsuspend_user_' . $user->getId())
+            ->getValue();
 
         return $this->json([
             'success' => true,
@@ -156,10 +161,17 @@ class AdminController extends AbstractController
 
     #[Route('/admin/utilisateur/unsuspendre/{id}', name: 'admin_unsuspendre_utilisateur', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function unsuspendUser(Request $request, User $user, EntityManagerInterface $em, MailerInterface $mailer): JsonResponse
+    public function unsuspendUser(int $id, Request $request, UserRepository $userRepository, EntityManagerInterface $em, MailerInterface $mailer): JsonResponse
     {
+        $user = $userRepository->find($id);
+        if (!$user) {
+            return $this->json(['success' => false, 'error' => 'Utilisateur non trouvé'], 404);
+        }
+
         $data = json_decode($request->getContent(), true) ?? [];
-        if (!($data['_token'] ?? null) || !$this->isCsrfTokenValid('unsuspend_user_' . $user->getId(), $data['_token'])) {
+        $csrfToken = $data['_token'] ?? null;
+
+        if (!$csrfToken || !$this->isCsrfTokenValid('unsuspend_user_' . $user->getId(), $csrfToken)) {
             return $this->json(['success' => false, 'error' => 'Token CSRF invalide'], 400);
         }
 
@@ -167,20 +179,19 @@ class AdminController extends AbstractController
         $user->setSuspendReason(null);
         $em->flush();
 
-        // Envoi du mail
         if ($user->getEmail()) {
             $email = (new TemplatedEmail())
                 ->from('noreply@ecoride.fr')
                 ->to($user->getEmail())
                 ->subject('Votre compte a été réactivé')
                 ->htmlTemplate('emails/reactivation_utilisateur.html.twig')
-                ->context([
-                    'user' => $user
-                ]);
+                ->context(['user' => $user]);
             $mailer->send($email);
         }
 
-        $suspendToken = $this->container->get('security.csrf.token_manager')->getToken('suspend_user_' . $user->getId())->getValue();
+        $suspendToken = $this->container->get('security.csrf.token_manager')
+            ->getToken('suspend_user_' . $user->getId())
+            ->getValue();
 
         return $this->json([
             'success' => true,
