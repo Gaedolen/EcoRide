@@ -131,6 +131,19 @@ class AdminController extends AbstractController
         $user->setSuspendReason($reason);
         $em->flush();
 
+        // Envoi du mail
+        $email = (new TemplatedEmail())
+            ->from('noreply@ecoride.com')
+            ->to($user->getEmail())
+            ->subject('Votre compte a été suspendu')
+            ->htmlTemplate('emails/suspension_utilisateur.html.twig')
+            ->context([
+                'user' => $user,
+                'reason' => $reason
+            ]);
+
+        $mailer->send($email);
+
         $unsuspendToken = $this->container->get('security.csrf.token_manager')->getToken('unsuspend_user_' . $user->getId())->getValue();
 
         return $this->json(['success' => true, 'userId' => $user->getId(), 'unsuspendToken' => $unsuspendToken]);
@@ -148,6 +161,18 @@ class AdminController extends AbstractController
         $user->setIsSuspended(false);
         $user->setSuspendReason(null);
         $em->flush();
+
+        // Envoi du mail
+        $email = (new TemplatedEmail())
+            ->from('noreply@ecoride.com')
+            ->to($user->getEmail())
+            ->subject('Votre compte a été réactivé')
+            ->htmlTemplate('emails/reactivation_utilisateur.html.twig')
+            ->context([
+                'user' => $user
+            ]);
+
+        $mailer->send($email);
 
         $suspendToken = $this->container->get('security.csrf.token_manager')->getToken('suspend_user_' . $user->getId())->getValue();
 
