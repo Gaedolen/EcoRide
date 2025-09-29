@@ -75,7 +75,7 @@ class EmployeController extends AbstractController
 
             // Envoi du mail à l'auteur
             $email = (new TemplatedEmail())
-                ->from('noreply@ecoride.fr')
+                ->from('ecoride.covoiturage@gmail.com')
                 ->to($avis->getAuteur()->getEmail())
                 ->subject('Votre avis a été refusé')
                 ->htmlTemplate('emails/avis_refuse.html.twig')
@@ -211,7 +211,7 @@ class EmployeController extends AbstractController
         $message = substr($request->request->get('message'), 0, 2000);
 
         $email = (new TemplatedEmail())
-            ->from('contact@ecoride.com')
+            ->from('ecoride.covoiturage@gmail.com')
             ->to($user->getEmail())
             ->subject($subject)
             ->html($this->renderView('emails/contact_utilisateur.html.twig', [

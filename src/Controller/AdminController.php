@@ -140,7 +140,7 @@ class AdminController extends AbstractController
 
         if ($user->getEmail()) {
             $email = (new TemplatedEmail())
-                ->from('noreply@ecoride.fr')
+                ->from('ecoride.covoiturage@gmail.com')
                 ->to($user->getEmail())
                 ->subject('Votre compte a été suspendu')
                 ->htmlTemplate('emails/suspension_utilisateur.html.twig')
@@ -182,7 +182,7 @@ class AdminController extends AbstractController
 
         if ($user->getEmail()) {
             $email = (new TemplatedEmail())
-                ->from('noreply@ecoride.fr')
+                ->from('ecoride.covoiturage@gmail.com')
                 ->to($user->getEmail())
                 ->subject('Votre compte a été réactivé')
                 ->htmlTemplate('emails/reactivation_utilisateur.html.twig')

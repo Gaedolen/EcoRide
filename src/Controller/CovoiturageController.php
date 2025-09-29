@@ -347,7 +347,7 @@ class CovoiturageController extends AbstractController
 
             if ($chauffeur) {
                 $email = (new TemplatedEmail())
-                    ->from('noreply@ecoride.fr')
+                    ->from('ecoride.covoiturage@gmail.com')
                     ->to($chauffeur['email'])
                     ->subject('Nouvelle réservation')
                     ->htmlTemplate('emails/nouvelle_reservation.html.twig')
@@ -644,7 +644,7 @@ class CovoiturageController extends AbstractController
             // Envoyer les mails après commit pour éviter de bloquer la transaction
             foreach ($passagers as $passager) {
                 $email = (new TemplatedEmail())
-                    ->from('noreply@ecoride.com')
+                    ->from('ecoride.covoiturage@gmail.com')
                     ->to($passager['email'])
                     ->subject('Annulation de covoiturage')
                     ->htmlTemplate('emails/annulation_covoiturage.html.twig')
@@ -730,7 +730,7 @@ class CovoiturageController extends AbstractController
 
             if ($chauffeur) {
                 $email = (new TemplatedEmail())
-                    ->from('noreply@ecoride.fr')
+                    ->from('ecoride.covoiturage@gmail.com')
                     ->to($chauffeur['email'])
                     ->htmlTemplate('emails/annulation_reservation.html.twig')
                     ->context([
@@ -828,7 +828,7 @@ class CovoiturageController extends AbstractController
             if (!$participant || !$participant->getEmail()) continue;
 
             $email = (new TemplatedEmail())
-                ->from('no-reply@ecoride.com')
+                ->from('ecoride.covoiturage@gmail.com')
                 ->to($participant->getEmail())
                 ->subject('Merci de confirmer le bon déroulement du trajet')
                 ->htmlTemplate('emails/confirmation_trajet.html.twig')

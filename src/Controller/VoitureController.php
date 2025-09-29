@@ -189,7 +189,7 @@ class VoitureController extends AbstractController
 
                     foreach ($passagers as $passager) {
                         $email = (new TemplatedEmail())
-                            ->from('contact@ecoride.com')
+                            ->from('ecoride.covoiturage@gmail.com')
                             ->to($passager['email'])
                             ->subject('Annulation de votre covoiturage')
                             ->htmlTemplate('emails/annulation_covoiturage.html.twig')

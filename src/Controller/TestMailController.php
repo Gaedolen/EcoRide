@@ -14,7 +14,7 @@ class TestMailController extends AbstractController
     public function index(MailerInterface $mailer): Response
     {
         $email = (new Email())
-            ->from('no-reply@ecoride.com')
+            ->from('ecoride.covoiturage@gmail.com')
             ->to('test@example.com') // peu importe, Mailtrap va le capter
             ->subject('Test Mailtrap')
             ->text('Ceci est un mail de test envoyé depuis Symfony.');
