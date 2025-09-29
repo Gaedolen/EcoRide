@@ -48,7 +48,7 @@
     </div>
 
   
-    <script>
+    {# <script>
         window.dashboardData = {
             covoiturages: {
                 labels: {{ covoituragesParJour|map(c => c.jour)|json_encode|raw }},
@@ -57,6 +57,18 @@
             credits: {
                 labels: {{ creditsParJour|map(c => c.jour)|json_encode|raw }},
                 values: {{ creditsParJour|map(c => c.credits_plateforme|default(0)|number_format(0, '', ''))|json_encode|raw }}
+            }
+        };
+    </script> #}
+    <script>
+        window.dashboardData = {
+            covoiturages: {
+                labels: {{ covoituragesLabels|json_encode|raw }},
+                values: {{ covoituragesValues|json_encode|raw }}
+            },
+            credits: {
+                labels: {{ creditsLabels|json_encode|raw }},
+                values: {{ creditsValues|json_encode|raw }}
             }
         };
     </script>

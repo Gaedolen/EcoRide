@@ -72,11 +72,22 @@ class AdminController extends AbstractController
         // Total des crédits gagnés
         $totalCredits = array_sum(array_column($creditsParJour, 'credits_plateforme'));
 
+        // Préparer les données pour Chart.js
+        $covoituragesLabels = array_column($covoituragesParJour, 'jour');
+        $covoituragesValues = array_column($covoituragesParJour, 'totalCovoiturages');
+
+        $creditsLabels = array_column($creditsParJour, 'jour');
+        $creditsValues = array_column($creditsParJour, 'credits_plateforme');
+
         return $this->render('admin/dashboard.html.twig', [
             'covoituragesParJour' => $covoituragesParJour,
             'creditsParJour' => $creditsParJour,
             'totalCredits' => (int) $totalCredits,
-            'totalCovoiturages' => (int) $totalCovoiturages
+            'totalCovoiturages' => (int) $totalCovoiturages,
+            'covoituragesLabels' => $covoituragesLabels,
+            'covoituragesValues' => $covoituragesValues,
+            'creditsLabels' => $creditsLabels,
+            'creditsValues' => $creditsValues,
         ]);
     }
 
