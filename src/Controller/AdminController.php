@@ -132,21 +132,26 @@ class AdminController extends AbstractController
         $em->flush();
 
         // Envoi du mail
-        $email = (new TemplatedEmail())
-            ->from('noreply@ecoride.com')
-            ->to($user->getEmail())
-            ->subject('Votre compte a été suspendu')
-            ->htmlTemplate('emails/suspension_utilisateur.html.twig')
-            ->context([
-                'user' => $user,
-                'reason' => $reason
-            ]);
-
-        $mailer->send($email);
+        if ($user->getEmail()) {
+            $email = (new TemplatedEmail())
+                ->from('noreply@ecoride.fr')
+                ->to($user->getEmail())
+                ->subject('Votre compte a été suspendu')
+                ->htmlTemplate('emails/user_suspension.html.twig')
+                ->context([
+                    'user' => $user,
+                    'reason' => $reason
+                ]);
+            $mailer->send($email);
+        }
 
         $unsuspendToken = $this->container->get('security.csrf.token_manager')->getToken('unsuspend_user_' . $user->getId())->getValue();
 
-        return $this->json(['success' => true, 'userId' => $user->getId(), 'unsuspendToken' => $unsuspendToken]);
+        return $this->json([
+            'success' => true,
+            'userId' => $user->getId(),
+            'unsuspendToken' => $unsuspendToken
+        ]);
     }
 
     #[Route('/admin/utilisateur/unsuspendre/{id}', name: 'admin_unsuspendre_utilisateur', methods: ['POST'])]
@@ -163,20 +168,25 @@ class AdminController extends AbstractController
         $em->flush();
 
         // Envoi du mail
-        $email = (new TemplatedEmail())
-            ->from('noreply@ecoride.com')
-            ->to($user->getEmail())
-            ->subject('Votre compte a été réactivé')
-            ->htmlTemplate('emails/reactivation_utilisateur.html.twig')
-            ->context([
-                'user' => $user
-            ]);
-
-        $mailer->send($email);
+        if ($user->getEmail()) {
+            $email = (new TemplatedEmail())
+                ->from('noreply@ecoride.fr')
+                ->to($user->getEmail())
+                ->subject('Votre compte a été réactivé')
+                ->htmlTemplate('emails/user_reactivation.html.twig')
+                ->context([
+                    'user' => $user
+                ]);
+            $mailer->send($email);
+        }
 
         $suspendToken = $this->container->get('security.csrf.token_manager')->getToken('suspend_user_' . $user->getId())->getValue();
 
-        return $this->json(['success' => true, 'userId' => $user->getId(), 'suspendToken' => $suspendToken]);
+        return $this->json([
+            'success' => true,
+            'userId' => $user->getId(),
+            'suspendToken' => $suspendToken
+        ]);
     }
 
     #[Route('/admin/employes', name: 'admin_employes')]
