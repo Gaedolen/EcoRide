@@ -40,7 +40,7 @@ class AdminController extends AbstractController
             ORDER BY jour ASC
         ";
         $stmt1 = $connection->prepare($sql1);
-        $covoituragesParJour = $stmt1->executeQuery([])->fetchAllAssociative();
+        $covoituragesParJour = $stmt1->executeQuery()->fetchAllAssociative();
 
         foreach ($covoituragesParJour as &$row) {
             $row['totalCovoiturages'] = (int) $row['totalCovoiturages'];
@@ -59,7 +59,7 @@ class AdminController extends AbstractController
             ORDER BY jour ASC
         ";
         $stmt2 = $connection->prepare($sql2);
-        $creditsParJour = $stmt2->executeQuery([])->fetchAllAssociative();
+        $creditsParJour = $stmt2->executeQuery()->fetchAllAssociative();
 
         foreach ($creditsParJour as &$row) {
             $row['credits_plateforme'] = (int) $row['credits_plateforme'];
