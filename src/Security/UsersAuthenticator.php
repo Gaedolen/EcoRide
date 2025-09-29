@@ -57,10 +57,24 @@ class UsersAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, $token, string $firewallName): ?RedirectResponse
     {
+       // Vérifie d'abord si l'utilisateur avait une URL cible avant login
         if ($targetPath = $this->getTargetPath($request->getSession(), $firewallName)) {
             return new RedirectResponse($targetPath);
         }
 
+        // Récupère l'utilisateur connecté
+        $user = $token->getUser();
+
+        // Redirection selon le rôle
+        if (in_array('ROLE_ADMIN', $user->getRoles(), true)) {
+            return new RedirectResponse($this->urlGenerator->generate('admin_dashboard'));
+        }
+
+        if (in_array('ROLE_EMPLOYE', $user->getRoles(), true)) {
+            return new RedirectResponse($this->urlGenerator->generate('employe_dashboard'));
+        }
+
+        // Redirection par défaut pour les autres utilisateurs
         return new RedirectResponse($this->urlGenerator->generate('app_accueil'));
     }
 

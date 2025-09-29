@@ -39,12 +39,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     /**
-     * @var list<string> The user roles
-     */
-    #[ORM\Column]
-    private array $roles = [];
-
-    /**
      * @var string The hashed password
      */
     #[ORM\Column]
@@ -166,17 +160,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $roles[] = 'ROLE_USER'; // exige que chaque utilisateur ait au moins le ROLE_USER
 
         return array_unique($roles);
-    }
-
-
-    /**
-     * @param list<string> $roles
-     */
-    public function setRoles(array $roles): static
-    {
-        $this->roles = $roles;
-
-        return $this;
     }
 
     /**
