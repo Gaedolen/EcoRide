@@ -66,13 +66,17 @@ class AdminController extends AbstractController
             $row['jour'] = (string) $row['jour'];
         }
 
+        // Total des covoiturages
+        $totalCovoiturages = array_sum(array_column($covoituragesParJour, 'totalCovoiturages'));
+
         // Total des crédits gagnés
         $totalCredits = array_sum(array_column($creditsParJour, 'credits_plateforme'));
 
         return $this->render('admin/dashboard.html.twig', [
             'covoituragesParJour' => $covoituragesParJour,
             'creditsParJour' => $creditsParJour,
-            'totalCredits' => (int) ($totalCredits ?? 0)
+            'totalCredits' => (int) ($totalCredits ?? 0),
+            'totalCovoiturages' => (int) ($totalCovoiturages ?? 0)
         ]);
     }
 
