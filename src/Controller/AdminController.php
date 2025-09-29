@@ -137,7 +137,7 @@ class AdminController extends AbstractController
                 ->from('noreply@ecoride.fr')
                 ->to($user->getEmail())
                 ->subject('Votre compte a été suspendu')
-                ->htmlTemplate('emails/user_suspension.html.twig')
+                ->htmlTemplate('emails/suspension_utilisateur.html.twig')
                 ->context([
                     'user' => $user,
                     'reason' => $reason
@@ -173,7 +173,7 @@ class AdminController extends AbstractController
                 ->from('noreply@ecoride.fr')
                 ->to($user->getEmail())
                 ->subject('Votre compte a été réactivé')
-                ->htmlTemplate('emails/user_reactivation.html.twig')
+                ->htmlTemplate('emails/reactivation_utilisateur.html.twig')
                 ->context([
                     'user' => $user
                 ]);
