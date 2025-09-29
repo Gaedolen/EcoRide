@@ -43,8 +43,8 @@ class AdminController extends AbstractController
         $covoituragesParJour = $stmt1->executeQuery()->fetchAllAssociative();
 
         foreach ($covoituragesParJour as &$row) {
-            $row['totalCovoiturages'] = isset($row['totalCovoiturages']) ? (int) $row['totalCovoiturages'] : 0;
-            $row['jour'] = isset($row['jour']) ? (string) $row['jour'] : '';
+            $row['totalCovoiturages'] = (int) ($row['totalcovoiturages'] ?? 0);
+            $row['jour'] = (string) ($row['jour'] ?? '');
         }
 
         // Crédits gagnés par jour
@@ -78,8 +78,6 @@ class AdminController extends AbstractController
 
         $creditsLabels = array_column($creditsParJour, 'jour');
         $creditsValues = array_column($creditsParJour, 'credits_plateforme');
-
-        dump($covoituragesParJour);
 
         return $this->render('admin/dashboard.html.twig', [
             'covoituragesParJour' => $covoituragesParJour,
