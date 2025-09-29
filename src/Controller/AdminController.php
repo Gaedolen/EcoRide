@@ -79,6 +79,8 @@ class AdminController extends AbstractController
         $creditsLabels = array_column($creditsParJour, 'jour');
         $creditsValues = array_column($creditsParJour, 'credits_plateforme');
 
+        dump($covoituragesParJour);
+
         return $this->render('admin/dashboard.html.twig', [
             'covoituragesParJour' => $covoituragesParJour,
             'creditsParJour' => $creditsParJour,
