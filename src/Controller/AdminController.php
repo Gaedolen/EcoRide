@@ -74,7 +74,7 @@ class AdminController extends AbstractController
 
         // Préparer les données pour Chart.js
         $covoituragesLabels = array_column($covoituragesParJour, 'jour');
-        $covoituragesValues = array_column($covoituragesParJour, 'totalCovoiturages');
+        $covoituragesValues = array_map('intval', array_column($covoituragesParJour, 'totalCovoiturages'));
 
         $creditsLabels = array_column($creditsParJour, 'jour');
         $creditsValues = array_column($creditsParJour, 'credits_plateforme');

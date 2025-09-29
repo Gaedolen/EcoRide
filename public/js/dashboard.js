@@ -14,13 +14,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 labels: covoiturages.labels.map(dateStr => parseDate(dateStr).toLocaleDateString("fr-FR")),
                 datasets: [{
                     label: "Covoiturages",
-                    data: covoiturages.values,
+                    data: covoiturages.values.map(Number), // <-- ici
                     backgroundColor: "rgba(54, 162, 235, 0.6)",
                     borderColor: "rgba(54, 162, 235, 1)",
                     borderWidth: 1
                 }]
             },
-            options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { maxRotation: 45, minRotation: 45 } }, y: { beginAtZero: true } } }
+            options: { 
+                responsive: true, 
+                plugins: { legend: { display: false } }, 
+                scales: { 
+                    x: { ticks: { maxRotation: 45, minRotation: 45 } }, 
+                    y: { beginAtZero: true } 
+                } 
+            }
         }
     );
 
