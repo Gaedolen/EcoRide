@@ -161,7 +161,8 @@ class AdminController extends AbstractController
 
     #[Route('/admin/utilisateur/unsuspendre/{id}', name: 'admin_unsuspendre_utilisateur', methods: ['POST'])]
     #[IsGranted('ROLE_ADMIN')]
-    public function unsuspendUser(int $id, Request $request, UserRepository $userRepository, EntityManagerInterface $em, MailerInterface $mailer): JsonResponse
+    public function unsuspendUser(int $id, Request $request, UserRepository $userRepository, EntityManagerInterface $em, MailerInterface $mailer, CsrfTokenManagerInterface $csrfTokenManager
+    ): JsonResponse
     {
         $user = $userRepository->find($id);
         if (!$user) {
@@ -189,9 +190,7 @@ class AdminController extends AbstractController
             $mailer->send($email);
         }
 
-        $suspendToken = $this->container->get('security.csrf.token_manager')
-            ->getToken('suspend_user_' . $user->getId())
-            ->getValue();
+        $suspendToken = $csrfTokenManager->getToken('suspend_user_' . $user->getId())->getValue();
 
         return $this->json([
             'success' => true,
